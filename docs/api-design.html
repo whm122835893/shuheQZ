@@ -1,0 +1,2621 @@
+<!-- 修订版：v4.1 修复安全、规范、业务逻辑并补充抽奖次数与第三方钱包预留 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RESTful API 接口文档 · 数和文创 v4.1</title>
+<style>
+  :root {
+    --bg: #f8f9fa;
+    --bg2: #ffffff;
+    --bg3: #f0f2f5;
+    --ink: #1a1a2e;
+    --muted: #6b7280;
+    --rule: #e5e7eb;
+    --accent: #4f46e5;
+    --accent2: #0ea5e9;
+    --accent-light: #eef2ff;
+    --get: #059669;
+    --get-bg: #ecfdf5;
+    --post: #4f46e5;
+    --post-bg: #eef2ff;
+    --put: #d97706;
+    --put-bg: #fffbeb;
+    --patch: #7c3aed;
+    --patch-bg: #f5f3ff;
+    --del: #dc2626;
+    --del-bg: #fef2f2;
+    --code-bg: #1e1e2e;
+    --code-ink: #cdd6f4;
+    --code-key: #89b4fa;
+    --code-str: #a6e3a1;
+    --code-num: #fab387;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans CJK SC', 'WenQuanYi Micro Hei', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .layout { display: flex; max-width: 1200px; margin: 0 auto; }
+
+  /* Sidebar TOC */
+  .sidebar {
+    width: 240px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--bg2);
+    border-right: 1px solid var(--rule);
+    padding: 1.5rem 1rem;
+    flex-shrink: 0;
+  }
+  .sidebar h1 { font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .sidebar .ver { font-size: 0.7rem; color: var(--muted); margin-bottom: 1rem; }
+  .sidebar a {
+    display: block;
+    padding: 0.35rem 0.5rem;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+  .sidebar a:hover { background: var(--accent-light); color: var(--accent); }
+  .sidebar a.toc-sub { padding-left: 1.2rem; font-size: 0.75rem; }
+  .sidebar .toc-group { margin-bottom: 0.5rem; }
+  .sidebar .toc-group-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink);
+    padding: 0.3rem 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Main content */
+  .main { flex: 1; padding: 2rem 2.5rem; min-width: 0; }
+
+  /* Cover */
+  .cover {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    color: white;
+    padding: 2rem 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+  }
+  .cover h1 { font-size: 1.5rem; font-weight: 700; }
+  .cover p { font-size: 0.85rem; opacity: 0.85; margin-top: 0.3rem; }
+  .cover-stats { display: flex; gap: 2rem; margin-top: 1.2rem; flex-wrap: wrap; }
+  .cover-stat .num { font-size: 1.6rem; font-weight: 700; }
+  .cover-stat .lbl { font-size: 0.7rem; opacity: 0.8; }
+
+  /* Sections */
+  .section { margin-bottom: 2.5rem; scroll-margin-top: 1rem; }
+  .section-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    padding-bottom: 0.4rem;
+    border-bottom: 2px solid var(--accent);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .section-title .icon {
+    width: 28px; height: 28px;
+    background: var(--accent-light);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem;
+  }
+
+  /* Endpoint card */
+  .endpoint {
+    background: var(--bg2);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+  .endpoint-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .method-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+  }
+  .method-badge.GET { background: var(--get-bg); color: var(--get); }
+  .method-badge.POST { background: var(--post-bg); color: var(--post); }
+  .method-badge.PUT { background: var(--put-bg); color: var(--put); }
+  .method-badge.PATCH { background: var(--patch-bg); color: var(--patch); }
+  .method-badge.DELETE { background: var(--del-bg); color: var(--del); }
+  .endpoint-url {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 0.82rem;
+    font-weight: 600;
+    flex: 1;
+  }
+  .endpoint-desc-inline { font-size: 0.78rem; color: var(--muted); }
+  .auth-tag {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .auth-tag.jwt { background: var(--get-bg); color: var(--get); }
+  .auth-tag.txpwd { background: var(--put-bg); color: var(--put); }
+  .auth-tag.none { background: var(--bg3); color: var(--muted); }
+
+  .endpoint-body { padding: 1rem; }
+
+  /* Field tables */
+  .field-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    margin-bottom: 0.75rem;
+  }
+  .field-table th {
+    background: var(--bg3);
+    padding: 0.4rem 0.6rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--rule);
+  }
+  .field-table td {
+    padding: 0.35rem 0.6rem;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  .field-table .req { color: var(--del); font-weight: 600; }
+  .field-table .opt { color: var(--muted); }
+  .field-table .cond { color: var(--put); font-weight: 600; }
+  .field-table .type { font-family: 'JetBrains Mono', monospace; color: var(--accent2); font-size: 0.75rem; }
+  .param-label { font-weight: 600; }
+
+  .endpoint-body .biz {
+    font-size: 0.8rem;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg3);
+    border-radius: 6px;
+    border-left: 3px solid var(--accent2);
+  }
+
+  /* Code blocks */
+  pre {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    border-radius: 6px;
+    padding: 0.75rem;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 0.73rem;
+    line-height: 1.6;
+    overflow-x: auto;
+    white-space: pre;
+    margin-top: 0.4rem;
+  }
+  pre .k { color: var(--code-key); }
+  pre .s { color: var(--code-str); }
+  pre .n { color: var(--code-num); }
+
+  .label-small {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Overview tables */
+  .info-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-bottom: 1rem; }
+  .info-table th { background: var(--bg3); padding: 0.5rem 0.75rem; text-align: left; font-weight: 600; color: var(--muted); font-size: 0.72rem; border-bottom: 2px solid var(--rule); }
+  .info-table td { padding: 0.4rem 0.75rem; border-bottom: 1px solid var(--rule); }
+  .info-table .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 8px; }
+  .table-wrap.max-h { max-height: 400px; overflow-y: auto; }
+
+  .note { background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.78rem; margin-bottom: 0.75rem; }
+  .note.info { background: var(--accent-light); border-color: var(--accent); }
+
+  @media (max-width: 768px) {
+    .layout { flex-direction: column; }
+    .sidebar { position: relative; width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--rule); }
+    .main { padding: 1rem; }
+  }
+  @media print { .sidebar { display: none; } .main { max-width: 100%; padding: 0; } }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ============ SIDEBAR ============ -->
+<aside class="sidebar">
+  <h1>API 接口文档</h1>
+  <div class="ver">数和文创 v4.1 · 2026-08-06</div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">概览</div>
+    <a href="#overview">通用说明</a>
+    <a href="#response-format">响应格式</a>
+    <a href="#error-codes">错误码表</a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">核心模块</div>
+    <a href="#user">用户模块</a>
+    <a href="#collectible">藏品模块</a>
+    <a href="#market">市场模块</a>
+    <a href="#blindbox">盲盒模块</a>
+    <a href="#synthesis">合成模块</a>
+    <a href="#checkin">签到模块</a>
+    <a href="#luckydraw">抽奖模块</a>
+    <a href="#luckydraw-chances" class="toc-sub">- 次数明细</a>
+    <a href="#transfer">转赠模块</a>
+    <a href="#payment">支付模块</a>
+    <a href="#priority">优先购模块</a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">辅助模块</div>
+    <a href="#artifact">文物展馆</a>
+    <a href="#wallet">钱包模块</a>
+    <a href="#wallet-channels" class="toc-sub">- 支付通道</a>
+    <a href="#wallet-transactions" class="toc-sub">- 钱包流水</a>
+    <a href="#announce">公告新闻</a>
+    <a href="#system">系统模块</a>
+    <a href="#system-feedback" class="toc-sub">- 意见反馈</a>
+    <a href="#summary">接口总览</a>
+  </div>
+</aside>
+
+<!-- ============ MAIN ============ -->
+<div class="main">
+
+<div class="cover">
+  <h1>RESTful API 接口文档</h1>
+  <p>数和文创数字藏品平台 · 对接前端全部接口 · v4.1</p>
+  <div class="cover-stats">
+    <div class="cover-stat"><div class="num">65</div><div class="lbl">API 端点</div></div>
+    <div class="cover-stat"><div class="num">14</div><div class="lbl">功能模块</div></div>
+    <div class="cover-stat"><div class="num">43</div><div class="lbl">需 JWT</div></div>
+    <div class="cover-stat"><div class="num">4</div><div class="lbl">需交易密码</div></div>
+  </div>
+</div>
+
+<!-- ============ OVERVIEW ============ -->
+<div class="section" id="overview">
+  <h2 class="section-title"><span class="icon">i</span>一、通用说明</h2>
+
+  <h3 style="font-size:0.9rem;margin-bottom:0.5rem;">基础信息</h3>
+  <div class="table-wrap">
+    <table class="info-table">
+      <tbody>
+        <tr><td style="width:140px;font-weight:600;">Base URL</td><td class="mono">https://api.shuhe-wenchuang.com/api/v1</td></tr>
+        <tr><td style="font-weight:600;">认证方式</td><td>JWT Bearer Token，Header: <code>Authorization: Bearer {token}</code></td></tr>
+        <tr><td style="font-weight:600;">Content-Type</td><td class="mono">application/json</td></tr>
+        <tr><td style="font-weight:600;">分页参数</td><td><code>page</code>(页码,默认1) + <code>page_size</code>(每页条数,默认20)</td></tr>
+        <tr><td style="font-weight:600;">时间格式</td><td>ISO 8601: <code>2026-08-06T14:30:00+08:00</code>（不含毫秒）</td></tr>
+        <tr><td style="font-weight:600;">金额单位</td><td>元（DECIMAL(10,2)，精确到分）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note info">
+    <b>Token 与认证策略：</b><br>
+    1. JWT 有效期 7 天，支持通过 <code>refresh_token</code> 续期（见 POST /user/refresh-token）<br>
+    2. 修改登录密码或交易密码后，该用户所有 JWT 即时失效（加入 Redis 黑名单）<br>
+    3. POST /user/logout 主动登出会将当前 Token 加入 Redis 黑名单即时失效<br>
+    4. 所有以 <code>is_</code> / <code>has_</code> 为前缀的字段均为<b>布尔类型</b>（true/false），不使用 0/1
+  </div>
+
+  <h3 style="font-size:0.9rem;margin:1rem 0 0.5rem;">认证等级说明</h3>
+  <div class="table-wrap">
+    <table class="info-table">
+      <thead><tr><th>标签</th><th>含义</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><span class="auth-tag none">无需认证</span></td><td>公开接口</td><td>无需任何 Token</td></tr>
+        <tr><td><span class="auth-tag jwt">JWT</span></td><td>需登录</td><td>Header 携带有效 JWT Token</td></tr>
+        <tr><td><span class="auth-tag jwt">JWT</span> + <span class="auth-tag txpwd">交易密码</span></td><td>需登录+交易密码</td><td>JWT + Body 中携带 <code>transaction_password</code>（ bcrypt 校验）；仅 4 个端点：POST /market/listings、POST /collectibles/{id}/buy、POST /market/listings/{id}/buy、POST /transfers</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="font-size:0.9rem;margin:1rem 0 0.5rem;">支付通道</h3>
+  <div class="table-wrap">
+    <table class="info-table">
+      <thead><tr><th>通道代码</th><th>名称</th><th>状态</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">balance</td><td>余额支付</td><td><span class="auth-tag jwt">active</span></td><td>平台钱包余额（内部结算）</td></tr>
+        <tr><td class="mono">alipay</td><td>支付宝</td><td><span class="auth-tag jwt">active</span></td><td>已接入</td></tr>
+        <tr><td class="mono">wechat</td><td>微信支付</td><td><span class="auth-tag jwt">active</span></td><td>已接入</td></tr>
+        <tr><td class="mono">huifu</td><td>汇付天下</td><td><span class="auth-tag none">coming_soon</span></td><td>第三方钱包预留，参数已支持</td></tr>
+        <tr><td class="mono">yeepay</td><td>易宝支付</td><td><span class="auth-tag none">coming_soon</span></td><td>第三方钱包预留，参数已支持</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">当前启用支付通道可通过 <code>GET /wallet/channels</code> 查询，前端据此渲染支付方式选项。</div>
+
+  <h3 style="font-size:0.9rem;margin:1rem 0 0.5rem;">HTTP 状态码映射</h3>
+  <div class="table-wrap">
+    <table class="info-table">
+      <thead><tr><th>HTTP Status</th><th>含义</th><th>使用场景</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">200</td><td>OK</td><td>请求处理成功</td></tr>
+        <tr><td class="mono">400</td><td>Bad Request</td><td>参数错误/格式不合法/文件异常隔离</td></tr>
+        <tr><td class="mono">401</td><td>Unauthorized</td><td>未认证 / JWT 缺失或已失效</td></tr>
+        <tr><td class="mono">403</td><td>Forbidden</td><td>无权限 / 操作他人资源 / 账号被禁用</td></tr>
+        <tr><td class="mono">404</td><td>Not Found</td><td>资源不存在</td></tr>
+        <tr><td class="mono">409</td><td>Conflict</td><td>业务冲突（重复操作/库存不足）</td></tr>
+        <tr><td class="mono">422</td><td>Unprocessable Entity</td><td>业务校验失败（限购/时间窗口/概率池全空/实名不一致）</td></tr>
+        <tr><td class="mono">429</td><td>Too Many Requests</td><td>触发限流</td></tr>
+        <tr><td class="mono">500</td><td>Internal Server Error</td><td>服务器内部异常</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note info">业务码（响应体 <code>code</code>）与 HTTP 状态码保持一致取值，便于网关与前端统一处理。</div>
+</div>
+
+<div class="section" id="response-format">
+  <h2 class="section-title"><span class="icon">{ }</span>二、统一响应格式</h2>
+  <p style="font-size:0.82rem;margin-bottom:0.5rem;">所有接口统一返回以下 JSON 结构：</p>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    <span class="s">// 业务数据，可能是对象、数组或 null</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+
+  <div class="label-small">分页响应格式</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "list": [ { <span class="s">/* 记录数组 */</span> } ],
+    "total": <span class="n">100</span>,
+    "page": <span class="n">1</span>,
+    "page_size": <span class="n">20</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+</div>
+
+<div class="section" id="error-codes">
+  <h2 class="section-title"><span class="icon">!</span>三、错误码表</h2>
+  <div class="table-wrap max-h">
+    <table class="info-table">
+      <thead><tr><th>code</th><th>含义</th><th>使用场景</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">200</td><td>成功</td><td>请求处理成功</td></tr>
+        <tr><td class="mono">400</td><td>参数错误</td><td>必填字段缺失/格式不合法/上传文件异常隔离</td></tr>
+        <tr><td class="mono">401</td><td>未认证</td><td>JWT 缺失或过期/Token 已加入黑名单</td></tr>
+        <tr><td class="mono">403</td><td>无权限</td><td>操作他人资源/账号被禁用</td></tr>
+        <tr><td class="mono">404</td><td>资源不存在</td><td>藏品/订单/用户不存在</td></tr>
+        <tr><td class="mono">409</td><td>业务冲突</td><td>重复操作/库存不足/白名单已用完</td></tr>
+        <tr><td class="mono">422</td><td>业务校验失败</td><td>限购超出/时间窗口不符/藏品状态不允许/概率池全空/身份证与姓名不一致</td></tr>
+        <tr><td class="mono">429</td><td>请求过频</td><td>触发限流（短信 IP/手机号超限）</td></tr>
+        <tr><td class="mono">500</td><td>服务器错误</td><td>内部异常</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============ USER MODULE ============ -->
+<div class="section" id="user">
+  <h2 class="section-title"><span class="icon">U</span>四、用户模块</h2>
+
+  <!-- 4.1 发送短信验证码 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/sms/send</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">发送短信验证码</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Body)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">phone</td><td class="type">string</td><td class="req">是</td><td>手机号（11位）</td></tr>
+          <tr><td class="param-label">scene</td><td class="type">int</td><td class="req">是</td><td>场景：1=注册 2=登录 3=修改密码 4=设置交易密码 5=找回密码</td></tr>
+          <tr><td class="param-label">captcha_key</td><td class="type">string</td><td class="cond">条件必填</td><td>图形验证码 key（scene=1,2,5 时必填）</td></tr>
+          <tr><td class="param-label">captcha_code</td><td class="type">string</td><td class="cond">条件必填</td><td>图形验证码（scene=1,2,5 时必填）</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>校验手机号格式 → scene=1,2,5 时校验图形验证码（captcha_key+captcha_code）→ 60秒内不可重复发送 → 频率限制：同一 IP 日上限 20 条、同一手机号日上限 5 条（超限返回 429）→ 生成6位随机码写入 nft_sms_logs → 调用短信服务商发送</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": { "expire_in": <span class="n">300</span> },
+  "message": <span class="s">"验证码已发送"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 4.2 用户注册 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/user/register</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">用户注册</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Body)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">phone</td><td class="type">string</td><td class="req">是</td><td>手机号（11位，未注册）</td></tr>
+          <tr><td class="param-label">code</td><td class="type">string</td><td class="req">是</td><td>短信验证码（scene=1）</td></tr>
+          <tr><td class="param-label">captcha_key</td><td class="type">string</td><td class="req">是</td><td>图形验证码 key</td></tr>
+          <tr><td class="param-label">captcha_code</td><td class="type">string</td><td class="req">是</td><td>图形验证码</td></tr>
+          <tr><td class="param-label">login_password</td><td class="type">string</td><td class="req">是</td><td>登录密码（8-20位，字母+数字）</td></tr>
+          <tr><td class="param-label">username</td><td class="type">string</td><td class="req">是</td><td>用户名/昵称（≤50字）</td></tr>
+          <tr><td class="param-label">inviter_uid</td><td class="type">string</td><td class="opt">否</td><td>邀请人UID（5位数字）</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>校验图形验证码（captcha_key+captcha_code）→ 校验短信验证码 → 校验手机号唯一 → 生成5位UID → 密码 bcrypt 加密 → 写入 nft_users → 自动创建 nft_user_wallets（余额0）→ 若 inviter_uid 非空：写入 nft_invite_records → 若存在进行中抽奖活动且 register_grant>0，为新用户发放对应次数到 nft_lucky_draw_user_chances → 若邀请人有效且该活动 invite_grant>0，为邀请人发放次数到 nft_lucky_draw_user_chances</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "token": <span class="s">"eyJhbGciOiJIUzI1NiJ9..."</span>,
+    "refresh_token": <span class="s">"rft_8f2c1a9e5b7d..."</span>,
+    "expires_in": <span class="n">604800</span>,
+    "user": {
+      "id": <span class="n">10001</span>,
+      "uid": <span class="s">"10001"</span>,
+      "phone": <span class="s">"138****8888"</span>,
+      "username": <span class="s">"数藏玩家"</span>,
+      "avatar": <span class="s">""</span>,
+      "is_realname": <span class="n">false</span>,
+      "has_transaction_password": <span class="n">false</span>
+    }
+  },
+  "message": <span class="s">"注册成功"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 4.3 用户登录 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/user/login</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">用户登录</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Body)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">phone</td><td class="type">string</td><td class="req">是</td><td>手机号</td></tr>
+          <tr><td class="param-label">code</td><td class="type">string</td><td class="opt">否</td><td>验证码（scene=2），与密码二选一</td></tr>
+          <tr><td class="param-label">login_password</td><td class="type">string</td><td class="opt">否</td><td>登录密码，与验证码二选一</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>校验账号状态(status=1) → 验证码或密码校验 → 更新 last_login_at / login_count → 签发 JWT（有效期7天）+ refresh_token（有效期7天）</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "token": <span class="s">"eyJhbGciOiJIUzI1NiJ9..."</span>,
+    "refresh_token": <span class="s">"rft_8f2c1a9e5b7d..."</span>,
+    "expires_in": <span class="n">604800</span>,
+    "user": {
+      "id": <span class="n">10001</span>,
+      "uid": <span class="s">"10001"</span>,
+      "phone": <span class="s">"138****8888"</span>,
+      "username": <span class="s">"数藏玩家"</span>,
+      "avatar": <span class="s">"https://..."</span>,
+      "is_realname": <span class="n">true</span>,
+      "has_transaction_password": <span class="n">true</span>
+    }
+  },
+  "message": <span class="s">"登录成功"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 4.4 刷新 Token -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/user/refresh-token</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">刷新 Token（续期）</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Body)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">refresh_token</td><td class="type">string</td><td class="req">是</td><td>登录/注册时下发的 refresh_token</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>校验当前 JWT 有效 → 校验 refresh_token 有效且未过期、未被吊销 → 签发新 JWT（有效期7天）+ 新 refresh_token（有效期7天）→ 旧 refresh_token 立即失效</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "token": <span class="s">"eyJhbGciOiJIUzI1NiJ9..."</span>,
+    "refresh_token": <span class="s">"rft_2a8c7f1b3d5e..."</span>,
+    "expires_in": <span class="n">604800</span>
+  },
+  "message": <span class="s">"刷新成功"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 4.5 登出 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/user/logout</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">退出登录</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>将当前 JWT 加入 Redis 黑名单（剩余 TTL 内即时失效）→ refresh_token 同步吊销 → 返回成功</div>
+<pre><span class="k">{ "code": <span class="n">200</span>, "data": null, "message": <span class="s">"已退出登录"</span> }</pre>
+    </div>
+  </div>
+
+  <!-- 4.6 找回密码 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/user/reset-password</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">找回密码（未登录态）</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Body)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">phone</td><td class="type">string</td><td class="req">是</td><td>手机号（已注册）</td></tr>
+          <tr><td class="param-label">code</td><td class="type">string</td><td class="req">是</td><td>短信验证码（scene=5）</td></tr>
+          <tr><td class="param-label">new_password</td><td class="type">string</td><td class="req">是</td><td>新登录密码（8-20位，字母+数字）</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>校验短信验证码(scene=5) → bcrypt 加密新密码 → 更新 nft_users.login_password → 使该用户所有 JWT 即时失效（加入 Redis 黑名单）</div>
+<pre><span class="k">{ "code": <span class="n">200</span>, "data": null, "message": <span class="s">"密码已重置，请重新登录"</span> }</pre>
+    </div>
+  </div>
+
+  <!-- 4.7 修改密码 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge PUT">PUT</span>
+      <span class="endpoint-url">/user/password</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">修改登录密码（已登录态）</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Body)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">old_password</td><td class="type">string</td><td class="req">是</td><td>原登录密码</td></tr>
+          <tr><td class="param-label">new_password</td><td class="type">string</td><td class="req">是</td><td>新登录密码（8-20位，字母+数字，不可与原密码相同）</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>校验原密码（bcrypt）→ bcrypt 加密新密码 → 更新 nft_users.login_password → 使该用户所有 Token 即时失效（加入 Redis 黑名单）→ 签发新 JWT + refresh_token 返回</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "token": <span class="s">"eyJhbGciOiJIUzI1NiJ9..."</span>,
+    "refresh_token": <span class="s">"rft_3b9d8e2c4f1a..."</span>,
+    "expires_in": <span class="n">604800</span>
+  },
+  "message": <span class="s">"密码修改成功"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 4.8 实名认证 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/user/realname</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">实名认证</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Body)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">real_name</td><td class="type">string</td><td class="req">是</td><td>真实姓名</td></tr>
+          <tr><td class="param-label">id_card</td><td class="type">string</td><td class="req">是</td><td>身份证号（18位，后端加密存储）</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>校验是否已实名 → 调用第三方实名接口校验 → 校验失败（身份证与姓名不一致）返回 <b>422</b> → real_name/id_card AES加密后写入 nft_users → 更新 is_realname=true</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": { "is_realname": <span class="n">true</span> },
+  "message": <span class="s">"实名认证成功"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 4.9 修改用户资料 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge PATCH">PATCH</span>
+      <span class="endpoint-url">/user/profile</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">修改资料（头像/昵称，部分更新）</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Body)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">username</td><td class="type">string</td><td class="opt">否</td><td>新昵称（≤50字）</td></tr>
+          <tr><td class="param-label">avatar</td><td class="type">string</td><td class="opt">否</td><td>头像URL（先调用上传接口获取）</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>至少传一个字段 → PATCH 增量更新 nft_users 对应字段 → 返回最新用户信息</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "id": <span class="n">10001</span>,
+    "username": <span class="s">"新昵称"</span>,
+    "avatar": <span class="s">"https://cdn.../avatar.png"</span>
+  },
+  "message": <span class="s">"修改成功"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 4.10 设置/修改交易密码 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/user/transaction-password</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">设置/修改交易密码</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Body)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">code</td><td class="type">string</td><td class="req">是</td><td>短信验证码（scene=4）</td></tr>
+          <tr><td class="param-label">transaction_password</td><td class="type">string</td><td class="req">是</td><td>交易密码（6位纯数字）</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>校验验证码 → bcrypt 加密交易密码 → 写入 nft_users.transaction_password（首次设置直接写入，修改时覆盖）→ 使该用户所有 Token 失效（交易密码变更后需重新登录）</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": null,
+  "message": <span class="s">"交易密码设置成功"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 4.11 获取用户信息 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/user/info</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">获取当前用户信息</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>从 JWT 解析 user_id → 查询 nft_users + nft_user_wallets → 返回用户信息和钱包余额</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "id": <span class="n">10001</span>,
+    "uid": <span class="s">"10001"</span>,
+    "phone": <span class="s">"138****8888"</span>,
+    "username": <span class="s">"数藏玩家"</span>,
+    "avatar": <span class="s">"https://..."</span>,
+    "is_realname": <span class="n">true</span>,
+    "has_transaction_password": <span class="n">true</span>,
+    "inviter_uid": <span class="s">"10000"</span>,
+    "last_login_at": <span class="s">"2026-08-06T10:30:00+08:00"</span>,
+    "wallet": {
+      "balance": <span class="s">"500.00"</span>,
+      "frozen_balance": <span class="s">"100.00"</span>
+    }
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 4.12 我的藏品 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/user/collectibles</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">我的藏品列表</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Query)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">page</td><td class="type">int</td><td class="opt">否</td><td>页码，默认1</td></tr>
+          <tr><td class="param-label">page_size</td><td class="type">int</td><td class="opt">否</td><td>每页条数，默认20</td></tr>
+          <tr><td class="param-label">holding_status</td><td class="type">int</td><td class="opt">否</td><td>持有状态：1=持有 2=寄售中（默认1）。注：已从 status 改名为 holding_status，避免与藏品发售状态混淆</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>查询 nft_user_collectibles WHERE user_id=? AND status=holding_status AND is_delete=0 → JOIN nft_collectibles 获取藏品信息 → 链上标识脱敏</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "list": [{
+      "id": <span class="n">1</span>,
+      "collectible_id": <span class="n">5</span>,
+      "collectible_name": <span class="s">"千里江山图·数字版"</span>,
+      "collectible_image": <span class="s">"https://..."</span>,
+      "serial_no": <span class="s">"#0042"</span>,
+      "source": <span class="s">"purchase"</span>,
+      "acquired_price": <span class="s">"99.00"</span>,
+      "acquired_at": <span class="s">"2026-08-01T15:00:00+08:00"</span>,
+      "status": <span class="n">1</span>,
+      "is_on_chain": <span class="n">true</span>,
+      "mint_status": <span class="n">3</span>,
+      "tx_hash_masked": <span class="s">"0xab12cd****5678ef"</span>
+    }],
+    "total": <span class="n">5</span>, "page": <span class="n">1</span>, "page_size": <span class="n">20</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 4.13 藏品流转历史 -->
+  <div class="endpoint" id="user-collectible-history">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/user/collectibles/{id}/history</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">藏品流转历史</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">路径参数 (Path)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">id</td><td class="type">int</td><td class="req">是</td><td>用户藏品ID（nft_user_collectibles.id）</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>校验藏品归属（user_id=当前用户）→ 汇总该藏品的流转时间线：发售购买 / 市场购买 / 转赠收发 / 盲盒开出 / 合成产出 / 抽奖中奖 → 按时间倒序返回</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "user_collectible_id": <span class="n">1</span>,
+    "collectible_name": <span class="s">"千里江山图·数字版"</span>,
+    "serial_no": <span class="s">"#0042"</span>,
+    "timeline": [{
+      "event": <span class="s">"purchase"</span>,
+      "desc": <span class="s">"发售购买"</span>,
+      "price": <span class="s">"99.00"</span>,
+      "from_uid": <span class="n">null</span>,
+      "to_uid": <span class="s">"10001"</span>,
+      "occurred_at": <span class="s">"2026-08-01T15:00:00+08:00"</span>
+    }, {
+      "event": <span class="s">"transfer_in"</span>,
+      "desc": <span class="s">"转赠接收"</span>,
+      "from_uid": <span class="s">"10050"</span>,
+      "to_uid": <span class="s">"10001"</span>,
+      "occurred_at": <span class="s">"2026-08-03T11:20:00+08:00"</span>
+    }]
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ============ COLLECTIBLE MODULE ============ -->
+<div class="section" id="collectible">
+  <h2 class="section-title"><span class="icon">C</span>五、藏品模块</h2>
+
+  <!-- 5.1 分类列表 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/categories</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">藏品分类列表</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>查询 nft_categories WHERE is_delete=0 ORDER BY sort_order → 返回全部分类</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "list": [
+      { "id": <span class="n">1</span>, "name": <span class="s">"国画"</span>, "code": <span class="s">"GUOHUA"</span>, "icon": <span class="s">"paint"</span>, "sort_order": <span class="n">1</span> },
+      { "id": <span class="n">2</span>, "name": <span class="s">"书法"</span>, "code": <span class="s">"CALLIGRAPHY"</span>, "icon": <span class="s">"pen"</span>, "sort_order": <span class="n">2</span> }
+    ]
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 5.2 藏品列表 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/collectibles</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">藏品列表</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Query)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">page</td><td class="type">int</td><td class="opt">否</td><td>页码，默认1</td></tr>
+          <tr><td class="param-label">page_size</td><td class="type">int</td><td class="opt">否</td><td>每页条数，默认20</td></tr>
+          <tr><td class="param-label">category_id</td><td class="type">int</td><td class="opt">否</td><td>分类ID筛选</td></tr>
+          <tr><td class="param-label">status</td><td class="type">int</td><td class="opt">否</td><td>发售状态：1=即将发售 2=发售中 3=已售罄</td></tr>
+          <tr><td class="param-label">keyword</td><td class="type">string</td><td class="opt">否</td><td>名称关键词搜索</td></tr>
+          <tr><td class="param-label">featured</td><td class="type">int</td><td class="opt">否</td><td>1=仅推荐藏品</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>查询 nft_collectibles WHERE is_release=1 AND is_delete=0 → 条件过滤 → 合约地址脱敏 → 返回分页列表</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "list": [{
+      "id": <span class="n">5</span>,
+      "name": <span class="s">"千里江山图·数字版"</span>,
+      "subtitle": <span class="s">"北宋·王希孟"</span>,
+      "image": <span class="s">"https://..."</span>,
+      "price": <span class="s">"99.00"</span>,
+      "edition": <span class="n">10000</span>,
+      "sold": <span class="n">8520</span>,
+      "circulate": <span class="n">1480</span>,
+      "status": <span class="n">2</span>,
+      "onsale_at": <span class="s">"2026-08-01T15:00:00+08:00"</span>,
+      "issuer": <span class="s">"数和文创"</span>,
+      "is_on_chain": <span class="n">true</span>,
+      "is_transferable": <span class="n">true</span>
+    }],
+    "total": <span class="n">36</span>, "page": <span class="n">1</span>, "page_size": <span class="n">20</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 5.3 藏品详情 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/collectibles/{id}</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">藏品详情</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">路径参数 (Path)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">id</td><td class="type">int</td><td class="req">是</td><td>藏品ID</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>查询 nft_collectibles + nft_categories → 合约地址脱敏 → 若已登录返回 is_favored 状态 → 返回完整详情含 description</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "id": <span class="n">5</span>,
+    "category": { "id": <span class="n">1</span>, "name": <span class="s">"国画"</span> },
+    "name": <span class="s">"千里江山图·数字版"</span>,
+    "subtitle": <span class="s">"北宋·王希孟"</span>,
+    "image": <span class="s">"https://..."</span>,
+    "gradient": <span class="s">"#1a3a5f"</span>,
+    "price": <span class="s">"99.00"</span>,
+    "edition": <span class="n">10000</span>,
+    "sold": <span class="n">8520</span>,
+    "circulate": <span class="n">1480</span>,
+    "status": <span class="n">2</span>,
+    "issuer": <span class="s">"数和文创"</span>,
+    "creator": <span class="s">"数和文创"</span>,
+    "brand": <span class="s">"数和文创"</span>,
+    "description": <span class="s">"《千里江山图》数字藏品..."</span>,
+    "release_date": <span class="s">"2026-08-01T00:00:00+08:00"</span>,
+    "onsale_at": <span class="s">"2026-08-01T15:00:00+08:00"</span>,
+    "is_on_chain": <span class="n">true</span>,
+    "chain_type": <span class="n">1</span>,
+    "token_standard": <span class="n">1</span>,
+    "contract_address_masked": <span class="s">"0xab12cd****5678ef"</span>,
+    "cert_id": <span class="s">"CERT-2026-0042"</span>,
+    "is_transferable": <span class="n">true</span>,
+    "vol": <span class="n">320</span>,
+    "is_favored": <span class="n">false</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 5.4 关注/取消关注 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/collectibles/{id}/favorite</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">关注藏品</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>INSERT nft_user_favorites（UNIQUE(user_id,collectible_id) 防重复）→ 已存在则返回"已关注"</div>
+<pre><span class="k">{ "code": <span class="n">200</span>, "data": null, "message": <span class="s">"关注成功"</span> }</pre>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge DELETE">DELETE</span>
+      <span class="endpoint-url">/collectibles/{id}/favorite</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">取消关注</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>软删除 nft_user_favorites WHERE user_id=? AND collectible_id=?</div>
+<pre><span class="k">{ "code": <span class="n">200</span>, "data": null, "message": <span class="s">"已取消关注"</span> }</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MARKET MODULE ============ -->
+<div class="section" id="market">
+  <h2 class="section-title"><span class="icon">M</span>六、市场模块</h2>
+
+  <!-- 6.1 市场在售列表 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/market/listings</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">市场在售列表</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Query)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">page</td><td class="type">int</td><td class="opt">否</td><td>页码，默认1</td></tr>
+          <tr><td class="param-label">page_size</td><td class="type">int</td><td class="opt">否</td><td>每页条数，默认20</td></tr>
+          <tr><td class="param-label">collectible_id</td><td class="type">int</td><td class="opt">否</td><td>按藏品筛选</td></tr>
+          <tr><td class="param-label">sort</td><td class="type">string</td><td class="opt">否</td><td>排序：price_asc/price_desc/newest，默认newest</td></tr>
+          <tr><td class="param-label">min_price</td><td class="type">decimal</td><td class="opt">否</td><td>最低价格</td></tr>
+          <tr><td class="param-label">max_price</td><td class="type">decimal</td><td class="opt">否</td><td>最高价格</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>查询 nft_resale_listings WHERE status=1 AND is_delete=0 → JOIN nft_collectibles + nft_user_collectibles(serial_no) → 排序分页</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "list": [{
+      "listing_id": <span class="n">88</span>,
+      "collectible_id": <span class="n">5</span>,
+      "collectible_name": <span class="s">"千里江山图·数字版"</span>,
+      "collectible_image": <span class="s">"https://..."</span>,
+      "serial_no": <span class="s">"#0042"</span>,
+      "price": <span class="s">"150.00"</span>,
+      "listed_at": <span class="s">"2026-08-05T10:00:00+08:00"</span>,
+      "seller_uid": <span class="s">"10050"</span>
+    }],
+    "total": <span class="n">120</span>, "page": <span class="n">1</span>, "page_size": <span class="n">20</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 6.2 寄售挂单 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/market/listings</span>
+      <span class="auth-tag jwt">JWT</span> + <span class="auth-tag txpwd">交易密码</span>
+      <span class="endpoint-desc-inline">挂售藏品（寄售）</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Body)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">user_collectible_id</td><td class="type">int</td><td class="req">是</td><td>用户藏品ID（nft_user_collectibles.id）</td></tr>
+          <tr><td class="param-label">price</td><td class="type">decimal</td><td class="req">是</td><td>挂单价格（>0）</td></tr>
+          <tr><td class="param-label">transaction_password</td><td class="type">string</td><td class="req">是</td><td>交易密码（6位数字）</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>第一步校验交易密码（bcrypt）→ 校验藏品归属(user_id匹配)且 status=1(持有) 且 is_transferable=1 → 乐观锁更新 user_collectibles.status=2(寄售中, 基于 user_collectibles.version) → 写入 nft_resale_listings(status=1) → 写入 operation_logs 审计</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": { "listing_id": <span class="n">89</span>, "listed_at": <span class="s">"2026-08-06T14:00:00+08:00"</span> },
+  "message": <span class="s">"挂售成功"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 6.3 取消寄售 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge PUT">PUT</span>
+      <span class="endpoint-url">/market/listings/{id}/cancel</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">取消寄售</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>校验挂单归属(seller_id匹配)且 status=1 → 乐观锁更新 resale_listings.status=3(已取消, 基于 resale_listings.version) → 恢复 user_collectibles.status=1(持有) → 写入审计</div>
+<pre><span class="k">{ "code": <span class="n">200</span>, "data": null, "message": <span class="s">"已取消寄售"</span> }</pre>
+    </div>
+  </div>
+
+  <!-- 6.4 购买市场藏品 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/market/listings/{id}/buy</span>
+      <span class="auth-tag jwt">JWT</span> + <span class="auth-tag txpwd">交易密码</span>
+      <span class="endpoint-desc-inline">购买市场藏品（创建订单）</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Body)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">payment_method</td><td class="type">string</td><td class="req">是</td><td>支付方式：balance/alipay/wechat/huifu/yeepay（以 /wallet/channels 为准）</td></tr>
+          <tr><td class="param-label">transaction_password</td><td class="type">string</td><td class="req">是</td><td>交易密码（6位数字）</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>第一步校验交易密码（bcrypt）→ 校验挂单 status=1 → 不能买自己的挂单 → 乐观锁更新 listing.status=2(已售出, 基于 resale_listings.version) → 创建 nft_orders(source='market', resale_listing_id=挂单ID) → 锁定库存 → 返回订单号，引导支付</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "order_id": <span class="n">5001</span>,
+    "order_no": <span class="s">"ORD20260806143052001"</span>,
+    "total_price": <span class="s">"150.00"</span>,
+    "expires_at": <span class="s">"2026-08-06T14:45:52+08:00"</span>
+  },
+  "message": <span class="s">"下单成功，请尽快支付"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 6.5 发售购买 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/collectibles/{id}/buy</span>
+      <span class="auth-tag jwt">JWT</span> + <span class="auth-tag txpwd">交易密码</span>
+      <span class="endpoint-desc-inline">发售购买（创建订单）</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Body)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">quantity</td><td class="type">int</td><td class="req">是</td><td>购买数量（≥1）</td></tr>
+          <tr><td class="param-label">payment_method</td><td class="type">string</td><td class="req">是</td><td>支付方式：balance/alipay/wechat/huifu/yeepay（以 /wallet/channels 为准）</td></tr>
+          <tr><td class="param-label">transaction_password</td><td class="type">string</td><td class="req">是</td><td>交易密码（6位数字）</td></tr>
+          <tr><td class="param-label">priority_sale_id</td><td class="type">int</td><td class="opt">否</td><td>优先购活动ID（优先购下单时传）</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>第一步校验交易密码（bcrypt）→ 校验藏品 status=2(发售中) 且 circulate-locked_quantity ≥ quantity → 若 priority_sale_id 非空：校验时间窗口+白名单资格+限购数量 → 乐观锁扣减库存(locked_quantity+=quantity, 基于 collectibles.version) → 创建订单(source='release') → 返回订单号</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "order_id": <span class="n">5002</span>,
+    "order_no": <span class="s">"ORD20260806143053002"</span>,
+    "unit_price": <span class="s">"99.00"</span>,
+    "quantity": <span class="n">1</span>,
+    "total_price": <span class="s">"99.00"</span>,
+    "expires_at": <span class="s">"2026-08-06T14:45:53+08:00"</span>
+  },
+  "message": <span class="s">"下单成功，请尽快支付"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 6.6 我的挂单 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/market/my-listings</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">我的寄售挂单列表</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Query)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">status</td><td class="type">int</td><td class="opt">否</td><td>1=寄售中 2=已售出 3=已取消，默认全部</td></tr>
+          <tr><td class="param-label">page</td><td class="type">int</td><td class="opt">否</td><td>页码</td></tr>
+          <tr><td class="param-label">page_size</td><td class="type">int</td><td class="opt">否</td><td>每页条数</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>查询 nft_resale_listings WHERE seller_id=当前用户 → JOIN 藏品信息 → 分页返回</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "list": [{
+      "listing_id": <span class="n">88</span>,
+      "collectible_id": <span class="n">5</span>,
+      "collectible_name": <span class="s">"千里江山图·数字版"</span>,
+      "collectible_image": <span class="s">"https://..."</span>,
+      "serial_no": <span class="s">"#0042"</span>,
+      "price": <span class="s">"150.00"</span>,
+      "status": <span class="n">1</span>,
+      "listed_at": <span class="s">"2026-08-05T10:00:00+08:00"</span>
+    }],
+    "total": <span class="n">3</span>, "page": <span class="n">1</span>, "page_size": <span class="n">20</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ============ BLINDBOX MODULE ============ -->
+<div class="section" id="blindbox">
+  <h2 class="section-title"><span class="icon">B</span>七、盲盒模块</h2>
+  <div class="note info"><b>交互说明：</b>本模块开盒奖励结果由前端弹窗即时展示，不写入消息中心。本模块仅 JWT 认证，<b>不涉及交易密码</b>。</div>
+
+  <!-- 7.1 盲盒列表 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/blind-boxes</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">盲盒列表</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Query)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">page</td><td class="type">int</td><td class="opt">否</td><td>页码，默认1</td></tr>
+          <tr><td class="param-label">page_size</td><td class="type">int</td><td class="opt">否</td><td>每页条数，默认20</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>查询 nft_blind_boxes → JOIN nft_collectibles(盲盒本身也是藏品) WHERE is_release=1 → JOIN nft_blind_box_items 获取奖品池预览（不暴露概率）→ 分页</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "list": [{
+      "id": <span class="n">1</span>,
+      "collectible_id": <span class="n">10</span>,
+      "name": <span class="s">"夏日惊喜盲盒"</span>,
+      "image": <span class="s">"https://..."</span>,
+      "price": <span class="s">"59.00"</span>,
+      "edition": <span class="n">5000</span>,
+      "sold": <span class="n">1200</span>,
+      "status": <span class="n">2</span>,
+      "prize_preview": [
+        { "name": <span class="s">"稀有·青花瓷"</span>, "image": <span class="s">"https://..."</span>, "rarity": <span class="s">"SSR"</span> },
+        { "name": <span class="s">"普通·书签"</span>, "image": <span class="s">"https://..."</span>, "rarity": <span class="s">"R"</span> }
+      ]
+    }],
+    "total": <span class="n">8</span>, "page": <span class="n">1</span>, "page_size": <span class="n">20</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 7.2 盲盒详情 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/blind-boxes/{id}</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">盲盒详情（含完整奖品池）</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>查询盲盒信息 + nft_blind_box_items JOIN nft_collectibles → 返回奖品池含概率</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "id": <span class="n">1</span>,
+    "name": <span class="s">"夏日惊喜盲盒"</span>,
+    "image": <span class="s">"https://..."</span>,
+    "price": <span class="s">"59.00"</span>,
+    "edition": <span class="n">5000</span>,
+    "sold": <span class="n">1200</span>,
+    "prizes": [{
+      "id": <span class="n">1</span>,
+      "collectible_id": <span class="n">11</span>,
+      "name": <span class="s">"稀有·青花瓷"</span>,
+      "image": <span class="s">"https://..."</span>,
+      "probability": <span class="s">"0.0500"</span>,
+      "quantity_limit": <span class="n">250</span>,
+      "quantity_distributed": <span class="n">60</span>
+    }]
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 7.3 开启盲盒 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/blind-boxes/{id}/open</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">开启盲盒</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">路径参数 (Path)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">id</td><td class="type">int</td><td class="req">是</td><td>盲盒藏品ID（nft_blind_boxes.id）</td></tr>
+        </tbody>
+      </table>
+      <div class="label-small">请求参数 (Body)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">user_collectible_id</td><td class="type">int</td><td class="req">是</td><td>用户持有的盲盒藏品ID（nft_user_collectibles.id）</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>校验盲盒归属且 status=1(持有) → 概率总和校验（误差 ≤ 1e-6）→ 库存(quantity_limit-quantity_distributed)用尽的奖品概率置 0 并归一化 → 若奖品池全空返回 <b>422</b> → 加权随机选择奖品（按归一化后 probability）→ 事务内：消耗盲盒(status=5已消耗) + 生成奖品藏品(source='blindbox') → 写入 nft_blind_box_open_records → 若上链则触发异步mint</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "prize": {
+      "collectible_id": <span class="n">11</span>,
+      "name": <span class="s">"稀有·青花瓷"</span>,
+      "image": <span class="s">"https://..."</span>,
+      "serial_no": <span class="s">"#0061"</span>,
+      "rarity": <span class="s">"SSR"</span>
+    },
+    "new_user_collectible_id": <span class="n">201</span>
+  },
+  "message": <span class="s">"恭喜获得稀有藏品！"</span>
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SYNTHESIS MODULE ============ -->
+<div class="section" id="synthesis">
+  <h2 class="section-title"><span class="icon">S</span>八、合成模块</h2>
+  <div class="note info"><b>交互说明：</b>本模块合成结果由前端弹窗即时展示，不写入消息中心。本模块仅 JWT 认证，<b>不涉及交易密码</b>。</div>
+
+  <!-- 8.1 合成活动列表 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/synthesis/activities</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">合成活动列表</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>查询 nft_synthesis_activities WHERE status=2(进行中) AND is_delete=0 → 返回活动列表含合成结果藏品预览</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "list": [{
+      "id": <span class="n">1</span>,
+      "name": <span class="s">"三合一·限定青花"</span>,
+      "result_collectible": {
+        "id": <span class="n">20</span>, "name": <span class="s">"限定青花瓷·合成版"</span>, "image": <span class="s">"https://..."</span>
+      },
+      "type": <span class="s">"limit"</span>,
+      "total_limit": <span class="n">100</span>,
+      "used_count": <span class="n">35</span>,
+      "per_user_limit": <span class="n">1</span>,
+      "end_time": <span class="s">"2026-08-31T23:59:59+08:00"</span>
+    }]
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 8.2 合成公式详情 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/synthesis/activities/{id}</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">合成公式查询（含我的持有情况）</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>查询活动详情 + nft_synthesis_materials（材料清单）→ JOIN 藏品信息 → 查询当前用户对各材料的持有数量 → 返回可合成状态</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "id": <span class="n">1</span>,
+    "name": <span class="s">"三合一·限定青花"</span>,
+    "result_collectible": { "id": <span class="n">20</span>, "name": <span class="s">"限定青花瓷"</span>, "image": <span class="s">"https://..."</span> },
+    "materials": [{
+      "collectible_id": <span class="n">17</span>,
+      "name": <span class="s">"青花碎片A"</span>,
+      "image": <span class="s">"https://..."</span>,
+      "required_quantity": <span class="n">1</span>,
+      "my_holding": <span class="n">2</span>,
+      "is_sufficient": <span class="n">true</span>
+    }, {
+      "collectible_id": <span class="n">18</span>,
+      "name": <span class="s">"青花碎片B"</span>,
+      "image": <span class="s">"https://..."</span>,
+      "required_quantity": <span class="n">1</span>,
+      "my_holding": <span class="n">0</span>,
+      "is_sufficient": <span class="n">false</span>
+    }],
+    "can_synthesize": <span class="n">false</span>,
+    "my_used_count": <span class="n">0</span>,
+    "per_user_limit": <span class="n">1</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 8.3 提交合成 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/synthesis/activities/{id}/synthesize</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">提交合成</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Body)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">material_user_collectible_ids</td><td class="type">int[]</td><td class="req">是</td><td>消耗的用户藏品ID数组（需匹配材料配方数量）</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>校验活动进行中 → 校验用户合成次数 < per_user_limit → 校验总次数 < total_limit → 校验材料匹配配方（材料数组长度=配方总数；每个 ID 属于当前用户且 status=1；按 collectible_id 一一匹配；不允许重复 ID）→ 事务内：乐观锁消耗材料(status=5, 基于 user_collectibles.version) + 生成结果藏品(source='synthesis') + 写入 synthesis_records + synthesis_record_items + operation_logs</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "result_user_collectible_id": <span class="n">301</span>,
+    "result_collectible": {
+      "id": <span class="n">20</span>, "name": <span class="s">"限定青花瓷·合成版"</span>, "image": <span class="s">"https://..."</span>, "serial_no": <span class="s">"#0036"</span>
+    }
+  },
+  "message": <span class="s">"合成成功！"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 8.4 合成记录 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/synthesis/records</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">我的合成记录</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>查询 nft_synthesis_records WHERE user_id=当前用户 → JOIN 活动名+结果藏品信息 → 分页</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "list": [{
+      "id": <span class="n">1</span>,
+      "activity_name": <span class="s">"三合一·限定青花"</span>,
+      "result_name": <span class="s">"限定青花瓷·合成版"</span>,
+      "result_image": <span class="s">"https://..."</span>,
+      "result_serial_no": <span class="s">"#0036"</span>,
+      "created_at": <span class="s">"2026-08-06T14:00:00+08:00"</span>
+    }],
+    "total": <span class="n">1</span>, "page": <span class="n">1</span>, "page_size": <span class="n">20</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CHECKIN MODULE ============ -->
+<div class="section" id="checkin">
+  <h2 class="section-title"><span class="icon">✓</span>九、签到模块</h2>
+  <div class="note info"><b>交互说明：</b>本模块签到奖励结果由前端弹窗即时展示，不写入消息中心。</div>
+
+  <!-- 9.1 每日签到 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/check-in</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">每日签到</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>查询今日是否已签到(UNIQUE user_id+check_in_date) → 计算连续天数（昨日有签到则+1，否则重置为1）→ 写入 nft_check_in_records → 根据连续天数发放奖励（reward_type）→ 若 reward_type=lucky_draw_chance：写入 nft_lucky_draw_user_chances（source='check_in'）为用户在对应抽奖活动发放抽奖次数</div>
+      <div class="label-small">reward_type 取值与 reward 结构</div>
+      <table class="field-table">
+        <thead><tr><th>reward_type</th><th>reward 结构</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">points</td><td class="mono">{ "points": 10 }</td><td>积分奖励，写入钱包/积分账户</td></tr>
+          <tr><td class="mono">collectible</td><td class="mono">{ "collectible_id", "name", "serial_no" }</td><td>藏品奖励，生成 user_collectibles(source='checkin')</td></tr>
+          <tr><td class="mono">lucky_draw_chance</td><td class="mono">{ "chances", "activity_id", "activity_name" }</td><td>抽奖次数奖励，发放到对应抽奖活动</td></tr>
+        </tbody>
+      </table>
+<pre><span class="s">// 示例1：lucky_draw_chance（抽奖次数）</span>
+{
+  "code": <span class="n">200</span>,
+  "data": {
+    "check_in_date": <span class="s">"2026-08-07"</span>,
+    "consecutive_days": <span class="n">8</span>,
+    "reward_type": <span class="s">"lucky_draw_chance"</span>,
+    "reward": {
+      "chances": <span class="n">1</span>,
+      "activity_id": <span class="n">1</span>,
+      "activity_name": <span class="s">"中秋抽奖盛典"</span>
+    }
+  },
+  "message": <span class="s">"签到成功，连续8天！"</span>
+}
+<span class="s">// 示例2：points（积分）</span>
+{
+  "code": <span class="n">200</span>,
+  "data": {
+    "check_in_date": <span class="s">"2026-08-05"</span>,
+    "consecutive_days": <span class="n">6</span>,
+    "reward_type": <span class="s">"points"</span>,
+    "reward": { "points": <span class="n">10</span> }
+  },
+  "message": <span class="s">"签到成功"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 9.2 签到记录 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/check-in/records</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">签到记录查询</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Query)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">month</td><td class="type">string</td><td class="opt">否</td><td>月份，格式 YYYY-MM，默认当月</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>查询 nft_check_in_records WHERE user_id=? AND check_in_date BETWEEN 月初 AND 月末 → 返回签到日历+连续天数+奖励列表</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "current_consecutive": <span class="n">7</span>,
+    "total_days": <span class="n">15</span>,
+    "records": [{
+      "check_in_date": <span class="s">"2026-08-06"</span>,
+      "consecutive_days": <span class="n">7</span>,
+      "reward_type": <span class="s">"lucky_draw_chance"</span>
+    }, {
+      "check_in_date": <span class="s">"2026-08-05"</span>,
+      "consecutive_days": <span class="n">6</span>,
+      "reward_type": <span class="s">"points"</span>
+    }]
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ============ LUCKY DRAW MODULE ============ -->
+<div class="section" id="luckydraw">
+  <h2 class="section-title"><span class="icon">L</span>十、抽奖模块</h2>
+  <div class="note info"><b>交互说明：</b>本模块中奖结果由前端弹窗即时展示，不写入消息中心。本模块仅 JWT 认证，<b>不涉及交易密码</b>。抽奖次数可通过注册/邀请/签到/持有藏品等多渠道配置发放。</div>
+
+  <!-- 10.1 抽奖活动列表 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/lucky-draw/activities</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">抽奖活动列表</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Query)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">page</td><td class="type">int</td><td class="opt">否</td><td>页码，默认1</td></tr>
+          <tr><td class="param-label">page_size</td><td class="type">int</td><td class="opt">否</td><td>每页条数，默认20</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>查询 nft_lucky_draw_activities WHERE status=2(进行中) AND 时间范围内 → 返回活动信息 → 分页</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "list": [{
+      "id": <span class="n">1</span>,
+      "name": <span class="s">"中秋抽奖盛典"</span>,
+      "image": <span class="s">"https://..."</span>,
+      "draw_limit_per_user": <span class="n">3</span>,
+      "start_time": <span class="s">"2026-09-15T00:00:00+08:00"</span>,
+      "end_time": <span class="s">"2026-09-17T23:59:59+08:00"</span>
+    }],
+    "total": <span class="n">2</span>, "page": <span class="n">1</span>, "page_size": <span class="n">20</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 10.2 抽奖规则/奖品池 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/lucky-draw/activities/{id}</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">抽奖规则与奖品池</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>查询活动详情 + nft_lucky_draw_prizes → JOIN 藏品信息 → 返回奖品池含概率+已发放/限制量 → 查询 <code>nft_lucky_draw_user_chances</code> 表按来源分组聚合，返回当前用户剩余抽奖次数（my_remaining_draws = draw_chances 各来源 remaining 之和）+ 次数来源明细 draw_chances</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "id": <span class="n">1</span>,
+    "name": <span class="s">"中秋抽奖盛典"</span>,
+    "draw_limit_per_user": <span class="n">3</span>,
+    "my_remaining_draws": <span class="n">5</span>,
+    "draw_chances": [
+      { "source": <span class="s">"hold_collectible"</span>, "source_name": <span class="s">"持有指定藏品"</span>, "related_id": <span class="n">5</span>, "granted_count": <span class="n">2</span>, "used_count": <span class="n">1</span>, "remaining": <span class="n">1</span> },
+      { "source": <span class="s">"invite_friend"</span>, "source_name": <span class="s">"邀请好友"</span>, "related_id": <span class="k">null</span>, "granted_count": <span class="n">3</span>, "used_count": <span class="n">0</span>, "remaining": <span class="n">3</span> },
+      { "source": <span class="s">"register"</span>, "source_name": <span class="s">"注册奖励"</span>, "related_id": <span class="k">null</span>, "granted_count": <span class="n">1</span>, "used_count": <span class="n">1</span>, "remaining": <span class="n">0</span> },
+      { "source": <span class="s">"check_in"</span>, "source_name": <span class="s">"签到奖励"</span>, "related_id": <span class="k">null</span>, "granted_count": <span class="n">1</span>, "used_count": <span class="n">0</span>, "remaining": <span class="n">1</span> },
+      { "source": <span class="s">"system"</span>, "source_name": <span class="s">"系统赠送"</span>, "related_id": <span class="k">null</span>, "granted_count": <span class="n">2</span>, "used_count": <span class="n">2</span>, "remaining": <span class="n">0</span> }
+    ],
+    "prizes": [{
+      "id": <span class="n">1</span>,
+      "collectible_id": <span class="n">25</span>,
+      "name": <span class="s">"特等奖·金箔月饼"</span>,
+      "image": <span class="s">"https://..."</span>,
+      "probability": <span class="s">"0.0100"</span>,
+      "quantity_limit": <span class="n">10</span>,
+      "quantity_distributed": <span class="n">3</span>
+    }, {
+      "id": <span class="n">2</span>,
+      "name": <span class="s">"谢谢参与"</span>,
+      "probability": <span class="s">"0.5000"</span>
+    }]
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 10.3 参与抽奖 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/lucky-draw/activities/{id}/draw</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">参与抽奖</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>校验活动进行中 → 校验用户剩余次数（my_remaining_draws > 0）→ 概率总和校验（误差 ≤ 1e-6）→ 库存(quantity_limit-quantity_distributed)用尽的奖品概率置 0 并归一化 → 若奖品池全空返回 <b>422</b> → 加权随机选择奖品（按归一化后 probability）→ 若中奖：生成 user_collectibles(source='lucky_draw') → 写入 nft_lucky_draw_records → 扣减对应来源剩余次数</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "won": <span class="n">true</span>,
+    "prize": {
+      "prize_id": <span class="n">1</span>,
+      "collectible_id": <span class="n">25</span>,
+      "name": <span class="s">"特等奖·金箔月饼"</span>,
+      "image": <span class="s">"https://..."</span>,
+      "serial_no": <span class="s">"#0004"</span>
+    },
+    "new_user_collectible_id": <span class="n">401</span>,
+    "remaining_draws": <span class="n">1</span>
+  },
+  "message": <span class="s">"恭喜中奖！"</span>
+}</pre>
+<pre><span class="s">// 未中奖时：</span>
+{
+  "code": <span class="n">200</span>,
+  "data": { "won": <span class="n">false</span>, "prize": null, "remaining_draws": <span class="n">1</span> },
+  "message": <span class="s">"很遗憾未中奖"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 10.4 中奖记录 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/lucky-draw/records</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">我的抽奖记录</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>查询 nft_lucky_draw_records WHERE user_id=当前用户 → JOIN 奖品信息 → 分页</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "list": [{
+      "id": <span class="n">1</span>,
+      "activity_name": <span class="s">"中秋抽奖盛典"</span>,
+      "prize_name": <span class="s">"特等奖·金箔月饼"</span>,
+      "prize_image": <span class="s">"https://..."</span>,
+      "won": <span class="n">true</span>,
+      "created_at": <span class="s">"2026-09-15T14:00:00+08:00"</span>
+    }],
+    "total": <span class="n">3</span>, "page": <span class="n">1</span>, "page_size": <span class="n">20</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 10.5 抽奖次数明细 -->
+  <div class="endpoint" id="luckydraw-chances">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/lucky-draw/activities/{id}/chances</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">我的抽奖次数来源明细</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">路径参数 (Path)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">id</td><td class="type">int</td><td class="req">是</td><td>抽奖活动ID</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>查询 <code>nft_lucky_draw_user_chances</code> 表 WHERE user_id=当前用户 AND activity_id=? → 按来源分组聚合 granted_count/used_count/remaining → 返回明细列表与合计</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "activity_id": <span class="n">1</span>,
+    "activity_name": <span class="s">"中秋抽奖盛典"</span>,
+    "total_granted": <span class="n">9</span>,
+    "total_used": <span class="n">4</span>,
+    "total_remaining": <span class="n">5</span>,
+    "chances": [{
+      "source": <span class="s">"hold_collectible"</span>,
+      "source_name": <span class="s">"持有指定藏品"</span>,
+      "related_id": <span class="n">5</span>,
+      "granted_count": <span class="n">2</span>,
+      "used_count": <span class="n">1</span>,
+      "remaining": <span class="n">1</span>
+    }, {
+      "source": <span class="s">"invite_friend"</span>,
+      "source_name": <span class="s">"邀请好友"</span>,
+      "related_id": <span class="k">null</span>,
+      "granted_count": <span class="n">3</span>,
+      "used_count": <span class="n">0</span>,
+      "remaining": <span class="n">3</span>
+    }, {
+      "source": <span class="s">"register"</span>,
+      "source_name": <span class="s">"注册奖励"</span>,
+      "related_id": <span class="k">null</span>,
+      "granted_count": <span class="n">1</span>,
+      "used_count": <span class="n">1</span>,
+      "remaining": <span class="n">0</span>
+    }, {
+      "source": <span class="s">"check_in"</span>,
+      "source_name": <span class="s">"签到奖励"</span>,
+      "related_id": <span class="k">null</span>,
+      "granted_count": <span class="n">1</span>,
+      "used_count": <span class="n">0</span>,
+      "remaining": <span class="n">1</span>
+    }, {
+      "source": <span class="s">"system"</span>,
+      "source_name": <span class="s">"系统赠送"</span>,
+      "related_id": <span class="k">null</span>,
+      "granted_count": <span class="n">2</span>,
+      "used_count": <span class="n">2</span>,
+      "remaining": <span class="n">0</span>
+    }]
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TRANSFER MODULE ============ -->
+<div class="section" id="transfer">
+  <h2 class="section-title"><span class="icon">T</span>十一、转赠模块</h2>
+  <div class="note info"><b>交互说明：</b>本模块转赠结果由前端弹窗即时展示，不写入消息中心。仅 POST /transfers（发起转赠）需要交易密码，确认/拒绝/取消仅需 JWT。</div>
+
+  <!-- 11.1 发起转赠 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/transfers</span>
+      <span class="auth-tag jwt">JWT</span> + <span class="auth-tag txpwd">交易密码</span>
+      <span class="endpoint-desc-inline">发起转赠</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Body)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">user_collectible_id</td><td class="type">int</td><td class="req">是</td><td>要转赠的用户藏品ID</td></tr>
+          <tr><td class="param-label">to_phone</td><td class="type">string</td><td class="req">是</td><td>接收方手机号（不能是自己的）</td></tr>
+          <tr><td class="param-label">transaction_password</td><td class="type">string</td><td class="req">是</td><td>交易密码（6位数字）</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>第一步校验交易密码（bcrypt）→ 校验藏品归属且 status=1(持有) 且 is_transferable=1 → 查询接收方用户是否存在 → 冻结藏品(status=3冻结, 基于 user_collectibles.version) → 写入 nft_transfers(status=1待确认) → 写入 operation_logs</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "transfer_id": <span class="n">1</span>,
+    "to_nickname": <span class="s">"藏友小李"</span>,
+    "status": <span class="n">1</span>,
+    "created_at": <span class="s">"2026-08-06T14:00:00+08:00"</span>
+  },
+  "message": <span class="s">"转赠请求已发送，等待对方确认"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 11.2 确认/拒绝转赠 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge PUT">PUT</span>
+      <span class="endpoint-url">/transfers/{id}/confirm</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">确认接收转赠</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>校验 to_user_id=当前用户 且 status=1(待确认) → 事务内：更新藏品 user_id=接收方, source='transfer', status=1（基于 user_collectibles.version）→ 更新 transfer.status=2(已接受) → 若上链触发 transferFrom → 写入 operation_logs → 获得新藏品后异步检测 hold_collectible 类型抽奖规则，命中则发放次数到 nft_lucky_draw_user_chances</div>
+<pre><span class="k">{ "code": <span class="n">200</span>, "data": null, "message": <span class="s">"已确认接收"</span> }</pre>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge PUT">PUT</span>
+      <span class="endpoint-url">/transfers/{id}/reject</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">拒绝转赠</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>校验 to_user_id=当前用户 且 status=1 → 更新 transfer.status=3(已拒绝) → 恢复藏品 status=1(持有) → 写入审计</div>
+<pre><span class="k">{ "code": <span class="n">200</span>, "data": null, "message": <span class="s">"已拒绝转赠"</span> }</pre>
+    </div>
+  </div>
+
+  <!-- 11.3 转赠记录 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/transfers</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">转赠记录</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Query)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">direction</td><td class="type">string</td><td class="opt">否</td><td>sent=我发出的 / received=我收到的，默认全部</td></tr>
+          <tr><td class="param-label">status</td><td class="type">int</td><td class="opt">否</td><td>1=待确认 2=已接受 3=已拒绝 4=已取消</td></tr>
+          <tr><td class="param-label">page</td><td class="type">int</td><td class="opt">否</td><td>页码</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>查询 nft_transfers WHERE from_user_id 或 to_user_id = 当前用户 → JOIN 藏品信息 → 分页</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "list": [{
+      "id": <span class="n">1</span>,
+      "direction": <span class="s">"sent"</span>,
+      "to_phone": <span class="s">"139****6666"</span>,
+      "to_nickname": <span class="s">"藏友小李"</span>,
+      "collectible_name": <span class="s">"千里江山图·数字版"</span>,
+      "collectible_image": <span class="s">"https://..."</span>,
+      "serial_no": <span class="s">"#0042"</span>,
+      "status": <span class="n">1</span>,
+      "created_at": <span class="s">"2026-08-06T14:00:00+08:00"</span>
+    }],
+    "total": <span class="n">5</span>, "page": <span class="n">1</span>, "page_size": <span class="n">20</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 11.4 取消转赠 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge PUT">PUT</span>
+      <span class="endpoint-url">/transfers/{id}/cancel</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">取消转赠（发起方）</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>校验 from_user_id=当前用户 且 status=1(待确认) → 更新 transfer.status=4(已取消) → 恢复藏品 status=1(持有) → 写入审计</div>
+<pre><span class="k">{ "code": <span class="n">200</span>, "data": null, "message": <span class="s">"已取消转赠"</span> }</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PAYMENT MODULE ============ -->
+<div class="section" id="payment">
+  <h2 class="section-title"><span class="icon">P</span>十二、支付模块</h2>
+  <div class="note"><b>订单与库存设计说明：</b>订单创建后 <code>expires_at</code> 为 15 分钟；定时任务每 5 分钟扫描 <code>status=1</code> 且超时的订单，自动取消并释放锁定库存（<code>locked_quantity -= qty</code>）；市场购买超时需同步恢复 <code>listing.status=1</code>。</div>
+
+  <!-- 12.1 订单列表 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/orders</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">我的订单列表</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Query)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">status</td><td class="type">int</td><td class="opt">否</td><td>1=待支付 2=已完成 3=已取消</td></tr>
+          <tr><td class="param-label">source</td><td class="type">string</td><td class="opt">否</td><td>release=发售购买 market=市场购买</td></tr>
+          <tr><td class="param-label">page</td><td class="type">int</td><td class="opt">否</td><td>页码</td></tr>
+          <tr><td class="param-label">page_size</td><td class="type">int</td><td class="opt">否</td><td>每页条数</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>查询 nft_orders WHERE user_id=当前用户 → JOIN 藏品信息 → 分页（含 priority_sale_id 标记优先购订单）</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "list": [{
+      "id": <span class="n">5001</span>,
+      "order_no": <span class="s">"ORD20260806143052001"</span>,
+      "collectible_name": <span class="s">"千里江山图·数字版"</span>,
+      "collectible_image": <span class="s">"https://..."</span>,
+      "unit_price": <span class="s">"99.00"</span>,
+      "quantity": <span class="n">1</span>,
+      "total_price": <span class="s">"99.00"</span>,
+      "status": <span class="n">1</span>,
+      "source": <span class="s">"release"</span>,
+      "is_priority": <span class="n">false</span>,
+      "expires_at": <span class="s">"2026-08-06T14:45:52+08:00"</span>,
+      "created_at": <span class="s">"2026-08-06T14:30:52+08:00"</span>
+    }],
+    "total": <span class="n">12</span>, "page": <span class="n">1</span>, "page_size": <span class="n">20</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 12.2 订单详情 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/orders/{id}</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">订单详情</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>查询 nft_orders WHERE id=? AND user_id=当前用户 → JOIN 藏品+支付信息 → 返回完整订单详情</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "id": <span class="n">5001</span>,
+    "order_no": <span class="s">"ORD20260806143052001"</span>,
+    "collectible": { "id": <span class="n">5</span>, "name": <span class="s">"千里江山图"</span>, "image": <span class="s">"https://..."</span> },
+    "unit_price": <span class="s">"99.00"</span>,
+    "quantity": <span class="n">1</span>,
+    "total_price": <span class="s">"99.00"</span>,
+    "status": <span class="n">2</span>,
+    "source": <span class="s">"release"</span>,
+    "priority_sale_id": <span class="n">null</span>,
+    "paid_at": <span class="s">"2026-08-06T14:35:00+08:00"</span>,
+    "completed_at": <span class="s">"2026-08-06T14:35:01+08:00"</span>,
+    "expires_at": <span class="s">"2026-08-06T14:45:52+08:00"</span>,
+    "payment": {
+      "payment_method": <span class="s">"alipay"</span>,
+      "status": <span class="n">2</span>,
+      "transaction_no": <span class="s">"2026080622001488..."</span>
+    }
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 12.3 创建支付 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/payments</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">创建支付（发起支付）</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Body)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">order_id</td><td class="type">int</td><td class="req">是</td><td>订单ID</td></tr>
+          <tr><td class="param-label">payment_method</td><td class="type">string</td><td class="req">是</td><td>支付方式：balance/alipay/wechat/huifu/yeepay（以 /wallet/channels 为准）</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>校验订单 status=1(待支付) 且未过期 → 若 balance：校验钱包余额 ≥ total_price → 乐观锁扣减余额（基于 wallets.version）→ 直接完成支付 → 若 alipay/wechat/huifu/yeepay：创建支付记录 → 调用第三方下单 → 返回支付参数</div>
+<pre><span class="s">// 余额支付直接成功：</span>
+{
+  "code": <span class="n">200</span>,
+  "data": {
+    "payment_id": <span class="n">8001</span>,
+    "status": <span class="n">2</span>,
+    "paid_at": <span class="s">"2026-08-06T14:35:00+08:00"</span>
+  },
+  "message": <span class="s">"支付成功"</span>
+}
+<span class="s">// 支付宝/微信需跳转：</span>
+{
+  "code": <span class="n">200</span>,
+  "data": {
+    "payment_id": <span class="n">8002</span>,
+    "status": <span class="n">1</span>,
+    "pay_url": <span class="s">"https://openapi.alipay.com/..."</span>
+  },
+  "message": <span class="s">"请跳转支付"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 12.4 支付回调 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/payments/callback</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">支付回调（第三方异步通知）</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Body - 第三方回调格式)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">order_no</td><td class="type">string</td><td class="req">是</td><td>我方订单号</td></tr>
+          <tr><td class="param-label">transaction_no</td><td class="type">string</td><td class="req">是</td><td>第三方流水号（幂等键）</td></tr>
+          <tr><td class="param-label">status</td><td class="type">string</td><td class="req">是</td><td>支付状态：success/failed</td></tr>
+          <tr><td class="param-label">amount</td><td class="type">decimal</td><td class="req">是</td><td>支付金额（校验一致性）</td></tr>
+          <tr><td class="param-label">signature</td><td class="type">string</td><td class="req">是</td><td>签名（验签防篡改）</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>验签 → 幂等校验（幂等键为 <code>transaction_no</code>，已处理直接返回 "SUCCESS"）→ 事务内：更新 payment.status=2, paid_at → 更新 order.status=2, completed_at → 乐观锁扣减库存(circulate-=qty, sold+=qty, 基于 collectibles.version) → 生成 user_collectibles（含 serial_no 生成） → 若优先购：乐观锁扣减白名单 used_quantity（基于 priority_sale_whitelists.version）→ 若上链：触发异步 mint → 获得新藏品后异步检测 hold_collectible 类型抽奖规则，命中则发放次数到 nft_lucky_draw_user_chances → 返回 "SUCCESS" 给第三方</div>
+<pre><span class="s">// 回调响应（给第三方，非标准JSON响应）</span>
+SUCCESS</pre>
+      <div class="note"><b>注意：</b>此接口由支付宝/微信服务器调用，返回纯文本 "SUCCESS"，不走统一 { code, data, message } 格式。后端以 transaction_no 为幂等键，重复回调直接返回 "SUCCESS"。</div>
+    </div>
+  </div>
+
+  <!-- 12.5 取消订单 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge PUT">PUT</span>
+      <span class="endpoint-url">/orders/{id}/cancel</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">取消订单</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>校验订单 status=1(待支付) → 更新 order.status=3(已取消) → 释放锁定库存(locked_quantity-=qty, 基于 collectibles.version) → 若市场购买恢复 listing.status=1</div>
+<pre><span class="k">{ "code": <span class="n">200</span>, "data": null, "message": <span class="s">"订单已取消"</span> }</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PRIORITY SALE MODULE ============ -->
+<div class="section" id="priority">
+  <h2 class="section-title"><span class="icon">★</span>十三、优先购模块 [v4.0]</h2>
+
+  <!-- 13.1 优先购活动列表 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/priority-sales</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">优先购活动列表</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Query)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">collectible_id</td><td class="type">int</td><td class="opt">否</td><td>按藏品筛选</td></tr>
+          <tr><td class="param-label">status</td><td class="type">int</td><td class="opt">否</td><td>1=待开始 2=进行中 3=已结束，默认查进行中</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>查询 nft_priority_sales → JOIN nft_collectibles → 查询当前用户在各活动的白名单状态(nft_priority_sale_whitelists) → 返回活动列表+我的资格</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "list": [{
+      "id": <span class="n">1</span>,
+      "collectible_id": <span class="n">5</span>,
+      "collectible_name": <span class="s">"千里江山图·数字版"</span>,
+      "collectible_image": <span class="s">"https://..."</span>,
+      "name": <span class="s">"VIP优先购"</span>,
+      "start_time": <span class="s">"2026-08-06T14:30:00+08:00"</span>,
+      "end_time": <span class="s">"2026-08-06T15:00:00+08:00"</span>,
+      "status": <span class="n">2</span>,
+      "my_whitelist": {
+        "max_quantity": <span class="n">2</span>,
+        "used_quantity": <span class="n">0</span>,
+        "status": <span class="n">1</span>,
+        "can_buy": <span class="n">true</span>
+      }
+    }]
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 13.2 优先购资格查询 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/priority-sales/{id}/eligibility</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">查询我的优先购资格</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>查询 nft_priority_sale_whitelists WHERE priority_sale_id=? AND user_id=当前用户 → 返回资格状态+剩余可购数量</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "priority_sale_id": <span class="n">1</span>,
+    "is_eligible": <span class="n">true</span>,
+    "max_quantity": <span class="n">2</span>,
+    "used_quantity": <span class="n">0</span>,
+    "remaining": <span class="n">2</span>,
+    "status": <span class="n">1</span>,
+    "sale_status": <span class="n">2</span>,
+    "can_buy_now": <span class="n">true</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 13.3 优先购买 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/priority-sales/{id}/buy</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">优先购下单</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Body)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">quantity</td><td class="type">int</td><td class="req">是</td><td>购买数量（≥1，≤剩余可购）</td></tr>
+          <tr><td class="param-label">payment_method</td><td class="type">string</td><td class="req">是</td><td>支付方式：balance/alipay/wechat/huifu/yeepay（以 /wallet/channels 为准）</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>校验活动 status=2(进行中) → 校验当前时间在 start_time~end_time → 校验白名单 status=1(有效) → 校验 used_quantity+quantity ≤ max_quantity → 乐观锁扣减库存(locked_quantity+=qty, 基于 collectibles.version) → 创建订单(source='release', priority_sale_id=活动ID) → 返回订单号引导支付（支付成功回调时再扣减白名单 used_quantity）</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "order_id": <span class="n">5003</span>,
+    "order_no": <span class="s">"ORD20260806143001003"</span>,
+    "unit_price": <span class="s">"99.00"</span>,
+    "quantity": <span class="n">1</span>,
+    "total_price": <span class="s">"99.00"</span>,
+    "priority_sale_id": <span class="n">1</span>,
+    "expires_at": <span class="s">"2026-08-06T14:45:01+08:00"</span>
+  },
+  "message": <span class="s">"优先购下单成功"</span>
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ARTIFACT MODULE ============ -->
+<div class="section" id="artifact">
+  <h2 class="section-title"><span class="icon">A</span>十四、文物展馆模块</h2>
+
+  <!-- 14.1 展品列表 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/artifacts</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">文物展品列表</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Query)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">page</td><td class="type">int</td><td class="opt">否</td><td>页码，默认1</td></tr>
+          <tr><td class="param-label">page_size</td><td class="type">int</td><td class="opt">否</td><td>每页条数，默认20</td></tr>
+          <tr><td class="param-label">dynasty</td><td class="type">string</td><td class="opt">否</td><td>朝代筛选</td></tr>
+          <tr><td class="param-label">category</td><td class="type">string</td><td class="opt">否</td><td>文物类别筛选</td></tr>
+          <tr><td class="param-label">keyword</td><td class="type">string</td><td class="opt">否</td><td>名称关键词搜索</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>查询 nft_artifacts WHERE is_delete=0 → 条件过滤 → 分页</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "list": [{
+      "id": <span class="n">1</span>,
+      "name": <span class="s">"清明上河图"</span>,
+      "dynasty": <span class="s">"北宋"</span>,
+      "category": <span class="s">"绘画"</span>,
+      "image": <span class="s">"https://..."</span>,
+      "tags": [<span class="s">"国宝"</span>, <span class="s">"绢本设色"</span>]
+    }],
+    "total": <span class="n">48</span>, "page": <span class="n">1</span>, "page_size": <span class="n">20</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 14.2 展品详情 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/artifacts/{id}</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">文物展品详情</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>查询 nft_artifacts WHERE id=? AND is_delete=0 → 返回完整信息含 description + tags(JSON数组)</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "id": <span class="n">1</span>,
+    "name": <span class="s">"清明上河图"</span>,
+    "dynasty": <span class="s">"北宋"</span>,
+    "category": <span class="s">"绘画"</span>,
+    "image": <span class="s">"https://..."</span>,
+    "description": <span class="s">"《清明上河图》是北宋画家张择端的作品..."</span>,
+    "tags": [<span class="s">"国宝"</span>, <span class="s">"绢本设色"</span>, <span class="s">"张择端"</span>]
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ============ WALLET MODULE ============ -->
+<div class="section" id="wallet">
+  <h2 class="section-title"><span class="icon">W</span>十五、钱包模块</h2>
+
+  <!-- 15.1 钱包信息 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/wallet</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">钱包信息</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>查询 nft_user_wallets WHERE user_id=当前用户 → 返回余额信息</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "balance": <span class="s">"500.00"</span>,
+    "frozen_balance": <span class="s">"100.00"</span>,
+    "total_recharged": <span class="s">"1000.00"</span>,
+    "total_consumed": <span class="s">"400.00"</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 15.2 支付通道 -->
+  <div class="endpoint" id="wallet-channels">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/wallet/channels</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">当前启用支付通道列表</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>查询支付通道配置表 → 返回当前启用的支付通道列表（含预留通道）→ status: active=已启用 / coming_soon=即将上线</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "list": [
+      { "code": <span class="s">"balance"</span>, "name": <span class="s">"余额支付"</span>, "status": <span class="s">"active"</span> },
+      { "code": <span class="s">"alipay"</span>, "name": <span class="s">"支付宝"</span>, "status": <span class="s">"active"</span> },
+      { "code": <span class="s">"wechat"</span>, "name": <span class="s">"微信支付"</span>, "status": <span class="s">"active"</span> },
+      { "code": <span class="s">"huifu"</span>, "name": <span class="s">"汇付天下"</span>, "status": <span class="s">"coming_soon"</span> },
+      { "code": <span class="s">"yeepay"</span>, "name": <span class="s">"易宝支付"</span>, "status": <span class="s">"coming_soon"</span> }
+    ]
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+      <div class="note">前端仅渲染 status=active 的通道；coming_soon 通道参数已在 recharge/payments 接口预留，启用后无需改动接口。</div>
+    </div>
+  </div>
+
+  <!-- 15.3 充值 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/wallet/recharge</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">钱包充值</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Body)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">amount</td><td class="type">decimal</td><td class="req">是</td><td>充值金额（>0）</td></tr>
+          <tr><td class="param-label">payment_method</td><td class="type">string</td><td class="req">是</td><td>支付方式：alipay/wechat/huifu/yeepay（balance 不支持充值）</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>校验 payment_method 为已启用通道 → 创建充值订单 → 调用第三方支付下单 → 返回支付链接 → 回调成功后乐观锁更新钱包 balance+=amount, total_recharged+=amount（基于 wallets.version）</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "recharge_id": <span class="n">9001</span>,
+    "amount": <span class="s">"200.00"</span>,
+    "pay_url": <span class="s">"https://openapi.alipay.com/..."</span>
+  },
+  "message": <span class="s">"请跳转支付完成充值"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 15.4 充值回调 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/wallet/recharge/callback</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">充值回调</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>验签 → 幂等校验（transaction_no 为幂等键，已处理直接返回 "SUCCESS"）→ 乐观锁更新 nft_user_wallets（balance+=amount, total_recharged+=amount, version+=1，基于 wallets.version）→ 返回 "SUCCESS"</div>
+<pre>SUCCESS</pre>
+    </div>
+  </div>
+
+  <!-- 15.5 钱包流水 -->
+  <div class="endpoint" id="wallet-transactions">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/wallet/transactions</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">钱包流水列表</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Query)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">type</td><td class="type">string</td><td class="opt">否</td><td>流水类型：all=全部(默认) recharge=充值 consume=消费 freeze=冻结 unfreeze=解冻</td></tr>
+          <tr><td class="param-label">page</td><td class="type">int</td><td class="opt">否</td><td>页码，默认1</td></tr>
+          <tr><td class="param-label">page_size</td><td class="type">int</td><td class="opt">否</td><td>每页条数，默认20</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>查询 nft_wallet_transactions WHERE user_id=当前用户 → 按 type 过滤 → 按 created_at DESC 分页</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "list": [{
+      "id": <span class="n">7001</span>,
+      "type": <span class="s">"recharge"</span>,
+      "amount": <span class="s">"200.00"</span>,
+      "balance_after": <span class="s">"700.00"</span>,
+      "direction": <span class="s">"in"</span>,
+      "related_order_no": <span class="s">"RCH20260806143001001"</span>,
+      "remark": <span class="s">"支付宝充值"</span>,
+      "created_at": <span class="s">"2026-08-06T14:30:01+08:00"</span>
+    }, {
+      "id": <span class="n">7002</span>,
+      "type": <span class="s">"consume"</span>,
+      "amount": <span class="s">"99.00"</span>,
+      "balance_after": <span class="s">"601.00"</span>,
+      "direction": <span class="s">"out"</span>,
+      "related_order_no": <span class="s">"ORD20260806143053002"</span>,
+      "remark": <span class="s">"购买藏品"</span>,
+      "created_at": <span class="s">"2026-08-06T14:35:00+08:00"</span>
+    }],
+    "total": <span class="n">28</span>, "page": <span class="n">1</span>, "page_size": <span class="n">20</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ANNOUNCEMENT MODULE ============ -->
+<div class="section" id="announce">
+  <h2 class="section-title"><span class="icon">N</span>十六、公告新闻模块</h2>
+
+  <!-- 16.1 公告/新闻列表 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/announcements</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">公告/新闻列表</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Query)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">type</td><td class="type">string</td><td class="opt">否</td><td>notice=公告 news=新闻，默认全部</td></tr>
+          <tr><td class="param-label">page</td><td class="type">int</td><td class="opt">否</td><td>页码</td></tr>
+          <tr><td class="param-label">page_size</td><td class="type">int</td><td class="opt">否</td><td>每页条数</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>查询 nft_announcements WHERE is_delete=0 → 置顶优先(is_top DESC) → 按 created_at DESC → 分页</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "list": [{
+      "id": <span class="n">1</span>,
+      "title": <span class="s">"平台8月活动公告"</span>,
+      "summary": <span class="s">"8月系列数字藏品发售..."</span>,
+      "cover_image": <span class="s">"https://..."</span>,
+      "type": <span class="s">"notice"</span>,
+      "is_top": <span class="n">true</span>,
+      "created_at": <span class="s">"2026-08-01T10:00:00+08:00"</span>
+    }],
+    "total": <span class="n">15</span>, "page": <span class="n">1</span>, "page_size": <span class="n">20</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 16.2 公告详情 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/announcements/{id}</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">公告/新闻详情</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>查询 nft_announcements WHERE id=? AND is_delete=0 → 返回完整 content</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "id": <span class="n">1</span>,
+    "title": <span class="s">"平台8月活动公告"</span>,
+    "content": <span class="s">"<p>8月系列数字藏品发售...</p>"</span>,
+    "cover_image": <span class="s">"https://..."</span>,
+    "type": <span class="s">"notice"</span>,
+    "created_at": <span class="s">"2026-08-01T10:00:00+08:00"</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 16.3 轮播图 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/banners</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">首页轮播图</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>查询 nft_banners WHERE status=1 AND is_delete=0 ORDER BY sort_order ASC → 返回全部</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "list": [{
+      "id": <span class="n">1</span>,
+      "title": <span class="s">"千里江山图·首发"</span>,
+      "image": <span class="s">"https://..."</span>,
+      "link_type": <span class="s">"collectible"</span>,
+      "link_url": <span class="s">"/collectibles/5"</span>
+    }]
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SYSTEM MODULE ============ -->
+<div class="section" id="system">
+  <h2 class="section-title"><span class="icon">⚙</span>十七、系统模块</h2>
+
+  <!-- 17.1 合规文档 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/agreements/{code}</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">获取合规文档</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">路径参数</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">code</td><td class="type">string</td><td class="req">是</td><td>文档代码：user_agreement/privacy_policy/disclaimer</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>查询 nft_agreements WHERE code=? AND status=1(生效中) AND is_delete=0 → 返回文档内容</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "title": <span class="s">"用户协议"</span>,
+    "content": <span class="s">"<p>欢迎使用数和文创...</p>"</span>,
+    "version": <span class="s">"v2.1"</span>,
+    "effective_at": <span class="s">"2026-07-01T00:00:00+08:00"</span>
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 17.2 文件上传 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/upload</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">文件上传（头像/反馈图片等）</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (multipart/form-data)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">file</td><td class="type">file</td><td class="req">是</td><td>文件（jpg/png，≤2MB）</td></tr>
+          <tr><td class="param-label">type</td><td class="type">string</td><td class="opt">否</td><td>用途：avatar/feedback，默认avatar</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>校验文件类型+大小 → 上传至 OSS/MinIO → 上传后触发内容安全扫描 → 异常文件隔离并返回 <b>400</b> → 正常文件返回 CDN 访问 URL</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": { "url": <span class="s">"https://cdn.shuhe-wenchuang.com/uploads/20260806/avatar_10001.png"</span> },
+  "message": <span class="s">"上传成功"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 17.3 系统配置 -->
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method-badge GET">GET</span>
+      <span class="endpoint-url">/settings</span>
+      <span class="auth-tag none">无需认证</span>
+      <span class="endpoint-desc-inline">网站全局配置</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="biz"><b>业务逻辑：</b>查询 nft_site_settings WHERE is_delete=0 → 按 setting_group 分组返回 → 前端用于渲染站点名称、主题色、按钮文案等</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "basic": {
+      "site_name": <span class="s">"数和文创"</span>,
+      "site_logo": <span class="s">"https://..."</span>,
+      "contact_email": <span class="s">"support@shuhe-wenchuang.com"</span>
+    },
+    "theme": { "primary_color": <span class="s">"#4f46e5"</span> },
+    "button": { "buy_text": <span class="s">"立即购买"</span> }
+  },
+  "message": <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 17.4 意见反馈 -->
+  <div class="endpoint" id="system-feedback">
+    <div class="endpoint-header">
+      <span class="method-badge POST">POST</span>
+      <span class="endpoint-url">/feedback</span>
+      <span class="auth-tag jwt">JWT</span>
+      <span class="endpoint-desc-inline">意见反馈</span>
+    </div>
+    <div class="endpoint-body">
+      <div class="label-small">请求参数 (Body)</div>
+      <table class="field-table">
+        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="param-label">type</td><td class="type">string</td><td class="req">是</td><td>反馈类型：bug/suggestion/complaint/other</td></tr>
+          <tr><td class="param-label">content</td><td class="type">string</td><td class="req">是</td><td>反馈内容（≤1000字）</td></tr>
+          <tr><td class="param-label">images</td><td class="type">string[]</td><td class="opt">否</td><td>截图URL数组（先调用 /upload type=feedback 获取）</td></tr>
+          <tr><td class="param-label">contact</td><td class="type">string</td><td class="opt">否</td><td>联系方式（手机号/邮箱，便于回访）</td></tr>
+        </tbody>
+      </table>
+      <div class="biz"><b>业务逻辑：</b>校验 content 非空 → 写入 nft_feedback（user_id, type, content, images(JSON), contact, status=1待处理）→ 返回工单号 ticket_id → 后台可跟进处理</div>
+<pre><span class="k">{
+  "code": <span class="n">200</span>,
+  "data": {
+    "ticket_id": <span class="s">"FB20260806143000001"</span>,
+    "status": <span class="n">1</span>
+  },
+  "message": <span class="s">"反馈已提交，我们会尽快处理"</span>
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SUMMARY ============ -->
+<div class="section" id="summary">
+  <h2 class="section-title"><span class="icon">≡</span>十八、接口总览</h2>
+  <div class="table-wrap max-h">
+    <table class="info-table">
+      <thead><tr><th>#</th><th>模块</th><th>端点数</th><th>需JWT</th><th>需交易密码</th><th>关键端点</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>用户模块</td><td>13</td><td>9</td><td>0</td><td>短信/注册/登录/刷新Token/登出/找回密码/改密码/实名/资料/交易密码/用户信息/我的藏品/藏品流转</td></tr>
+        <tr><td>2</td><td>藏品模块</td><td>5</td><td>2</td><td>0</td><td>分类/列表/详情/关注/取消关注</td></tr>
+        <tr><td>3</td><td>市场模块</td><td>6</td><td>5</td><td>3</td><td>在售列表/挂售/取消/市场购买/发售购买/我的挂单</td></tr>
+        <tr><td>4</td><td>盲盒模块</td><td>3</td><td>1</td><td>0</td><td>列表/详情/开启</td></tr>
+        <tr><td>5</td><td>合成模块</td><td>4</td><td>3</td><td>0</td><td>活动列表/公式/合成/记录</td></tr>
+        <tr><td>6</td><td>签到模块</td><td>2</td><td>2</td><td>0</td><td>签到/记录</td></tr>
+        <tr><td>7</td><td>抽奖模块</td><td>5</td><td>4</td><td>0</td><td>活动列表/规则/抽奖/记录/次数明细</td></tr>
+        <tr><td>8</td><td>转赠模块</td><td>5</td><td>5</td><td>1</td><td>发起/确认/拒绝/记录/取消</td></tr>
+        <tr><td>9</td><td>支付模块</td><td>5</td><td>4</td><td>0</td><td>订单列表/详情/创建支付/回调/取消</td></tr>
+        <tr><td>10</td><td>优先购模块</td><td>3</td><td>3</td><td>0</td><td>活动列表/资格查询/优先购买</td></tr>
+        <tr><td>11</td><td>文物展馆</td><td>2</td><td>0</td><td>0</td><td>列表/详情</td></tr>
+        <tr><td>12</td><td>钱包模块</td><td>5</td><td>3</td><td>0</td><td>余额/支付通道/充值/回调/钱包流水</td></tr>
+        <tr><td>13</td><td>公告新闻</td><td>3</td><td>0</td><td>0</td><td>列表/详情/轮播图</td></tr>
+        <tr><td>14</td><td>系统模块</td><td>4</td><td>2</td><td>0</td><td>合规文档/上传/配置/意见反馈</td></tr>
+        <tr style="font-weight:700;background:var(--accent-light);">
+          <td>-</td><td>合计</td><td>65</td><td>43</td><td>4</td><td>覆盖全部前端业务场景</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note info" style="margin-top:1rem;">
+    <b>设计说明：</b><br>
+    1. 所有需交易密码的接口（仅 4 个：POST /market/listings、POST /collectibles/{id}/buy、POST /market/listings/{id}/buy、POST /transfers）均为涉及资产变动的敏感操作，交易密码在 Body 中传输，后端 bcrypt 校验，且为业务逻辑第一步<br>
+    2. 盲盒开启、抽奖、合成仅 JWT 认证，<b>绝对不涉及交易密码</b><br>
+    3. JWT 有效期 7 天，支持 refresh_token 续期；修改登录密码或交易密码后该用户所有 Token 即时失效（Redis 黑名单）<br>
+    4. 支付回调、充值回调为第三方服务器调用，不走 JWT 认证，通过签名验签保障安全；幂等键为 transaction_no，重复回调直接返回 "SUCCESS"<br>
+    5. 订单 expires_at 为 15 分钟，定时任务每 5 分钟扫描超时未支付订单自动取消并释放库存；优先购下单复用发售购买逻辑，区别仅在于额外校验白名单资格和时间窗口<br>
+    6. 库存共用：优先购与公售共用 nft_collectibles.circulate / locked_quantity，未单独拆分；所有乐观锁均基于对应表 version 字段（user_collectibles.version / collectibles.version / wallets.version 等）<br>
+    7. 抽奖次数可配置化：来源含 register/invite/checkin/hold_collectible 等；获得新藏品后（支付回调、转赠确认）异步检测 hold_collectible 规则发放次数<br>
+    8. 转赠/盲盒/抽奖/签到的奖励结果由前端弹窗即时展示，不写入消息中心<br>
+    9. 所有涉及藏品归属变更的操作（购买/转赠/合成/盲盒/抽奖）均写入 nft_operation_logs 审计；链上标识（contract_address / tx_hash / token_id）在 API 返回时一律脱敏展示<br>
+    10. 所有 is_/has_ 前缀字段均为布尔类型（true/false）；时间戳统一不含毫秒
+  </div>
+</div>
+
+</div>
+</div>
+</body>
+</html>
