@@ -164,7 +164,7 @@
           <template v-if="qualConfig.exchangeEnabled">
             <el-form-item label="兑换藏品" required>
               <el-select v-model="qualConfig.exchangeCollectible" placeholder="请选择藏品" filterable style="width:100%">
-                <el-option v-for="c in []" :key="c.id" :label="c.name" :value="c.name" />
+                <el-option v-for="c in availableCollectibles" :key="c.id" :label="c.name" :value="c.name" />
               </el-select>
             </el-form-item>
             <el-form-item label="兑换比例" required>
@@ -197,7 +197,7 @@
             <el-table-column label="持有藏品" min-width="180">
               <template #default="{ row }">
                 <el-select v-model="row.collectibleName" placeholder="选择藏品" filterable style="width:100%">
-                  <el-option v-for="c in []" :key="c.id" :label="c.name" :value="c.name" />
+                  <el-option v-for="c in availableCollectibles" :key="c.id" :label="c.name" :value="c.name" />
                 </el-select>
               </template>
             </el-table-column>
@@ -435,6 +435,7 @@ import { paginate } from '../../utils/pagination'
 import { marketingApi } from '../../api'
 import type { LuckyDrawActivity } from '../../api'
 import { post, put } from '../../api/request'
+import { availableCollectibles, availableBlindboxes, getAvailableCollectibles } from '../../api/salePlan'
 
 const rewardTypeOptions = [
   { label: '藏品', value: 'collectible' },
@@ -450,17 +451,16 @@ function rewardTagType(val: string) {
   const map: Record<string, string> = { collectible: 'success', priority: 'warning', qualification: 'danger', luckydraw: '', blindbox: 'info' }
   return map[val] || 'info'
 }
-function getRewardContentOptions(_type: string) {
+function getRewardContentOptions(type: string): { id: number; name: string }[] {
+  if (type === 'collectible') return availableCollectibles.value
+  if (type === 'blindbox') return availableBlindboxes.value
   return []
 }
 
 // 活动列表
 interface Activity { id: number; name: string; prizeCount: number; status: string; startTime: string; endTime: string }
-const activities = ref<Activity[]>([
-  { id: 1, name: '夏日抽奖盛典', prizeCount: 5, status: 'active', startTime: '2026-08-10 10:00:00', endTime: '2026-08-20 22:00:00' },
-  { id: 2, name: '中秋回馈抽奖', prizeCount: 4, status: 'pending', startTime: '2026-09-10 10:00:00', endTime: '2026-09-15 22:00:00' }
-])
-const currentActivity = ref<Activity | null>(activities.value[0])
+const activities = ref<Activity[]>([])
+const currentActivity = ref<Activity | null>(null)
 
 const activityDialog = reactive({ visible: false, form: { name: '', timeRange: [] as string[] } })
 function openActivityDialog() {
@@ -556,7 +556,11 @@ const collectibleDialog = reactive({
 })
 
 const filteredCollectiblesForPrize = computed(() => {
-  return []
+  const keyword = collectibleDialog.search.trim().toLowerCase()
+  if (!keyword) return availableCollectibles.value
+  return availableCollectibles.value.filter(c =>
+    c.name.toLowerCase().includes(keyword)
+  )
 })
 
 function toggleSelectCollectible(id: number) {
@@ -575,7 +579,7 @@ function confirmAddCollectiblesAsPrizes() {
   }
   let count = 0
   collectibleDialog.selected.forEach(id => {
-    const c: any = undefined
+    const c = availableCollectibles.value.find(item => item.id === id)
     if (c) {
       prizePool.value.push({
         id: prizeIdSeq++,
@@ -717,17 +721,7 @@ interface GrantRecord {
   remark: string
   createdAt: string
 }
-const grantRecords = ref<GrantRecord[]>([
-  {
-    id: 1,
-    activityName: '夏日抽奖盛典',
-    operator: 'admin',
-    phones: ['13800138000', '13900139000'],
-    times: 3,
-    remark: '活动补偿',
-    createdAt: '2026-08-12 14:30:00'
-  }
-])
+const grantRecords = ref<GrantRecord[]>([])
 
 function onGrantActivityChange() {
   // 可在此处加载活动信息
@@ -863,6 +857,7 @@ async function loadData() {
 onMounted(async () => {
   await loadData()
   fetchData()
+  getAvailableCollectibles()
 })
 </script>
 

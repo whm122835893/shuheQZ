@@ -64,7 +64,7 @@
           <template #default="{ row }">
             <el-switch
               v-model="row.is_top"
-              @change="(val) => handleTopChange(row, val as boolean)"
+              @change="(val: any) => handleTopChange(row, val as boolean)"
             />
           </template>
         </el-table-column>
@@ -216,7 +216,6 @@ import { cmsApi } from '../../api'
 import { paginate } from '../../utils/pagination'
 import RichTextEditor from '../../components/RichTextEditor.vue'
 import {
-  newsCategories,
   getEnabledNewsCategories,
   getAllNewsCategories,
   addNewsCategory,
@@ -247,31 +246,6 @@ interface NewsItem {
   is_top: boolean
 }
 
-const newsTitles = [
-  '平台系统维护通知',
-  '新春藏品首发预告',
-  '数字藏品市场趋势分析',
-  '平台品牌升级公告',
-  '藏品交易新规则上线',
-  '艺术家联名系列发布',
-  '平台合规化运营报告',
-  '用户隐私安全升级',
-  '区块链技术赋能藏品',
-  '年度优秀创作者评选',
-  '藏品展览线上开幕',
-  '平台 APP 新版本更新',
-  '新年限量藏品发售',
-  '市场交易数据月报',
-  '平台合作伙伴计划',
-  '藏品溯源技术上链',
-  '创作者激励政策发布',
-  '用户社区正式上线',
-  '藏品保险服务上线',
-  '平台国际化战略启动',
-  '年度数据报告发布',
-  '新春活动开启预告'
-]
-
 let idSeq = 1000
 const newsList = ref<NewsItem[]>([])
 
@@ -289,7 +263,7 @@ function getFiltered(): NewsItem[] {
   return list
 }
 
-// 注意：目前后端暂无新闻专用接口，暂用 cmsApi.announcements 作为最近匹配
+// 通过 cmsApi.announcements 获取新闻/公告列表
 async function loadData() {
   try {
     const res = await cmsApi.announcements({ page: 1, pageSize: 1000, type: 'news' })

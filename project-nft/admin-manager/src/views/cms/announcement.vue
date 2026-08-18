@@ -64,7 +64,7 @@
           <template #default="{ row }">
             <el-switch
               v-model="row.is_top"
-              @change="(val) => handleTopChange(row, val as boolean)"
+              @change="(val: any) => handleTopChange(row, val as boolean)"
             />
           </template>
         </el-table-column>

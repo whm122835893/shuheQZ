@@ -40,7 +40,7 @@
     <!-- Issuer info card -->
     <div class="ad-issuer">
       <div class="ad-issuer__avatar">
-        <img src="/logo.jpg" alt="数和文创" class="ad-issuer__avatar-img" />
+        <span class="ad-issuer__avatar-text">数和</span>
       </div>
       <div class="ad-issuer__info">
         <div class="ad-issuer__name">数和文创</div>
@@ -117,8 +117,8 @@ async function loadArtifact() {
       description: d.description,
       tags: d.tags || [],
       period: d.dynasty,          // 后端无 period，用 dynasty 代替
-      size: '—',                  // 后端无 size，用占位符
-      origin: '—',                // 后端无 origin，用占位符
+      size: d.size || '—',        // 文物尺寸
+      origin: d.origin || '—',    // 出土/产地
       story: d.description || '暂无介绍'  // 后端无 story，用 description 代替，空值兜底
     }
   } catch (e) {
@@ -300,11 +300,16 @@ function goBack() {
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
 }
-.ad-issuer__avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.ad-issuer__avatar-text {
+  line-height: 1;
 }
 .ad-issuer__info {
   flex: 1;

@@ -14,7 +14,8 @@ export interface PaginationQuery {
   page?: number
   pageSize?: number
   keyword?: string
-  status?: number
+  status?: number | string
+  type?: string
   startDate?: string
   endDate?: string
 }
@@ -132,6 +133,21 @@ export interface BlindBoxItem {
 export interface BlindBoxDetail extends BlindBox {
   collectible: Collectible | null
   items: BlindBoxItem[]
+  name?: string
+  image?: string
+  description?: string
+  edition?: number
+  sold?: number
+  airdroppedCount?: number
+  destroyedCount?: number
+  pool?: number
+  circulate?: number
+  circulation?: number
+  price?: string | number
+  status?: number
+  perUserLimit?: number
+  onsaleAt?: string
+  itemCount?: number
 }
 
 /** 盲盒开盒记录（nft_blind_box_open_records） */
@@ -157,6 +173,7 @@ export interface Collectible {
   subtitle: string | null
   image: string | null
   price: string
+  royaltyRate?: number
   edition: number
   circulate: number
   sold: number
@@ -291,6 +308,9 @@ export interface PrioritySale {
   startTime: string
   endTime: string
   status: number
+  listCount?: number
+  reservedCount?: number
+  price?: number
   isDelete: number
   deletedAt: string | null
   createdAt: string
@@ -457,6 +477,23 @@ export interface Banner {
   updatedAt: string
 }
 
+/** 文物（nft_artifacts） */
+export interface Artifact {
+  id: number
+  name: string
+  dynasty: string | null
+  category: string | null
+  image: string
+  description: string | null
+  size: string | null
+  origin: string | null
+  tags: string[] | null
+  isDelete: number
+  deletedAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
 // ============================================================
 // 权限管理
 // ============================================================
@@ -468,6 +505,7 @@ export interface AdminUser {
   realName: string
   role: number
   status: number
+  phone?: string
   lastLoginAt: string | null
   lastLoginIp: string | null
   loginCount: number

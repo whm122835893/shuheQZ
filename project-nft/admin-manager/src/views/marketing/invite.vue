@@ -195,7 +195,8 @@ import { Plus, Promotion, Download } from '@element-plus/icons-vue'
 import { paginate } from '../../utils/pagination'
 import { marketingApi } from '../../api'
 import type { InviteActivity } from '../../api'
-import { put, post } from '../../api/request'
+import { put, post, get } from '../../api/request'
+import { availableCollectibles, availableBlindboxes, getAvailableCollectibles, getAvailableBlindboxes } from '../../api/salePlan'
 
 const rewardTypeOptions = [
   { label: '藏品', value: 'collectible' },
@@ -211,7 +212,9 @@ function rewardTagType(val: string) {
   const map: Record<string, string> = { collectible: 'success', priority: 'warning', qualification: 'danger', luckydraw: '', blindbox: 'info' }
   return map[val] || 'info'
 }
-function getRewardContentOptions(_type: string) {
+function getRewardContentOptions(type: string): { id: number; name: string }[] {
+  if (type === 'collectible') return availableCollectibles.value
+  if (type === 'blindbox') return availableBlindboxes.value
   return []
 }
 
@@ -230,12 +233,7 @@ interface LadderReward {
   quantity: number
   completedCount: number
 }
-const ladderRewards = ref<LadderReward[]>([
-  { threshold: 1, rewardType: 'luckydraw', rewardContent: '抽奖次数', quantity: 1, completedCount: 128 },
-  { threshold: 3, rewardType: 'collectible', rewardContent: '敦煌飞天 第1期', quantity: 1, completedCount: 64 },
-  { threshold: 6, rewardType: 'priority', rewardContent: '优先购资格', quantity: 1, completedCount: 32 },
-  { threshold: 9, rewardType: 'blindbox', rewardContent: '新春系列 第1期', quantity: 1, completedCount: 12 }
-])
+const ladderRewards = ref<LadderReward[]>([])
 
 // 添加阶梯（不限数量）
 function addLadder() {
@@ -406,9 +404,51 @@ function cancelPwd() {
 
 // 加载真实 API 数据
 async function loadData() {
+  // 加载邀请活动（用于空投模式等配置）
   try {
-    const res = await marketingApi.inviteActivities({ page: 1, pageSize: 9999 })
-    const list = (res?.list || []) as InviteActivity[]
+    const actRes = await marketingApi.inviteActivities({ page: 1, pageSize: 9999 })
+    const actList = (actRes?.list || []) as InviteActivity[]
+    if (actList.length > 0) {
+      const latest = actList[0]
+      if (latest.airdropMode) {
+        airdropMode.value = latest.airdropMode as 'auto' | 'manual'
+      }
+    }
+  } catch (e: any) {
+    ElMessage.error(e.message || '加载邀请活动失败')
+  }
+
+  // 加载邀请配置（阶梯奖励、注册奖励、空投模式）
+  try {
+    const config: any = await get('/marketing/invite/config')
+    if (config) {
+      if (config.registerReward) {
+        const r = config.registerReward
+        if (r.rewardType) registerReward.rewardType = r.rewardType
+        if (r.rewardContent) registerReward.rewardContent = r.rewardContent
+        if (r.quantity !== undefined) registerReward.quantity = r.quantity
+      }
+      if (Array.isArray(config.ladderRewards) && config.ladderRewards.length > 0) {
+        ladderRewards.value = config.ladderRewards.map((r: any) => ({
+          threshold: r.threshold ?? 1,
+          rewardType: r.rewardType || '',
+          rewardContent: r.rewardContent || '',
+          quantity: r.quantity ?? 1,
+          completedCount: r.completedCount ?? 0
+        }))
+      }
+      if (config.airdropMode) {
+        airdropMode.value = config.airdropMode as 'auto' | 'manual'
+      }
+    }
+  } catch (e: any) {
+    // 配置可能尚未创建，静默忽略
+  }
+
+  // 加载邀请记录
+  try {
+    const res = await marketingApi.inviteRecords({ page: 1, pageSize: 9999 })
+    const list = (res?.list || []) as any[]
     records.value = list.map((item: any) => ({
       id: item.id,
       inviter: item.inviter || item.inviter_name || '',
@@ -420,14 +460,16 @@ async function loadData() {
       registerTime: item.registerTime || item.register_time || '',
       rewardTime: item.rewardTime || item.reward_time || ''
     }))
-  } catch (e) {
-    ElMessage.error('数据加载失败')
+  } catch (e: any) {
+    ElMessage.error(e.message || '加载邀请记录失败')
   }
 }
 
 onMounted(async () => {
   await loadData()
   fetchData()
+  getAvailableCollectibles()
+  getAvailableBlindboxes()
 })
 </script>
 

@@ -148,7 +148,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, RefreshLeft, ArrowRight } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
-import { systemApi } from '../../api'
+import { cmsApi } from '../../api'
 import { paginate } from '../../utils/pagination'
 
 interface AgreementItem {
@@ -161,80 +161,7 @@ interface AgreementItem {
   updated_at: string
 }
 
-const agreementList = ref<AgreementItem[]>([
-  {
-    id: 1,
-    name: '用户协议',
-    agreement_key: 'user_agreement',
-    version: '2.1',
-    status: 'enabled',
-    content: '欢迎使用本平台。在使用本平台服务前，请您仔细阅读并同意本用户协议。\n本协议明确了您与平台之间的权利义务关系。\n一、服务内容\n二、用户义务\n三、知识产权\n四、免责声明\n五、争议解决',
-    updated_at: '2026-08-05 09:00:00'
-  },
-  {
-    id: 2,
-    name: '隐私政策',
-    agreement_key: 'privacy_policy',
-    version: '1.3',
-    status: 'enabled',
-    content: '本隐私政策说明我们如何收集、使用、存储和保护您的个人信息。\n一、信息收集\n二、信息使用\n三、信息共享\n四、信息安全\n五、您的权利',
-    updated_at: '2026-08-08 16:45:00'
-  },
-  {
-    id: 3,
-    name: '充值协议',
-    agreement_key: 'recharge_agreement',
-    version: '1.2',
-    status: 'enabled',
-    content: '充值协议\n请您在充值前仔细阅读本协议。\n一、充值方式与到账时间\n二、充值金额与限额\n三、充值优惠与活动规则\n四、退款政策\n五、禁止行为',
-    updated_at: '2026-07-20 11:30:00'
-  },
-  {
-    id: 4,
-    name: '寄售协议',
-    agreement_key: 'consignment_agreement',
-    version: '1.1',
-    status: 'enabled',
-    content: '寄售协议\n本协议适用于您在平台寄售数字藏品的场景。\n一、寄售资格\n二、寄售定价规则\n三、手续费标准\n四、交易流程\n五、违规处理',
-    updated_at: '2026-07-25 14:00:00'
-  },
-  {
-    id: 5,
-    name: '提现协议',
-    agreement_key: 'withdraw_agreement',
-    version: '1.4',
-    status: 'enabled',
-    content: '提现协议\n本协议适用于您在平台发起提现的场景。\n一、提现条件\n二、提现到账时间\n三、提现手续费\n四、银行卡绑定要求\n五、风险提示',
-    updated_at: '2026-08-10 10:15:00'
-  },
-  {
-    id: 6,
-    name: '实名认证协议',
-    agreement_key: 'realname_agreement',
-    version: '1.0',
-    status: 'enabled',
-    content: '实名认证协议\n为保障账户安全与合规要求，使用平台部分功能需完成实名认证。\n一、认证所需信息\n二、信息使用范围\n三、信息保护措施\n四、认证审核流程\n五、认证失败处理',
-    updated_at: '2026-06-15 09:30:00'
-  },
-  {
-    id: 7,
-    name: '未成年人保护协议',
-    agreement_key: 'minor_protection',
-    version: '1.2',
-    status: 'disabled',
-    content: '未成年人保护协议\n本协议旨在保护未成年人权益，防范未成年人沉迷与不当消费。\n一、年龄限制说明\n二、监护人责任\n三、消费限制措施\n四、退款保障\n五、投诉与举报渠道',
-    updated_at: '2026-07-01 16:00:00'
-  },
-  {
-    id: 8,
-    name: '免责声明',
-    agreement_key: 'disclaimer',
-    version: '1.1',
-    status: 'enabled',
-    content: '免责声明\n本声明适用于平台提供的全部服务。\n一、服务变更与中断\n二、数字藏品价值波动风险\n三、技术风险\n四、法律合规风险\n五、投资有风险，入市需谨慎',
-    updated_at: '2026-07-28 13:45:00'
-  }
-])
+const agreementList = ref<AgreementItem[]>([])
 
 const searchForm = reactive({ name: '', status: '' })
 const loading = ref(false)
@@ -249,12 +176,13 @@ function getFiltered(): AgreementItem[] {
   return list
 }
 
-// 注意：目前后端暂无协议专用列表接口，暂用 systemApi.global 中的 agreements 字段
+// 通过 cmsApi.agreements 获取协议列表
 async function loadData() {
   try {
-    const res: any = await systemApi.global()
-    if (res?.agreements && Array.isArray(res.agreements) && res.agreements.length) {
-      agreementList.value = res.agreements.map((item: any) => ({
+    const res: any = await cmsApi.agreements()
+    const list = Array.isArray(res) ? res : (res?.list ?? [])
+    if (list.length) {
+      agreementList.value = list.map((item: any) => ({
         id: item.id,
         name: item.name || '',
         agreement_key: item.agreementKey || item.agreement_key || '',
@@ -325,16 +253,22 @@ async function handleSave() {
   await formRef.value.validate(async (valid) => {
     if (!valid) return
     submitting.value = true
-    const target = agreementList.value.find(a => a.id === editForm.id)
-    if (target) {
-      target.version = editForm.nextVersion
-      target.content = editForm.content
-      target.updated_at = new Date().toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '-')
+    try {
+      await cmsApi.updateAgreement(editForm.id, {
+        content: editForm.content,
+        version: editForm.nextVersion,
+        remark: editForm.remark,
+        password: editForm.password
+      })
+      ElMessage.success(`协议「${editForm.name}」已更新，版本号 v${editForm.nextVersion}`)
+      editVisible.value = false
+      await loadData()
+      fetchData()
+    } catch (e: any) {
+      ElMessage.error(e.message || '保存失败')
+    } finally {
+      submitting.value = false
     }
-    submitting.value = false
-    editVisible.value = false
-    ElMessage.success(`协议「${editForm.name}」已更新，版本号 v${editForm.nextVersion}`)
-    fetchData()
   })
 }
 
@@ -366,11 +300,15 @@ function handleToggle(row: AgreementItem) {
     `${enabling ? '启用' : '停用'}确认`,
     { type: 'warning', confirmButtonText: `确定${enabling ? '启用' : '停用'}`, cancelButtonText: '取消' }
   )
-    .then(() => {
-      row.status = enabling ? 'enabled' : 'disabled'
-      row.updated_at = new Date().toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '-')
-      ElMessage.success(`协议「${row.name}」已${enabling ? '启用' : '停用'}`)
-      fetchData()
+    .then(async () => {
+      try {
+        await cmsApi.updateAgreement(row.id, { status: enabling ? 'enabled' : 'disabled' })
+        ElMessage.success(`协议「${row.name}」已${enabling ? '启用' : '停用'}`)
+        await loadData()
+        fetchData()
+      } catch (e: any) {
+        ElMessage.error(e.message || '操作失败')
+      }
     })
     .catch(() => {})
 }

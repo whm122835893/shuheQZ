@@ -1,4 +1,6 @@
 import { ref } from 'vue'
+import { collectibleApi, blindBoxApi } from './index'
+import type { Collectible } from './types'
 
 // ========== 发售计划共享状态 ==========
 
@@ -20,26 +22,92 @@ export interface SalePlan {
   created_at: string
 }
 
-// TODO: 待对接后端发售计划 API，当前返回空数组
-// 后端接口就绪后，应改为异步从后端拉取发售计划列表
+// 本地发售计划状态管理（无专用后端 API，使用 collectibleApi 数据映射）
 function initSalePlans(): SalePlan[] {
   return []
 }
 
 export const salePlans = ref<SalePlan[]>(initSalePlans())
 
-// 获取所有可选藏品（排除已创建发售计划的）
-// TODO: 待对接后端藏品 API（collectibleApi.list），获取真实藏品数据后排除已创建发售计划的藏品
-export function getAvailableCollectibles() {
-  // TODO: 改为调用 collectibleApi.list 获取真实藏品数据后进行过滤
-  return []
+// 可选藏品/盲盒的响应式缓存（供 computed 直接使用）
+export const availableCollectibles = ref<any[]>([])
+export const availableBlindboxes = ref<any[]>([])
+
+// 异步加载发售计划：从 collectibleApi.list 获取已发布藏品并映射为 SalePlan
+export async function loadSalePlans() {
+  try {
+    const res = await collectibleApi.list({ page: 1, pageSize: 9999 })
+    const list = (res?.list || []) as Collectible[]
+    salePlans.value = list
+      .filter((c) => c.isRelease === 1)
+      .map((c) => ({
+        id: Number(c.id),
+        collectible_id: Number(c.id),
+        collectible_name: c.name || '',
+        collectible_image: c.image || '',
+        collectible_type: 'collectible' as const,
+        price: parseFloat(c.price) || 0,
+        per_user_limit: 0,
+        sale_mode: 1 as 1 | 2,
+        status: c.status === 1 ? 'on_sale' as const : 'draft' as const,
+        status_text: c.status === 1 ? '发售中' : '待发布',
+        onsale_at: c.createdAt || '',
+        end_at: '',
+        edition: c.edition || 0,
+        sold: c.sold || 0,
+        created_at: c.createdAt || ''
+      }))
+  } catch (e) {
+    console.error('加载发售计划失败', e)
+  }
 }
 
-// 获取所有可选盲盒
-// TODO: 待对接后端盲盒 API（blindBoxApi.list），获取真实盲盒数据后排除已创建发售计划的盲盒
-export function getAvailableBlindboxes() {
-  // TODO: 改为调用 blindBoxApi.list 获取真实盲盒数据后进行过滤
-  return []
+// 获取所有可选藏品（排除已创建发售计划的）
+export async function getAvailableCollectibles() {
+  try {
+    const res = await collectibleApi.list({ page: 1, pageSize: 9999 })
+    const list = (res?.list || []) as Collectible[]
+    const usedIds = salePlans.value
+      .filter((p) => p.collectible_type === 'collectible')
+      .map((p) => p.collectible_id)
+    availableCollectibles.value = list
+      .map((c) => ({
+        id: Number(c.id),
+        name: c.name || '',
+        image: c.image || '',
+        edition: c.edition || 0,
+        price: parseFloat(c.price) || 0
+      }))
+      .filter((c) => !usedIds.includes(c.id))
+    return availableCollectibles.value
+  } catch (e) {
+    console.error('加载可选藏品失败', e)
+    return []
+  }
+}
+
+// 获取所有可选盲盒（排除已创建发售计划的）
+export async function getAvailableBlindboxes() {
+  try {
+    const res = await blindBoxApi.list({ page: 1, pageSize: 9999 })
+    const list = (res?.list || []) as any[]
+    const usedIds = salePlans.value
+      .filter((p) => p.collectible_type === 'blindbox')
+      .map((p) => p.collectible_id)
+    availableBlindboxes.value = list
+      .map((b) => ({
+        id: Number(b.id),
+        name: b.collectible?.name || `盲盒 #${b.id}`,
+        image: b.collectible?.image || '',
+        edition: b.collectible?.edition || 0,
+        price: parseFloat(b.collectible?.price || '0') || 0
+      }))
+      .filter((b) => !usedIds.includes(b.id))
+    return availableBlindboxes.value
+  } catch (e) {
+    console.error('加载可选盲盒失败', e)
+    return []
+  }
 }
 
 // 获取所有已设置为资格购的藏品（供资格购管理页面使用）

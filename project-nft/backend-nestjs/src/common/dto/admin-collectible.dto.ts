@@ -30,6 +30,12 @@ export class CreateCollectibleDto {
   @IsNumber()
   price?: number;
 
+  @ApiPropertyOptional({ description: '二级市场版税费率(%)', example: 5 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  royaltyRate?: number;
+
   @ApiPropertyOptional({ description: '发行份数', example: 5000 })
   @IsOptional()
   @Type(() => Number)
@@ -118,6 +124,12 @@ export class UpdateCollectibleDto {
   @Type(() => Number)
   @IsNumber()
   price?: number;
+
+  @ApiPropertyOptional({ description: '二级市场版税费率(%)', example: 5 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  royaltyRate?: number;
 
   @ApiPropertyOptional({ description: '发行份数', example: 5000 })
   @IsOptional()

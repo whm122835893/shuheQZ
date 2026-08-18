@@ -653,6 +653,81 @@ export class LuckyDrawService {
     }
   }
 
+  /**
+   * 检测并发放持有藏品类型的抽奖次数
+   * 在用户获得藏品（转赠确认/购买/空投/合成等）后异步调用
+   *
+   * 逻辑：
+   * 1. 查询进行中的抽奖活动，其 hold_collectible_id 等于指定藏品ID
+   * 2. 对每个匹配活动，检查用户是否已持有该藏品（status=1）
+   * 3. 若用户已持有且尚未发放过 hold_collectible 来源的次数，则发放
+   *
+   * @param userId       用户ID
+   * @param collectibleId 藏品ID（刚获得的藏品）
+   */
+  async checkAndGrantHoldCollectibleChances(
+    userId: number,
+    collectibleId: number,
+  ): Promise<void> {
+    const now = new Date();
+
+    // 查询进行中的、配置了 hold_collectible 规则的活动
+    const activities = await this.activityRepo
+      .createQueryBuilder('a')
+      .where('a.status = 2')
+      .andWhere('a.is_delete = 0')
+      .andWhere('a.hold_collectible_id = :collectibleId', { collectibleId })
+      .andWhere('a.hold_collectible_grant > 0')
+      .andWhere('(a.start_time IS NULL OR a.start_time <= :now)', { now })
+      .andWhere('(a.end_time IS NULL OR a.end_time >= :now)', { now })
+      .getMany();
+
+    if (activities.length === 0) {
+      this.logger.debug(
+        `hold_collectible 检测：无匹配活动 userId=${userId}, collectibleId=${collectibleId}`,
+      );
+      return;
+    }
+
+    // 校验用户确实持有该藏品（status=1 持有）
+    const holdingCount = await this.userCollectibleRepo.count({
+      where: { userId, collectibleId, status: 1, isDelete: 0 },
+    });
+    if (holdingCount === 0) {
+      this.logger.debug(
+        `hold_collectible 检测：用户未持有该藏品 userId=${userId}, collectibleId=${collectibleId}`,
+      );
+      return;
+    }
+
+    // 逐个活动发放次数（仅首次持有才发放，避免重复）
+    for (const activity of activities) {
+      // 检查是否已发放过 hold_collectible 来源的次数
+      const existing = await this.chanceRepo.findOne({
+        where: {
+          activityId: activity.id,
+          userId,
+          source: 'hold_collectible',
+          isDelete: 0,
+        },
+      });
+      if (existing) {
+        this.logger.debug(
+          `hold_collectible 已发放过：activityId=${activity.id}, userId=${userId}`,
+        );
+        continue;
+      }
+
+      const grantCount = Number(activity.holdCollectibleGrant) || 0;
+      if (grantCount > 0) {
+        await this.grantChances(userId, activity.id, 'hold_collectible', grantCount);
+        this.logger.log(
+          `hold_collectible 发放成功：activityId=${activity.id}, userId=${userId}, chances=${grantCount}`,
+        );
+      }
+    }
+  }
+
   // ============================================================
   // 私有辅助方法
   // ============================================================

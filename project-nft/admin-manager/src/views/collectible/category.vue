@@ -170,6 +170,7 @@ import { collectibleApi } from '../../api'
 import type { Collectible } from '../../api'
 import {
   categories,
+  fetchCategories,
   addCategory,
   updateCategoryName,
   toggleCategoryEnabled,
@@ -292,6 +293,8 @@ async function loadData() {
 }
 
 onMounted(async () => {
+  // 分类来自后端公开端点 GET /categories（替代 localStorage）
+  await fetchCategories()
   await loadData()
 })
 </script>

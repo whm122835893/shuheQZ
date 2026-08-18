@@ -1,5 +1,5 @@
 // [管理后台-藏品管理模块] - AdminCollectibleController
-// 18 个端点：列表/创建/详情/编辑/发行/配额/重新上架/强制售罄/销毁/软删除/
+// 19 个端点：列表/创建/详情/编辑/发行/配额/重新上架/强制售罄/切换状态/销毁/软删除/
 //           空投/寄售开关/价格管控/资格配置/资格白名单/优先购配置/优先购白名单/审计日志
 //
 // 守卫协作：
@@ -156,6 +156,20 @@ export class AdminCollectibleController {
       this.getAdmin(req),
     );
     return BaseResponseVo.success(data, '已强制售罄');
+  }
+
+  // 8.5. 切换藏品上下架状态
+  @Put(':id/toggle-status')
+  @ApiOperation({ summary: '切换藏品状态', description: '在 status=1(上架) 和 status=0(下架) 之间切换' })
+  async toggleStatus(
+    @Param('id') id: string,
+    @Req() req: Request,
+  ): Promise<BaseResponseVo<{ id: number; status: number }>> {
+    const data = await this.collectibleService.toggleStatus(
+      Number(id),
+      this.getAdmin(req),
+    );
+    return BaseResponseVo.success(data, '状态已切换');
   }
 
   // 9. 销毁库存

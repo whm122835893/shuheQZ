@@ -17,7 +17,7 @@
       <el-form :model="ruleForm" label-width="140px" style="max-width:800px">
         <el-form-item label="目标藏品" required>
           <el-select v-model="ruleForm.targetCollectible" placeholder="请选择合成目标藏品" filterable style="width:300px">
-            <el-option v-for="c in []" :key="c.id" :label="c.name" :value="c.name" />
+            <el-option v-for="c in availableCollectibles" :key="c.id" :label="c.name" :value="c.name" />
           </el-select>
         </el-form-item>
 
@@ -25,7 +25,7 @@
           <div class="materials-area">
             <div v-for="(mat, index) in ruleForm.materials" :key="index" class="material-row">
               <el-select v-model="mat.collectible" placeholder="选择材料藏品" filterable style="width:280px">
-                <el-option v-for="c in []" :key="c.id" :label="c.name" :value="c.name" />
+                <el-option v-for="c in availableCollectibles" :key="c.id" :label="c.name" :value="c.name" />
               </el-select>
               <el-input-number v-model="mat.quantity" :min="1" :max="99" placeholder="数量" style="margin:0 8px" />
               <el-button type="danger" link @click="removeMaterial(index)">
@@ -149,6 +149,7 @@ import { paginate } from '../../utils/pagination'
 import { marketingApi } from '../../api'
 import type { SynthesisActivity } from '../../api'
 import { post } from '../../api/request'
+import { availableCollectibles, getAvailableCollectibles } from '../../api/salePlan'
 
 interface Material { collectible: string; quantity: number }
 
@@ -191,22 +192,7 @@ interface SynthRule {
   endTime: string
 }
 
-const rules = ref<SynthRule[]>([
-  {
-    id: 1,
-    targetCollectible: '敦煌飞天 第1期',
-    materials: [
-      { collectible: '五牛图 第5期', quantity: 2 },
-      { collectible: '步辇图 第7期', quantity: 1 }
-    ],
-    perUserLimit: 1,
-    totalLimit: 100,
-    synthesized: 35,
-    status: 'active',
-    startTime: '2026-08-10 10:00:00',
-    endTime: '2026-08-25 22:00:00'
-  }
-])
+const rules = ref<SynthRule[]>([])
 
 async function saveRule() {
   if (!ruleForm.targetCollectible) {
@@ -308,6 +294,7 @@ async function loadData() {
 onMounted(async () => {
   await loadData()
   fetchData()
+  getAvailableCollectibles()
 })
 </script>
 

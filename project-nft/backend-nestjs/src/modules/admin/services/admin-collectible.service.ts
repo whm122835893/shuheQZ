@@ -143,6 +143,7 @@ export class AdminCollectibleService {
       image: dto.image,
       subtitle: dto.subtitle ?? null,
       price: Number(dto.price ?? 0),
+      royaltyRate: Number(dto.royaltyRate ?? 0),
       edition: Number(dto.edition ?? 0),
       issuer: dto.issuer ?? '数和文创',
       creator: dto.creator ?? '数和文创',
@@ -229,6 +230,7 @@ export class AdminCollectibleService {
       'gradient',
       'icon',
       'price',
+      'royaltyRate',
       'edition',
       'issuer',
       'creator',
@@ -417,6 +419,55 @@ export class AdminCollectibleService {
       this.logger.error(`强制售罄失败: ${err.message}`, err.stack);
       throw new HttpException(
         '强制售罄失败，请稍后重试',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  // ============================================================
+  // 8.5. 切换藏品上下架状态
+  // ============================================================
+  async toggleStatus(id: number, admin: AuthenticatedAdmin) {
+    const collectible = await this.findCollectibleOrThrow(id);
+    const currentStatus = Number(collectible.status);
+    const newStatus = currentStatus === 1 ? 0 : 1;
+    const now = new Date();
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const setFields: Record<string, unknown> = { status: newStatus };
+      if (newStatus === 1) {
+        setFields.onsaleAt = now;
+        setFields.offSaleAt = null;
+      } else {
+        setFields.offSaleAt = now;
+      }
+      await queryRunner.manager
+        .createQueryBuilder()
+        .update(NftCollectible)
+        .set(setFields)
+        .where('id = :id', { id })
+        .execute();
+      await this.logOperationWith(
+        queryRunner.manager,
+        admin,
+        TARGET_TABLE,
+        id,
+        'toggle_status',
+        { status: currentStatus },
+        { status: newStatus },
+      );
+      await queryRunner.commitTransaction();
+      await this.invalidateCollectiblesListCache();
+      return { id, status: newStatus };
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      this.logger.error(`切换藏品状态失败: ${err.message}`, err.stack);
+      throw new HttpException(
+        '切换藏品状态失败，请稍后重试',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     } finally {

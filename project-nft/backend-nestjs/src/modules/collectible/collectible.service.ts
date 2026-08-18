@@ -185,6 +185,7 @@ export class CollectibleService {
       image: collectible.image,
       gradient: collectible.gradient,
       price: collectible.price,
+      royalty_rate: collectible.royaltyRate,
       edition: collectible.edition,
       sold: collectible.sold,
       circulate: collectible.circulate,

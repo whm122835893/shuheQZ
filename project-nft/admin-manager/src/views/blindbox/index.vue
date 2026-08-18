@@ -549,7 +549,7 @@ async function openRecords(row: Blindbox) {
   recordsVisible.value = true
   recordsLoading.value = true
   try {
-    const result = await blindBoxApi.openRecords(row.id, { page: 1, page_size: 20 })
+    const result = await blindBoxApi.openRecords(row.id, { page: 1, pageSize: 20 })
     recordList.value = result.list || []
   } catch (e: any) {
     ElMessage.error(e?.message || '开启记录加载失败')

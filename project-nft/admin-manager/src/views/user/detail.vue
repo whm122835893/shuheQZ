@@ -594,8 +594,97 @@ async function loadData() {
       userInfo.value = user
       inviteInfo.value.totalInvited = user.inviteCount
 
-      walletTransactionsAll.value = []
+      // 并行加载各子标签页数据
+      const results = await Promise.allSettled([
+        userApi.wallet(userId),
+        userApi.collectibles(userId),
+        userApi.blindboxes(userId),
+        userApi.invites(userId),
+        userApi.priorityQualifications(userId)
+      ])
+
+      // 钱包交易记录
+      if (results[0].status === 'fulfilled') {
+        const walletRes: any = results[0].value
+        const txList = Array.isArray(walletRes) ? walletRes : (walletRes?.list ?? walletRes?.transactions ?? [])
+        walletTransactionsAll.value = txList.map((t: any) => ({
+          id: t.id,
+          type_text: t.typeText || t.type_text || '',
+          type: t.type || '',
+          amount: Number(t.amount ?? 0),
+          balance_after: Number(t.balanceAfter ?? t.balance_after ?? 0),
+          channel: t.channel || '-',
+          status: t.status || 'success',
+          created_at: t.createdAt || t.created_at || ''
+        }))
+      } else {
+        walletTransactionsAll.value = []
+      }
       handleWalletPageChange(1)
+
+      // 持有藏品
+      if (results[1].status === 'fulfilled') {
+        const colRes: any = results[1].value
+        const colList = Array.isArray(colRes) ? colRes : (colRes?.list ?? [])
+        userCollectibles.value = colList.map((c: any) => ({
+          id: c.id,
+          image: c.image || c.coverImage || '',
+          name: c.name || c.collectibleName || '',
+          category: c.category || '',
+          price: Number(c.price ?? c.acquiredPrice ?? 0),
+          acquired_at: c.acquiredAt || c.acquired_at || '',
+          is_listed: !!c.isListed
+        }))
+      }
+
+      // 持有盲盒
+      if (results[2].status === 'fulfilled') {
+        const bbRes: any = results[2].value
+        const bbList = Array.isArray(bbRes) ? bbRes : (bbRes?.list ?? [])
+        userBlindboxes.value = bbList.map((b: any) => ({
+          id: b.id,
+          image: b.image || b.coverImage || '',
+          name: b.name || b.blindboxName || '',
+          quantity: Number(b.quantity ?? 1),
+          price: Number(b.price ?? b.acquiredPrice ?? 0),
+          acquired_at: b.acquiredAt || b.acquired_at || '',
+          is_opened: !!b.isOpened
+        }))
+      }
+
+      // 邀请关系
+      if (results[3].status === 'fulfilled') {
+        const invRes: any = results[3].value
+        const invList = Array.isArray(invRes) ? invRes : (invRes?.list ?? [])
+        if (invRes?.inviteCode) inviteInfo.value.inviteCode = invRes.inviteCode
+        if (invRes?.inviteLink) inviteInfo.value.inviteLink = invRes.inviteLink
+        if (invRes?.totalInvited != null) inviteInfo.value.totalInvited = invRes.totalInvited
+        if (invRes?.monthInvited != null) inviteInfo.value.monthInvited = invRes.monthInvited
+        if (invRes?.rewardTotal != null) inviteInfo.value.rewardTotal = Number(invRes.rewardTotal)
+        inviteList.value = invList.map((i: any) => ({
+          id: i.id,
+          username: i.username || i.nickname || '',
+          phone: i.phone ? maskPhone(i.phone) : '-',
+          register_time: i.registerTime || i.register_time || i.createdAt || '',
+          reward: Number(i.reward ?? 0),
+          is_active: !!i.isActive
+        }))
+      }
+
+      // 优先购资格
+      if (results[4].status === 'fulfilled') {
+        const priRes: any = results[4].value
+        const priList = Array.isArray(priRes) ? priRes : (priRes?.list ?? [])
+        priorityList.value = priList.map((p: any) => ({
+          id: p.id,
+          collectible_name: p.collectibleName || p.collectible_name || '',
+          source: p.source || '',
+          total_quota: Number(p.totalQuota ?? p.total_quota ?? 0),
+          used_quota: Number(p.usedQuota ?? p.used_quota ?? 0),
+          status: p.status || 'valid',
+          expire_at: p.expireAt || p.expire_at || ''
+        }))
+      }
     }
   } finally {
     loading.value = false

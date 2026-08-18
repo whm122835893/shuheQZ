@@ -149,12 +149,12 @@ import { paginate } from '../../utils/pagination'
 const wechatFormRef = ref<FormInstance>()
 const wechatForm = reactive({
   channel: '微信支付',
-  mchId: '1600000000',
-  apiKey: 'wx_sk_1234567890abcdef',
-  appId: 'wx1234567890abcdef',
-  callbackUrl: 'https://api.example.com/pay/wechat/callback',
-  feeRate: 0.6,
-  enabled: true
+  mchId: '',
+  apiKey: '',
+  appId: '',
+  callbackUrl: '',
+  feeRate: 0,
+  enabled: false
 })
 const wechatRules: FormRules = {
   mchId: [{ required: true, message: '请输入商户号', trigger: 'blur' }],
@@ -168,12 +168,12 @@ const wechatRules: FormRules = {
 const alipayFormRef = ref<FormInstance>()
 const alipayForm = reactive({
   channel: '支付宝',
-  appId: '2021000000000000',
-  privateKey: 'MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQ...',
-  publicKey: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu...',
-  callbackUrl: 'https://api.example.com/pay/alipay/callback',
-  feeRate: 0.38,
-  enabled: true
+  appId: '',
+  privateKey: '',
+  publicKey: '',
+  callbackUrl: '',
+  feeRate: 0,
+  enabled: false
 })
 const alipayRules: FormRules = {
   appId: [{ required: true, message: '请输入应用ID', trigger: 'blur' }],
@@ -218,27 +218,8 @@ interface HistoryItem {
 }
 
 let historyIdSeq = 100
-const historyList = ref<HistoryItem[]>(
-  Array.from({ length: 15 }, (_, i) => {
-    const isWechat = i % 2 === 0
-    const changes = [
-      '修改商户号为 2088 新商户号',
-      '更新 API 密钥（密钥轮换）',
-      '调整手续费率 0.6% → 0.38%',
-      '更新回调地址为 HTTPS',
-      `${isWechat ? '微信支付' : '支付宝'}渠道已启用`,
-      `${isWechat ? '微信支付' : '支付宝'}渠道临时停用`,
-      '更换 AppID（小程序迁移）'
-    ]
-    return {
-      id: i + 1,
-      time: `2026-${String(7 + (i % 2)).padStart(2, '0')}-${String((i % 28) + 1).padStart(2, '0')} ${String(10 + (i % 8)).padStart(2, '0')}:${String((i * 4) % 60).padStart(2, '0')}:00`,
-      channel: isWechat ? 'wechat' : 'alipay',
-      content: changes[i % changes.length],
-      operator: ['admin', 'finance01', 'operator01'][i % 3]
-    }
-  })
-)
+// TODO: 变更历史需要后端 API 支持，当前仅本地记录保存操作产生的变更
+const historyList = ref<HistoryItem[]>([])
 
 const searchForm = reactive<{ channel: string; dateRange: [string, string] | null }>({
   channel: '',
@@ -263,29 +244,26 @@ async function loadData() {
   try {
     const res: any = await systemApi.payment()
     if (res) {
-      // 微信支付
-      if (res.wechat) {
-        const w = res.wechat
-        if (w.mchId) wechatForm.mchId = w.mchId
-        if (w.apiKey) wechatForm.apiKey = w.apiKey
-        if (w.appId) wechatForm.appId = w.appId
-        if (w.callbackUrl) wechatForm.callbackUrl = w.callbackUrl
-        if (w.feeRate !== undefined) wechatForm.feeRate = Number(w.feeRate)
-        if (w.enabled !== undefined) wechatForm.enabled = !!w.enabled
-      }
-      // 支付宝
-      if (res.alipay) {
-        const a = res.alipay
-        if (a.appId) alipayForm.appId = a.appId
-        if (a.privateKey) alipayForm.privateKey = a.privateKey
-        if (a.publicKey) alipayForm.publicKey = a.publicKey
-        if (a.callbackUrl) alipayForm.callbackUrl = a.callbackUrl
-        if (a.feeRate !== undefined) alipayForm.feeRate = Number(a.feeRate)
-        if (a.enabled !== undefined) alipayForm.enabled = !!a.enabled
-      }
+      // 微信支付（兼容嵌套对象和扁平字段两种返回格式）
+      const w = res.wechat || {}
+      wechatForm.mchId = w.mchId || res.wechatMchId || ''
+      wechatForm.apiKey = w.apiKey || ''
+      wechatForm.appId = w.appId || res.wechatAppId || ''
+      wechatForm.callbackUrl = w.callbackUrl || ''
+      wechatForm.feeRate = w.feeRate !== undefined ? Number(w.feeRate) : 0
+      wechatForm.enabled = w.enabled !== undefined ? !!w.enabled : !!res.wechatEnabled
+
+      // 支付宝（兼容嵌套对象和扁平字段两种返回格式）
+      const a = res.alipay || {}
+      alipayForm.appId = a.appId || res.alipayAppId || ''
+      alipayForm.privateKey = a.privateKey || ''
+      alipayForm.publicKey = a.publicKey || ''
+      alipayForm.callbackUrl = a.callbackUrl || ''
+      alipayForm.feeRate = a.feeRate !== undefined ? Number(a.feeRate) : 0
+      alipayForm.enabled = a.enabled !== undefined ? !!a.enabled : !!res.alipayEnabled
     }
-  } catch (e) {
-    ElMessage.error('数据加载失败')
+  } catch (e: any) {
+    ElMessage.error(e.message || '数据加载失败')
   }
 }
 

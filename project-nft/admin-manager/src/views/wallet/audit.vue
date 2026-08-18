@@ -258,7 +258,7 @@ async function loadData() {
       // 按日期聚合交易数据
       const dateMap = new Map<string, { recharge: number; consume: number; refund: number; fee: number }>()
       for (const t of res.list) {
-        const rawDate = (t.createdAt ?? t.created_at ?? '').substring(0, 10)
+        const rawDate = (t.createdAt ?? (t as any).created_at ?? '').substring(0, 10)
         if (!rawDate) continue
         if (!dateMap.has(rawDate)) {
           dateMap.set(rawDate, { recharge: 0, consume: 0, refund: 0, fee: 0 })

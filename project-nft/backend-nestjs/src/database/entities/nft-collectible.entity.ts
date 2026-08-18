@@ -38,6 +38,9 @@ export class NftCollectible {
   @Column({ name: 'price', type: 'decimal', precision: 10, scale: 2, default: '0.00' })
   price: number;
 
+  @Column({ name: 'royalty_rate', type: 'decimal', precision: 5, scale: 2, default: 0, comment: '二级市场版税费率(%)' })
+  royaltyRate: number;
+
   @Column({ name: 'edition', type: 'int', unsigned: true, default: 0 })
   edition: number;
 

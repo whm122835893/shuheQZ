@@ -22,7 +22,7 @@
         <template v-if="rewardForm.rewardType === 'collectible'">
           <el-form-item label="奖励藏品" required>
             <el-select v-model="rewardForm.collectibleId" placeholder="请选择藏品" filterable style="width:300px" @change="onCollectibleChange">
-              <el-option v-for="c in []" :key="c.id" :label="c.name" :value="c.id" />
+              <el-option v-for="c in availableCollectibles" :key="c.id" :label="c.name" :value="c.id" />
             </el-select>
           </el-form-item>
           <el-form-item label="发放数量" required>
@@ -60,7 +60,7 @@
         <template v-else-if="rewardForm.rewardType === 'qualification'">
           <el-form-item label="资格购藏品" required>
             <el-select v-model="rewardForm.qualificationCollectible" placeholder="请选择藏品" filterable style="width:300px">
-              <el-option v-for="c in []" :key="c.id" :label="c.name" :value="c.name" />
+              <el-option v-for="c in availableCollectibles" :key="c.id" :label="c.name" :value="c.name" />
             </el-select>
           </el-form-item>
           <el-form-item label="资格数量" required>
@@ -87,7 +87,7 @@
         <template v-else-if="rewardForm.rewardType === 'blindbox'">
           <el-form-item label="奖励盲盒" required>
             <el-select v-model="rewardForm.blindboxId" placeholder="请选择盲盒" filterable style="width:300px" @change="onBlindboxChange">
-              <el-option v-for="b in []" :key="b.id" :label="b.name" :value="b.id" />
+              <el-option v-for="b in availableBlindboxes" :key="b.id" :label="b.name" :value="b.id" />
             </el-select>
           </el-form-item>
           <el-form-item label="发放数量" required>
@@ -211,6 +211,7 @@ import { paginate } from '../../utils/pagination'
 import { marketingApi } from '../../api'
 import type { PrioritySale } from '../../api'
 import { put, post } from '../../api/request'
+import { availableCollectibles, availableBlindboxes, getAvailableCollectibles, getAvailableBlindboxes } from '../../api/salePlan'
 
 const rewardTypeOptions = [
   { label: '藏品', value: 'collectible' },
@@ -443,6 +444,8 @@ async function loadData() {
 onMounted(async () => {
   await loadData()
   fetchData()
+  getAvailableCollectibles()
+  getAvailableBlindboxes()
 })
 </script>
 

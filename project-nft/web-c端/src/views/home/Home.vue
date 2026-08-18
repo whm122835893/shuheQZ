@@ -31,19 +31,19 @@
       <div class="func-grid">
         <div class="func-cell" @click="go('/activity/synthesis')">
           <span class="func-cell__label">合成兑换</span>
-          <img src="@/assets/icons/synthesis.jpg" class="func-cell__img" alt="合成兑换" />
+          <span class="func-cell__img">🔬</span>
         </div>
         <div class="func-cell" @click="go('/home/lucky-draw')">
           <span class="func-cell__label">幸运抽奖</span>
-          <img src="@/assets/icons/lucky-draw.jpg" class="func-cell__img" alt="幸运抽奖" />
+          <span class="func-cell__img">🎰</span>
         </div>
         <div class="func-cell" @click="go('/home/lottery')">
           <span class="func-cell__label">抽签活动</span>
-          <img src="@/assets/icons/lottery.jpg" class="func-cell__img" alt="抽签活动" />
+          <span class="func-cell__img">🎲</span>
         </div>
         <div class="func-cell" @click="go('/home/checkin')">
           <span class="func-cell__label">签到专区</span>
-          <img src="@/assets/icons/checkin.jpg" class="func-cell__img" alt="签到专区" />
+          <span class="func-cell__img">📅</span>
         </div>
       </div>
 
@@ -52,19 +52,19 @@
       <!-- Row 3: 4 quick circular icons -->
       <div class="func-quick">
         <div class="func-quick__item" @click="go('/home/furnace')">
-          <img src="@/assets/icons/furnace.jpg" class="func-quick__img" alt="幻化熔炉" />
+          <span class="func-quick__img">🔥</span>
           <span class="func-quick__label">幻化熔炉</span>
         </div>
         <div class="func-quick__item" @click="go('/home/hall-of-fame')">
-          <img src="@/assets/icons/hall-of-fame.jpg" class="func-quick__img" alt="名人堂" />
+          <span class="func-quick__img">🏆</span>
           <span class="func-quick__label">名人堂</span>
         </div>
         <div class="func-quick__item" @click="go('/home/beginner-guide')">
-          <img src="@/assets/icons/beginner-guide.jpg" class="func-quick__img" alt="新手指南" />
+          <span class="func-quick__img">📖</span>
           <span class="func-quick__label">新手指南</span>
         </div>
         <div class="func-quick__item" @click="go('/home/museum')">
-          <img src="@/assets/icons/museum.jpg" class="func-quick__img" alt="文物展馆" />
+          <span class="func-quick__img">🏛️</span>
           <span class="func-quick__label">文物展馆</span>
         </div>
       </div>
@@ -126,7 +126,7 @@
               <div class="release-card__title">{{ item.name }}</div>
               <div class="release-card__brand">
                 <span class="release-card__logo">
-                  <img src="/logo.jpg" alt="数和文创" class="release-card__logo-img" />
+                  <span class="release-card__logo-text">数和</span>
                 </span>
                 <span class="release-card__brand-text">数和文创</span>
               </div>
@@ -397,10 +397,11 @@ function goDetail(id) {
   color: #1F2937;
 }
 .func-cell__img {
-  width: 40px;
-  height: 40px;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 12px;
-  object-fit: cover;
   flex-shrink: 0;
 }
 
@@ -425,10 +426,11 @@ function goDetail(id) {
   transform: scale(0.94);
 }
 .func-quick__img {
-  width: 48px;
-  height: 48px;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
-  object-fit: cover;
 }
 .func-quick__label {
   margin-top: 8px;
@@ -610,11 +612,16 @@ function goDetail(id) {
   border-radius: 4px;
   overflow: hidden;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
 }
-.release-card__logo-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.release-card__logo-text {
+  line-height: 1;
 }
 .release-card__brand-text {
   font-size: 13px;

@@ -265,7 +265,13 @@ import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'elem
 import {
   Plus, CircleClose, WarningFilled, Monitor, Lock, Checked
 } from '@element-plus/icons-vue'
-import { securityApi, type SecurityEvent as ApiSecurityEvent } from '../../api'
+import {
+  securityApi,
+  type Blacklist as ApiBlacklist,
+  type RiskAlert as ApiRiskAlert,
+  type SecurityEvent as ApiSecurityEvent,
+  type Approval as ApiApproval
+} from '../../api'
 
 // ============ 黑名单数据 ============
 interface BlacklistItem {
@@ -277,20 +283,7 @@ interface BlacklistItem {
   status: 'active' | 'expired'
 }
 
-const blacklist = ref<BlacklistItem[]>([
-  { id: 1, user: '用户0012', reason: '恶意刷单，频繁发起退款', operator: '风控赵六', expire_at: '2026-12-31 23:59:59', status: 'active' },
-  { id: 2, user: '用户0028', reason: '虚假交易，利用市场套利', operator: 'admin', expire_at: '2026-09-30 23:59:59', status: 'active' },
-  { id: 3, user: '138****1234', reason: '批量注册小号', operator: '风控赵六', expire_at: '2026-08-20 23:59:59', status: 'active' },
-  { id: 4, user: '用户0035', reason: '转赠洗钱嫌疑', operator: 'admin', expire_at: '2026-06-30 23:59:59', status: 'expired' },
-  { id: 5, user: '用户0042', reason: '使用外挂抢单', operator: '风控赵六', expire_at: '永久', status: 'active' },
-  { id: 6, user: '139****5678', reason: '薅羊毛，批量领取空投', operator: 'risk01', expire_at: '2026-10-15 23:59:59', status: 'active' },
-  { id: 7, user: '用户0051', reason: '发布违规言论', operator: 'service01', expire_at: '2026-08-25 23:59:59', status: 'active' },
-  { id: 8, user: '用户0058', reason: '冒用他人实名信息', operator: 'admin', expire_at: '2026-05-30 23:59:59', status: 'expired' },
-  { id: 9, user: '137****9999', reason: '异常登录，多IP频繁切换', operator: '风控赵六', expire_at: '2026-09-10 23:59:59', status: 'active' },
-  { id: 10, user: '用户0060', reason: '恶意举报他人', operator: 'service02', expire_at: '2026-08-18 23:59:59', status: 'active' },
-  { id: 11, user: '用户0063', reason: '利用漏洞重复领取奖励', operator: 'admin', expire_at: '永久', status: 'active' },
-  { id: 12, user: '135****3333', reason: '虚假实名认证', operator: '风控赵六', expire_at: '2026-11-01 23:59:59', status: 'active' }
-])
+const blacklist = ref<BlacklistItem[]>([])
 
 const pageMap = reactive({
   blacklist: 1,
@@ -370,20 +363,7 @@ interface RiskAlert {
   status: 'pending' | 'processed'
 }
 
-const riskAlerts = ref<RiskAlert[]>([
-  { id: 1, type: '高频交易', user: '用户0007', desc: '1分钟内发起 15 笔交易，触发频率限制', severity: 'high', status: 'pending' },
-  { id: 2, type: '异地登录', user: '用户0015', desc: '账号在北京登录后5分钟内在广州登录', severity: 'medium', status: 'pending' },
-  { id: 3, type: '异常转赠', user: '用户0023', desc: '短时间内向 5 个不同账号转赠藏品', severity: 'high', status: 'pending' },
-  { id: 4, type: '提现异常', user: '用户0031', desc: '单日提现金额超过 50000 元', severity: 'high', status: 'pending' },
-  { id: 5, type: '批量注册', user: '136****8899', desc: '同一IP注册 8 个新账号', severity: 'medium', status: 'processed' },
-  { id: 6, type: '抢单外挂', user: '用户0044', desc: '下单响应时间 < 50ms，疑似使用脚本', severity: 'high', status: 'pending' },
-  { id: 7, type: '价格异常', user: '用户0019', desc: '市场挂单价格高于原价 10 倍', severity: 'low', status: 'processed' },
-  { id: 8, type: '实名异常', user: '用户0052', desc: '实名信息与历史记录不符', severity: 'medium', status: 'pending' },
-  { id: 9, type: '设备指纹', user: '用户0036', desc: '检测到模拟器环境运行', severity: 'medium', status: 'processed' },
-  { id: 10, type: '关联账号', user: '用户0048', desc: '与 3 个封禁账号共用设备', severity: 'high', status: 'pending' },
-  { id: 11, type: '接口异常', user: '用户0027', desc: '调用 API 频率超出正常阈值', severity: 'low', status: 'pending' },
-  { id: 12, type: '充值异常', user: '用户0055', desc: '不同支付渠道反复充值后立即提现', severity: 'high', status: 'processed' }
-])
+const riskAlerts = ref<RiskAlert[]>([])
 
 const alertPendingCount = computed(() => riskAlerts.value.filter(a => a.status === 'pending').length)
 const pagedAlerts = computed(() => slicePage(riskAlerts.value, pageMap.alert))
@@ -429,19 +409,7 @@ interface SecurityEvent {
   handle_time: string
 }
 
-const securityEvents = ref<SecurityEvent[]>([
-  { id: 1, type: '暴力破解', user: '用户0003', ip: '45.62.1xx.22', ua: 'Mozilla/5.0 (Windows NT 10.0)', desc: '尝试登录失败 20 次', handler: '系统自动', handle_time: '2026-08-13 09:20:00' },
-  { id: 2, type: 'SQL注入', user: '未知', ip: '103.2xx.45.1', ua: 'sqlmap/1.6', desc: '检测到 SQL 注入特征请求', handler: '风控赵六', handle_time: '2026-08-12 16:45:00' },
-  { id: 3, type: 'XSS攻击', user: '用户0018', ip: '118.2xx.33.9', ua: 'Chrome/120', desc: '商品评论含恶意脚本', handler: '系统自动', handle_time: '2026-08-12 14:10:00' },
-  { id: 4, type: 'CSRF', user: '用户0021', ip: '223.7xx.12.5', ua: 'Safari/17', desc: '跨站请求伪造访问', handler: '风控赵六', handle_time: '2026-08-11 11:30:00' },
-  { id: 5, type: '越权访问', user: '用户0029', ip: '192.168.1.55', ua: 'PostmanRuntime/7.32', desc: '尝试访问其他用户订单数据', handler: 'admin', handle_time: '2026-08-11 10:05:00' },
-  { id: 6, type: '撞库攻击', user: '多个账号', ip: '36.9xx.78.3', ua: 'Python-urllib/3.10', desc: '使用泄露密码库批量尝试', handler: '系统自动', handle_time: '2026-08-10 22:15:00' },
-  { id: 7, type: '接口滥用', user: '用户0037', ip: '175.4xx.90.2', ua: 'okhttp/4.11', desc: '短时间内调用接口超 1000 次', handler: '风控赵六', handle_time: '2026-08-10 18:00:00' },
-  { id: 8, type: '数据爬取', user: '未知', ip: '210.5xx.11.7', ua: 'Scrapy/2.10', desc: '批量爬取藏品信息', handler: '系统自动', handle_time: '2026-08-09 15:20:00' },
-  { id: 9, type: '中间人攻击', user: '用户0046', ip: '121.3xx.55.8', ua: 'Chrome/120', desc: '检测到 SSL 证书异常', handler: 'admin', handle_time: '2026-08-09 09:45:00' },
-  { id: 10, type: 'DDoS', user: '未知', ip: '多IP', ua: '-', desc: 'API 网关流量突增 50 倍', handler: '系统自动', handle_time: '2026-08-08 23:50:00' },
-  { id: 11, type: '文件上传', user: '用户0050', ip: '183.6xx.22.4', ua: 'Chrome/120', desc: '尝试上传 .php 可执行文件', handler: '风控赵六', handle_time: '2026-08-08 14:30:00' }
-])
+const securityEvents = ref<SecurityEvent[]>([])
 
 const pagedEvents = computed(() => slicePage(securityEvents.value, pageMap.event))
 
@@ -499,20 +467,7 @@ interface Approval {
   status: 'pending' | 'approved' | 'rejected'
 }
 
-const approvals = ref<Approval[]>([
-  { id: 1, type: '大批量空投', target: '活动#12 - 向 5000 用户空投', initiator: '运营张三', approver: '-', status: 'pending' },
-  { id: 2, type: '大额退款', target: '订单 ORD00001007 - 退款 ¥3999', initiator: '客服钱七', approver: '-', status: 'pending' },
-  { id: 3, type: '藏品销毁', target: '藏品《敦煌飞天》销毁 200 份', initiator: '运营李四', approver: '-', status: 'pending' },
-  { id: 4, type: '修改手续费', target: '市场寄售手续费 5% → 8%', initiator: 'finance01', approver: 'admin', status: 'approved' },
-  { id: 5, type: '数据导出', target: '导出全部用户实名信息', initiator: 'risk01', approver: 'admin', status: 'approved' },
-  { id: 6, type: '系统配置', target: '关闭全站转赠功能', initiator: '运营张三', approver: 'admin', status: 'rejected' },
-  { id: 7, type: '大额提现', target: '用户0031 提现 ¥50000', initiator: '系统自动', approver: '-', status: 'pending' },
-  { id: 8, type: '账号解冻', target: '解冻用户 用户0042', initiator: 'service01', approver: 'admin', status: 'approved' },
-  { id: 9, type: '盲盒库存调整', target: '盲盒#3 追加发行 2000 份', initiator: '运营李四', approver: '-', status: 'pending' },
-  { id: 10, type: '权限变更', target: '客服角色增加导出权限', initiator: 'admin', approver: 'admin', status: 'rejected' },
-  { id: 11, type: '大额退款', target: '订单 ORD00001031 - 退款 ¥5990', initiator: '客服孙八', approver: '-', status: 'pending' },
-  { id: 12, type: '数据清理', target: '清理 30 天前过期日志', initiator: 'dev01', approver: 'admin', status: 'approved' }
-])
+const approvals = ref<Approval[]>([])
 
 const approvalPendingCount = computed(() => approvals.value.filter(a => a.status === 'pending').length)
 const pagedApprovals = computed(() => slicePage(approvals.value, pageMap.approval))
@@ -539,8 +494,22 @@ function handleApproval(row: Approval, action: 'approved' | 'rejected') {
     .catch(() => {})
 }
 
-// 后端安全事件列表返回的扁平化/联表字段（用户、UA、描述、处理人等），
-// API 的 SecurityEvent 未覆盖，此处以其为基础叠加可选额外字段。
+// 后端返回的扁平化/联表字段，API 类型未完全覆盖，此处叠加可选额外字段。
+type BlacklistRaw = ApiBlacklist & {
+  adminName?: string
+  operator?: string
+  username?: string
+  user?: string
+  expire_at?: string
+}
+
+type RiskAlertRaw = ApiRiskAlert & {
+  username?: string
+  user?: string
+  desc?: string
+  severity?: string
+}
+
 type SecurityEventRaw = ApiSecurityEvent & {
   user?: string
   username?: string
@@ -552,21 +521,76 @@ type SecurityEventRaw = ApiSecurityEvent & {
   handle_time?: string
 }
 
+type ApprovalRaw = ApiApproval & {
+  target?: string
+  initiator?: string
+  approver?: string
+}
+
+const loading = ref(false)
+
 async function loadData() {
+  loading.value = true
   try {
-    const result = await securityApi.events({ page: 1, pageSize: 100 })
-    securityEvents.value = result.list.map((e: SecurityEventRaw) => ({
+    const [blacklistRes, alertRes, eventRes, approvalRes] = await Promise.all([
+      securityApi.blacklist({ page: 1, pageSize: 100 }),
+      securityApi.riskAlerts({ page: 1, pageSize: 100 }),
+      securityApi.events({ page: 1, pageSize: 100 }),
+      securityApi.approvals({ page: 1, pageSize: 100 })
+    ])
+
+    // 黑名单
+    blacklist.value = blacklistRes.list.map((b: BlacklistRaw) => ({
+      id: Number(b.id),
+      user: b.user || b.username || b.target || '',
+      reason: b.reason || '',
+      operator: b.operator || b.adminName || (b.adminId ? String(b.adminId) : '-'),
+      expire_at: b.expire_at || b.expiredAt || '永久',
+      status: (b.status as any) === 1 || (b.status as any) === 'active' ? 'active' : 'expired'
+    }))
+
+    // 风控告警
+    riskAlerts.value = alertRes.list.map((a: RiskAlertRaw) => {
+      const severity = a.severity || (a.level === 3 ? 'high' : a.level === 2 ? 'medium' : 'low')
+      return {
+        id: Number(a.id),
+        type: a.type || '',
+        user: a.user || a.username || (a.userId ? String(a.userId) : '-'),
+        desc: a.desc || a.description || '',
+        severity: severity as 'high' | 'medium' | 'low',
+        status: (a.status as any) === 0 || (a.status as any) === 'pending' ? 'pending' : 'processed'
+      }
+    })
+
+    // 安全事件
+    securityEvents.value = eventRes.list.map((e: SecurityEventRaw) => ({
       id: Number(e.id),
       type: e.type || '',
-      user: e.user || e.username || '',
+      user: e.user || e.username || (e.userId ? String(e.userId) : '-'),
       ip: e.ip || '',
       ua: e.ua || e.userAgent || '',
       desc: e.desc || e.description || '',
       handler: e.handler || '',
       handle_time: e.handleTime || e.handle_time || ''
     }))
-  } catch {
-    // fallback: keep inline data already loaded in securityEvents
+
+    // 敏感操作审批
+    approvals.value = approvalRes.list.map((p: ApprovalRaw) => {
+      const statusNum = typeof p.status === 'number' ? p.status : 0
+      const status = statusNum === 1 ? 'approved' : statusNum === 2 ? 'rejected' : 'pending'
+      return {
+        id: Number(p.id),
+        type: p.type || '',
+        target: p.target || `${p.targetType || ''} #${p.targetId || ''}`,
+        initiator: p.initiator || p.applicantName || (p.applicantId ? String(p.applicantId) : '-'),
+        approver: p.approver || p.handlerName || (p.handlerId ? String(p.handlerId) : '-'),
+        status: status as 'pending' | 'approved' | 'rejected'
+      }
+    })
+  } catch (e) {
+    ElMessage.error('安全数据加载失败')
+  } finally {
+    loading.value = false
   }
 }
 

@@ -29,6 +29,12 @@ export class NftArtifact {
   @Column({ name: 'description', type: 'text', nullable: true })
   description: string | null;
 
+  @Column({ name: 'size', type: 'varchar', length: 100, nullable: true, comment: '文物尺寸' })
+  size: string | null;
+
+  @Column({ name: 'origin', type: 'varchar', length: 200, nullable: true, comment: '出土/产地' })
+  origin: string | null;
+
   @Column({ name: 'tags', type: 'json', nullable: true })
   tags: string[] | null;
 

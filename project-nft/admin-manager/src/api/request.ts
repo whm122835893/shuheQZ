@@ -47,9 +47,10 @@ async function request<T = any>(
     body?: Record<string, any>
     query?: Record<string, any>
   },
+  baseUrl: string = BASE_URL,
 ): Promise<T> {
   // 构建 URL（含 query 参数）
-  let url = `${BASE_URL}${path}`
+  let url = `${baseUrl}${path}`
   if (options?.query) {
     const params = new URLSearchParams()
     for (const [key, value] of Object.entries(options.query)) {
@@ -98,6 +99,17 @@ async function request<T = any>(
 /** GET 请求 */
 export function get<T = any>(path: string, query?: Record<string, any>): Promise<T> {
   return request<T>('GET', path, { query })
+}
+
+/**
+ * 公开端点 GET 请求
+ *
+ * 与 get() 的区别：不拼接 /admin/api/v1 前缀，直接访问后端公开路由（如 /categories）。
+ * 仍复用统一的响应解包（{ code, data, message }）与错误处理；公开端点无需登录态，
+ * 即便携带 token 也无副作用。需在 vite.config.ts 中为对应路径配置代理。
+ */
+export function getPublic<T = any>(path: string, query?: Record<string, any>): Promise<T> {
+  return request<T>('GET', path, { query }, '')
 }
 
 /** POST 请求 */

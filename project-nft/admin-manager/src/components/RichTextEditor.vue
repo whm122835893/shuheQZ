@@ -30,7 +30,6 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
 }>()
 
-const quillRef = ref()
 const innerContent = ref(props.modelValue || '')
 
 // 外部值变化时同步到内部

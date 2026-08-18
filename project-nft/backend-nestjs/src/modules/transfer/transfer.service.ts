@@ -227,10 +227,10 @@ export class TransferService {
    * 1. 校验 to_user_id=当前用户 且 status=1(待确认)
    * 2. 乐观锁更新藏品 user_id=接收方, source='transfer', status=1（基于 version）
    * 3. 更新 transfer.status=2(已接受)
-   * 4. 若上链触发 transferFrom（TODO）
+   * 4. 若上链触发 transferFrom（第三方链上接口，暂未接入）
    * 5. 写入 operation_logs
    *
-   * 事务提交后异步检测 hold_collectible 抽奖规则，命中则发放次数（TODO）。
+   * 事务提交后异步检测 hold_collectible 抽奖规则，命中则发放次数。
    *
    * @returns { data: null, message: '已确认接收' }
    */
@@ -324,7 +324,7 @@ export class TransferService {
       }
 
       // d) 若上链触发 transferFrom
-      // TODO: 若藏品已上链(is_on_chain=1)，调用链上 transferFrom(from地址, to地址, token_id)
+      // 第三方链上接口，暂未接入
 
       // e) 写入 operation_logs
       await manager.save(NftOperationLog, {
@@ -340,13 +340,17 @@ export class TransferService {
     });
 
     // 3) 获得新藏品后异步检测 hold_collectible 类型抽奖规则，命中则发放次数
-    // TODO: 检测当前进行中的 hold_collectible 类型抽奖活动，
-    //       若接收方持有的藏品(collectibleId)满足活动规则，
-    //       调用 luckyDrawService.grantChances 发放抽奖次数
-    //       e.g. await this.luckyDrawService.grantChances(toUserId, activityId, 'hold_collectible', count)
-    this.logger.debug(
-      `转赠确认完成，待检测 hold_collectible 抽奖规则: userId=${toUserId}, collectibleId=${collectibleId}`,
-    );
+    //    异常不影响转赠主流程（best-effort）
+    try {
+      await this.luckyDrawService.checkAndGrantHoldCollectibleChances(
+        toUserId,
+        collectibleId,
+      );
+    } catch (e: any) {
+      this.logger.error(
+        `hold_collectible 抽奖规则检测失败（不影响转赠）: userId=${toUserId}, collectibleId=${collectibleId}: ${e?.message}`,
+      );
+    }
 
     return {
       data: null,

@@ -105,7 +105,7 @@
     <!-- Issuer info card -->
     <div class="rd-issuer">
       <div class="rd-issuer__avatar">
-        <img src="/logo.jpg" alt="数和文创" class="rd-issuer__avatar-img" />
+        <span class="rd-issuer__avatar-text">数和</span>
       </div>
       <div class="rd-issuer__info">
         <div class="rd-issuer__name">{{ collectible.issuer }}</div>
@@ -135,6 +135,10 @@
       <div class="rd-detail-item">
         <span class="rd-detail-label">认证标识</span>
         <span class="rd-detail-value">{{ collectible.certId }}</span>
+      </div>
+      <div class="rd-detail-item">
+        <span class="rd-detail-label">版税费率</span>
+        <span class="rd-detail-value">{{ collectible.royalty_rate != null ? Number(collectible.royalty_rate) + '%' : '-' }}</span>
       </div>
     </div>
 
@@ -752,11 +756,16 @@ function goPriorityBuy() {
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
 }
-.rd-issuer__avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.rd-issuer__avatar-text {
+  line-height: 1;
 }
 .rd-issuer__info {
   flex: 1;

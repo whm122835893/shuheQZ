@@ -135,7 +135,7 @@
                 action="#"
                 :show-file-list="false"
                 :before-upload="handleBeforeUpload"
-                :http-request="(opts) => handleKingkongUpload(opts, $index)"
+                :http-request="(opts: any) => handleKingkongUpload(opts, $index)"
               >
                 <img v-if="row.image" :src="row.image" class="kingkong-preview" />
                 <div v-else class="kingkong-placeholder">

@@ -37,9 +37,9 @@
           <el-input v-model="form.creator" placeholder="请输入创作者" />
         </el-form-item>
 
-        <el-form-item label="版税比例" prop="royalty">
-          <el-input-number v-model="form.royalty" :min="0" :max="50" :precision="2" style="width: 200px" />
-          <span class="form-tip">单位 %，范围 0~50</span>
+        <el-form-item label="版税费率" prop="royaltyRate">
+          <el-input-number v-model="form.royaltyRate" :min="0" :max="30" :step="0.5" :precision="2" style="width: 200px" />
+          <span class="form-tip">单位 %，范围 0~30</span>
         </el-form-item>
 
         <el-form-item label="藏品图片" prop="image">
@@ -97,7 +97,7 @@ import { Plus } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules, UploadRequestOptions } from 'element-plus'
 import { collectibleApi } from '../../api'
 import type { Collectible } from '../../api'
-import { getEnabledCategoryNames, getAllCategoryNames } from '../../api/category'
+import { getEnabledCategoryNames, getAllCategoryNames, fetchCategories } from '../../api/category'
 
 const router = useRouter()
 const route = useRoute()
@@ -121,7 +121,7 @@ const form = reactive({
   edition: 1000,
   publisher: '',
   creator: '',
-  royalty: 5,
+  royaltyRate: 0,
   image: '',
   story: '',
   description: ''
@@ -133,7 +133,7 @@ const rules: FormRules = {
   edition: [{ required: true, message: '请输入发行总量', trigger: 'blur' }],
   publisher: [{ required: true, message: '请输入发行方', trigger: 'blur' }],
   creator: [{ required: true, message: '请输入创作者', trigger: 'blur' }],
-  royalty: [{ required: true, message: '请输入版税比例', trigger: 'blur' }],
+  royaltyRate: [{ required: true, message: '请输入版税费率', trigger: 'blur' }],
   image: [{ required: true, message: '请上传藏品图片', trigger: 'change' }],
   story: [{ required: true, message: '请输入藏品故事', trigger: 'blur' }]
 }
@@ -173,7 +173,7 @@ async function handleSubmit(type: 'draft' | 'sale') {
       edition: form.edition,
       image: form.image,
       description: form.description,
-      royalty: form.royalty,
+      royaltyRate: form.royaltyRate,
       category: form.category,
       story: form.story,
       isRelease: type === 'sale' ? 1 : 0
@@ -204,7 +204,7 @@ async function loadData() {
     form.edition = c.edition || 1000
     form.publisher = c.issuer || ''
     form.creator = c.creator || ''
-    form.royalty = 5
+    form.royaltyRate = c.royaltyRate ?? 0
     form.image = c.image || ''
     form.story = ''
     form.description = c.description || ''
@@ -214,6 +214,8 @@ async function loadData() {
 }
 
 onMounted(async () => {
+  // 分类选项来自后端公开端点 GET /categories（替代 localStorage）
+  await fetchCategories()
   await loadData()
 })
 </script>

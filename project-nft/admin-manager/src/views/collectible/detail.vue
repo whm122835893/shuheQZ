@@ -76,7 +76,7 @@
               <el-descriptions-item label="发行总量">{{ info.edition.toLocaleString() }}</el-descriptions-item>
               <el-descriptions-item label="发行方">{{ info.creator }}</el-descriptions-item>
               <el-descriptions-item label="创作者">{{ info.creator }}</el-descriptions-item>
-              <el-descriptions-item label="版税比例">{{ royaltyText }}</el-descriptions-item>
+              <el-descriptions-item label="版税费率">{{ royaltyText }}</el-descriptions-item>
               <el-descriptions-item label="创建时间">{{ info.created_at }}</el-descriptions-item>
               <el-descriptions-item label="藏品ID">{{ info.id }}</el-descriptions-item>
             </el-descriptions>
@@ -312,9 +312,8 @@ const info = ref<any>(null)
 const activeTab = ref('info')
 
 const royaltyText = computed(() => {
-  if (!info.value) return '-'
-  // 版税字段暂无后端支持，显示占位
-  return '-'
+  if (!info.value || info.value.royaltyRate == null) return '-'
+  return `${Number(info.value.royaltyRate)}%`
 })
 
 const statusText = (status: string) =>
@@ -580,6 +579,7 @@ async function loadData() {
       sale_mode: c.isRelease === 1 ? 1 : 0,
       sale_mode_text: c.isRelease === 1 ? '公售' : '未配置',
       price: parseFloat(c.price) || 0,
+      royaltyRate: c.royaltyRate ?? 0,
       per_user_limit: 0,
       onsale_at: '',
       is_resaleable: c.isTransferable,
@@ -592,8 +592,8 @@ async function loadData() {
     // 并行加载配额、空投、销毁记录
     const [quotas, airdrops, destroys] = await Promise.all([
       collectibleApi.quotas(id as string).catch(() => []),
-      collectibleApi.airdropRecords(id as string, { page: 1, page_size: 20 }).catch(() => ({ list: [] })),
-      collectibleApi.destroyRecords(id as string, { page: 1, page_size: 20 }).catch(() => ({ list: [] })),
+      collectibleApi.airdropRecords(id as string, { page: 1, pageSize: 20 }).catch(() => ({ list: [] })),
+      collectibleApi.destroyRecords(id as string, { page: 1, pageSize: 20 }).catch(() => ({ list: [] })),
     ])
     quotaList.value = (quotas || []).map((q: any) => ({
       id: q.id,

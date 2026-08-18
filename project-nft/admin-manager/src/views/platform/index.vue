@@ -288,14 +288,7 @@ interface ClearLog {
   status: 'success' | 'failed'
 }
 
-const clearLogs = ref<ClearLog[]>([
-  { id: 1, operator: 'admin', ip: '192.168.1.100', time: '2026-07-15 03:00:00', reason: '季度数据清理，配合系统版本升级', backup_path: '/data/backups/clear_20260715_030000.tar.gz', status: 'success' },
-  { id: 2, operator: 'admin', ip: '192.168.1.100', time: '2026-06-01 02:30:00', reason: '测试环境数据重置', backup_path: '/data/backups/clear_20260601_023000.tar.gz', status: 'success' },
-  { id: 3, operator: 'dev01', ip: '10.0.0.55', time: '2026-05-20 04:00:00', reason: '灰度环境数据清理', backup_path: '/data/backups/clear_20260520_040000.tar.gz', status: 'success' },
-  { id: 4, operator: 'admin', ip: '192.168.1.100', time: '2026-04-10 03:15:00', reason: '合规审计要求清理过期用户数据', backup_path: '/data/backups/clear_20260410_031500.tar.gz', status: 'failed' },
-  { id: 5, operator: 'admin', ip: '192.168.1.100', time: '2026-03-01 02:00:00', reason: '月度数据归档清理', backup_path: '/data/backups/clear_20260301_020000.tar.gz', status: 'success' },
-  { id: 6, operator: 'dev01', ip: '10.0.0.55', time: '2026-02-14 05:00:00', reason: '压力测试后数据清理', backup_path: '/data/backups/clear_20260214_050000.tar.gz', status: 'success' }
-])
+const clearLogs = ref<ClearLog[]>([])
 
 const logPage = ref(1)
 const pagedLogs = computed(() => {
@@ -443,27 +436,30 @@ function handleFinalExecute() {
 }
 
 // 从后端加载清库操作日志
+const loading = ref(false)
+
 async function loadData() {
+  loading.value = true
   try {
     const res = await platformApi.cleanupLogs({ page: 1, pageSize: 50 })
-    if (res && res.list && res.list.length > 0) {
-      clearLogs.value = res.list.map((l: any, idx: number) => {
-        const rawStatus = l.status ?? 'success'
-        const status: 'success' | 'failed' = rawStatus === 'failed' ? 'failed' : 'success'
-        return {
-          id: Number(l.id ?? idx + 1),
-          operator: l.operator ?? l.adminName ?? 'admin',
-          ip: l.ip ?? l.operatorIp ?? '-',
-          time: l.time ?? l.createdAt ?? l.operatedAt ?? '',
-          reason: l.reason ?? l.operationReason ?? '',
-          backup_path: l.backupPath ?? l.backup_path ?? '',
-          status
-        }
-      })
-      logPage.value = 1
-    }
+    clearLogs.value = (res.list || []).map((l: any, idx: number) => {
+      const rawStatus = l.status ?? 'success'
+      const status: 'success' | 'failed' = rawStatus === 'failed' ? 'failed' : 'success'
+      return {
+        id: Number(l.id ?? idx + 1),
+        operator: l.operator ?? l.adminName ?? 'admin',
+        ip: l.ip ?? l.operatorIp ?? '-',
+        time: l.time ?? l.createdAt ?? l.operatedAt ?? '',
+        reason: l.reason ?? l.operationReason ?? '',
+        backup_path: l.backupPath ?? l.backup_path ?? '',
+        status
+      }
+    })
+    logPage.value = 1
   } catch (e) {
     ElMessage.error('数据加载失败')
+  } finally {
+    loading.value = false
   }
 }
 

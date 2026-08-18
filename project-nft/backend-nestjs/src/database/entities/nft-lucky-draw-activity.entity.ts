@@ -30,6 +30,12 @@ export class NftLuckyDrawActivity {
   @Column({ name: 'invite_grant', type: 'int', unsigned: true, default: 0 })
   inviteGrant: number;
 
+  @Column({ name: 'hold_collectible_id', type: 'bigint', unsigned: true, nullable: true })
+  holdCollectibleId: number | null;
+
+  @Column({ name: 'hold_collectible_grant', type: 'int', unsigned: true, default: 0 })
+  holdCollectibleGrant: number;
+
   @Column({ name: 'start_time', type: 'datetime', precision: 3, nullable: true })
   startTime: Date | null;
 

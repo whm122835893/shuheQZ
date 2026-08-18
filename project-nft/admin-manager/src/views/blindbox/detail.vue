@@ -235,7 +235,7 @@ async function loadData() {
       destroyed_count: detail.destroyedCount || 0,
       pool: detail.pool || 0,
       circulation: detail.circulate || detail.circulation || 0,
-      price: parseFloat(detail.price) || 0,
+      price: parseFloat(String(detail.price)) || 0,
       status: detail.status === 2 ? 'on_sale' : detail.status === 3 ? 'sold_out' : detail.status === 0 ? 'draft' : 'off_shelf',
       per_user_limit: detail.perUserLimit || 0,
       onsale_at: detail.onsaleAt || '',
@@ -253,7 +253,7 @@ async function loadData() {
     info.value = item
     // 加载真实开盒记录
     try {
-      const recordsResult = await blindBoxApi.openRecords(id, { page: 1, page_size: 20 })
+      const recordsResult = await blindBoxApi.openRecords(id, { page: 1, pageSize: 20 })
       openRecords.value = (recordsResult.list || []).map((r: any) => ({
         order_no: r.orderNo || r.order_no || '-',
         user: r.user || r.nickname || '-',

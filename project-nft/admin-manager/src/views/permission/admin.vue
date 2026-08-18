@@ -318,22 +318,22 @@ function handleEdit(row: AdminItem) {
 
 async function handleSubmit() {
   if (!formRef.value) return
-  await formRef.value.validate(async (valid) => {
+  await formRef.value.validate(async (valid: boolean) => {
     if (!valid) return
-    const payload = {
-      username: adminForm.username,
-      real_name: adminForm.real_name,
-      role: adminForm.role,
-      phone: adminForm.phone,
-    }
     try {
       if (dialogMode.value === 'add') {
-        await permissionApi.createAdmin(payload)
+        await permissionApi.createAdmin({
+          username: adminForm.username,
+          password: adminForm.password,
+          realName: adminForm.real_name,
+          role: Number(adminForm.role) || 0,
+          phone: adminForm.phone,
+        })
         ElMessage.success(`管理员「${adminForm.username}」创建成功`)
       } else {
-        await permissionApi.updateAdmin(editingId.value, {
-          real_name: adminForm.real_name,
-          role: adminForm.role,
+        await permissionApi.updateAdmin(editingId.value!, {
+          realName: adminForm.real_name,
+          role: Number(adminForm.role) || 0,
           phone: adminForm.phone,
         })
         ElMessage.success(`管理员信息已更新`)

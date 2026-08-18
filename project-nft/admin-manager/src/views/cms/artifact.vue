@@ -48,6 +48,8 @@
           </template>
         </el-table-column>
         <el-table-column prop="description" label="描述" min-width="220" show-overflow-tooltip />
+        <el-table-column prop="size" label="尺寸" width="140" align="center" show-overflow-tooltip />
+        <el-table-column prop="origin" label="出土/产地" width="160" align="center" show-overflow-tooltip />
         <el-table-column label="展览状态" width="110" align="center">
           <template #default="{ row }">
             <el-tag :type="statusTagType(row.status)" size="small" effect="dark">
@@ -116,6 +118,12 @@
             show-word-limit
           />
         </el-form-item>
+        <el-form-item label="尺寸" prop="size">
+          <el-input v-model="form.size" placeholder="如：高 24.5cm" maxlength="100" show-word-limit style="width: 300px" />
+        </el-form-item>
+        <el-form-item label="出土/产地" prop="origin">
+          <el-input v-model="form.origin" placeholder="如：河南安阳殷墟" maxlength="200" show-word-limit style="width: 300px" />
+        </el-form-item>
         <el-form-item label="展览状态" prop="status">
           <el-select v-model="form.status" placeholder="请选择展览状态" style="width: 220px">
             <el-option v-for="s in statusOptions" :key="s.value" :label="s.label" :value="s.value" />
@@ -159,6 +167,8 @@ interface ArtifactItem {
   image: string
   category: string
   description: string
+  size: string
+  origin: string
   status: string
   created_at: string
 }
@@ -191,6 +201,8 @@ async function loadData() {
         image: item.image || '',
         category: item.category || '其他',
         description: item.content || item.description || '',
+        size: item.size || '',
+        origin: item.origin || '',
         status: item.status || 'unlisted',
         created_at: item.createdAt || item.created_at || ''
       }))
@@ -228,6 +240,8 @@ const defaultForm = () => ({
   image: '',
   category: '',
   description: '',
+  size: '',
+  origin: '',
   status: 'unlisted'
 })
 const form = reactive(defaultForm())
@@ -255,6 +269,8 @@ function openEdit(row: ArtifactItem) {
   form.image = row.image
   form.category = row.category
   form.description = row.description
+  form.size = row.size || ''
+  form.origin = row.origin || ''
   form.status = row.status
   dialogVisible.value = true
 }
@@ -293,6 +309,8 @@ async function handleSubmit() {
         target.image = form.image
         target.category = form.category
         target.description = form.description
+        target.size = form.size
+        target.origin = form.origin
         target.status = form.status
       }
       ElMessage.success('藏品已更新')
@@ -303,6 +321,8 @@ async function handleSubmit() {
         image: form.image,
         category: form.category,
         description: form.description,
+        size: form.size,
+        origin: form.origin,
         status: form.status,
         created_at: new Date().toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '-')
       })

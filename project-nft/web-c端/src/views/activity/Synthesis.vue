@@ -4,8 +4,8 @@
 
     <!-- Banner area -->
     <div class="banner">
-      <!-- Background image -->
-      <img src="/synthesis-banner.jpg" class="banner__bg" alt="合成兑换活动" />
+      <!-- Background gradient -->
+      <div class="banner__bg"></div>
 
       <!-- Text -->
       <div class="banner__text">
@@ -248,7 +248,7 @@ function goSynthesis(id) {
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
 }
 .banner__text {
   position: absolute;

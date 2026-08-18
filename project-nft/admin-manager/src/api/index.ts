@@ -14,7 +14,7 @@ import type {
   PrioritySale, PriorityWhitelistItem,
   InviteActivity, LuckyDrawActivity, SynthesisActivity, AirdropActivity, RewardConfigItem,
   WalletTransaction,
-  Announcement, Banner,
+  Announcement, Banner, Artifact,
   AdminUser, AdminUserListItem, AdminRoleListItem, PermissionTreeNode, OperationLog, AuditLog,
   Blacklist, RiskAlert, SecurityEvent, Approval,
   SupportTicket, Feedback,
@@ -36,7 +36,7 @@ export type {
   PrioritySale, PriorityWhitelistItem,
   InviteActivity, LuckyDrawActivity, SynthesisActivity, AirdropActivity, RewardConfigItem,
   WalletTransaction,
-  Announcement, Banner,
+  Announcement, Banner, Artifact,
   AdminUser, AdminUserListItem, AdminRoleListItem, PermissionTreeNode, OperationLog, AuditLog,
   Blacklist, RiskAlert, SecurityEvent, Approval,
   SupportTicket, Feedback,
@@ -69,7 +69,7 @@ export const authApi = {
 
   logout: () => post('/auth/logout'),
 
-  profile: () => get<AdminUser>('/auth/profile'),
+  profile: () => get<AdminUser>('/auth/me'),
 }
 
 // ============================================================
@@ -104,7 +104,7 @@ export const collectibleApi = {
   delete: (id: number | string) =>
     del(`/collectibles/${id}`),
   toggleStatus: (id: number | string) =>
-    patch(`/collectibles/${id}/toggle-status`),
+    put(`/collectibles/${id}/toggle-status`),
   quotas: (id: number | string) =>
     get<InventoryQuota[]>(`/collectibles/${id}/quotas`),
   airdropRecords: (id: number | string, params: PaginationQuery = {}) =>
@@ -137,9 +137,19 @@ export const userApi = {
   update: (id: number | string, data: Partial<User>) =>
     put<User>(`/users/${id}`, data),
   freeze: (id: number | string) =>
-    patch(`/users/${id}/freeze`),
+    put(`/users/${id}/freeze`),
   unfreeze: (id: number | string) =>
-    patch(`/users/${id}/unfreeze`),
+    put(`/users/${id}/unfreeze`),
+  wallet: (id: number | string) =>
+    get(`/users/${id}/wallet`),
+  collectibles: (id: number | string) =>
+    get(`/users/${id}/collectibles`),
+  blindboxes: (id: number | string) =>
+    get(`/users/${id}/blindboxes`),
+  invites: (id: number | string) =>
+    get(`/users/${id}/invites`),
+  priorityQualifications: (id: number | string) =>
+    get(`/users/${id}/priority-qualifications`),
 }
 
 // ============================================================
@@ -160,7 +170,7 @@ export const blindBoxApi = {
     get<PaginatedData<BlindBoxListItem>>('/blindboxes', params),
   detail: (id: number | string) =>
     get<BlindBoxDetail>(`/blindboxes/${id}`),
-  create: (data: { collectibleId: number }) =>
+  create: (data: Record<string, any>) =>
     post<BlindBox>('/blindboxes', data),
   update: (id: number | string, data: Partial<BlindBox>) =>
     put<BlindBox>(`/blindboxes/${id}`, data),
@@ -220,6 +230,8 @@ export const marketingApi = {
     get<RewardConfigItem[]>('/marketing/checkin/config'),
   inviteActivities: (params: PaginationQuery = {}) =>
     get<PaginatedData<InviteActivity>>('/marketing/invite/activities', params),
+  inviteRecords: (params: PaginationQuery = {}) =>
+    get<PaginatedData<any>>('/marketing/invite/records', params),
   luckyDraw: (params: PaginationQuery = {}) =>
     get<PaginatedData<LuckyDrawActivity>>('/marketing/lucky-draw', params),
   synthesis: (params: PaginationQuery = {}) =>
@@ -244,6 +256,15 @@ export const cmsApi = {
     get<PaginatedData<Announcement>>('/cms/announcements', params),
   banners: (params: PaginationQuery = {}) =>
     get<PaginatedData<Banner>>('/cms/banners', params),
+  agreements: () => get('/cms/agreements'),
+  updateAgreement: (id: number | string, data: any) =>
+    put(`/cms/agreements/${id}`, data),
+  artifacts: (params: PaginationQuery = {}) =>
+    get<PaginatedData<Artifact>>('/cms/artifacts', params),
+  createArtifact: (data: any) => post('/cms/artifacts', data),
+  updateArtifact: (id: number | string, data: any) =>
+    put(`/cms/artifacts/${id}`, data),
+  deleteArtifact: (id: number | string) => del(`/cms/artifacts/${id}`),
 }
 
 // ============================================================

@@ -1301,8 +1301,8 @@ export class UserService implements IUserService {
 
   /**
    * 读取抽奖活动赠送次数
-   * TODO: register_grant / invite_grant 字段需在 NftLuckyDrawActivity 实体中补充声明，
-   *       或通过原生查询获取；当前以防御式读取兼容多种命名，缺失时返回 0。
+   * register_grant / invite_grant 字段已在 NftLuckyDrawActivity 实体中声明，
+   * 数据库迁移脚本 004_lucky_draw_grants.sql 已补充对应列。
    */
   private getActivityGrant(
     activity: NftLuckyDrawActivity | null,
@@ -1311,11 +1311,8 @@ export class UserService implements IUserService {
     if (!activity) {
       return 0;
     }
-    const anyActivity = activity as any;
     const grant =
-      type === 'register'
-        ? anyActivity.registerGrant ?? anyActivity.register_grant
-        : anyActivity.inviteGrant ?? anyActivity.invite_grant;
+      type === 'register' ? activity.registerGrant : activity.inviteGrant;
     return Number(grant) || 0;
   }
 

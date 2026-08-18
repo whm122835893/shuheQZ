@@ -22,6 +22,10 @@ import { NftCheckInRecord } from '../../database/entities/nft-check-in-record.en
 import { NftUser } from '../../database/entities/nft-user.entity';
 import { NftUserCollectible } from '../../database/entities/nft-user-collectible.entity';
 import { NftCollectible } from '../../database/entities/nft-collectible.entity';
+import { NftUserWallet } from '../../database/entities/nft-user-wallet.entity';
+import { NftWalletTransaction } from '../../database/entities/nft-wallet-transaction.entity';
+import { NftLuckyDrawActivity } from '../../database/entities/nft-lucky-draw-activity.entity';
+import { NftLuckyDrawUserChance } from '../../database/entities/nft-lucky-draw-user-chance.entity';
 import { ErrorCode } from '../../common/enums/error-code.enum';
 import { CheckInRecordsQueryDto } from './dto/check-in-records-query.dto';
 
@@ -45,6 +49,14 @@ export class CheckInService {
     private readonly userCollectibleRepo: Repository<NftUserCollectible>,
     @InjectRepository(NftCollectible)
     private readonly collectibleRepo: Repository<NftCollectible>,
+    @InjectRepository(NftUserWallet)
+    private readonly walletRepo: Repository<NftUserWallet>,
+    @InjectRepository(NftWalletTransaction)
+    private readonly walletTxnRepo: Repository<NftWalletTransaction>,
+    @InjectRepository(NftLuckyDrawActivity)
+    private readonly activityRepo: Repository<NftLuckyDrawActivity>,
+    @InjectRepository(NftLuckyDrawUserChance)
+    private readonly chanceRepo: Repository<NftLuckyDrawUserChance>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -123,19 +135,15 @@ export class CheckInService {
           break;
         }
         case 'points': {
-          // TODO: 更新用户积分(调用 WalletService / PointsService)
-          reward = { points: DEFAULT_CHECKIN_POINTS };
-          rewardDesc = `${DEFAULT_CHECKIN_POINTS}积分`;
+          const pointsResult = await this.awardPoints(manager, userId);
+          reward = { points: pointsResult.points };
+          rewardDesc = pointsResult.desc;
           break;
         }
         case 'draw_chance': {
-          // TODO: 调用 LuckyDrawService.grantChances(userId, chances, 'check_in')
-          reward = {
-            chances: DEFAULT_CHECKIN_DRAW_CHANCES,
-            activity_id: null,
-            activity_name: null,
-          };
-          rewardDesc = `${DEFAULT_CHECKIN_DRAW_CHANCES}次抽奖机会`;
+          const drawResult = await this.awardDrawChance(manager, userId);
+          reward = drawResult.reward;
+          rewardDesc = drawResult.desc;
           break;
         }
         default: {
@@ -317,6 +325,153 @@ export class CheckInService {
         serial_no: serialNo,
       },
       desc: `限定藏品「${rewardCollectible.name}」`,
+    };
+  }
+
+  /**
+   * 发放积分奖励
+   * 事务内：查找/创建用户钱包 → 乐观锁更新余额 → 写入钱包流水
+   * 积分直接进入钱包余额，可在平台内消费使用
+   */
+  private async awardPoints(
+    manager: EntityManager,
+    userId: number,
+  ): Promise<{ points: number; desc: string }> {
+    // 查找用户钱包，不存在则创建（兜底，正常应在注册时创建）
+    let wallet = await manager.findOne(NftUserWallet, {
+      where: { userId, isDelete: 0 },
+    });
+    if (!wallet) {
+      this.logger.warn(`用户钱包不存在(user_id=${userId})，自动创建`);
+      wallet = manager.create(NftUserWallet, { userId });
+      wallet = await manager.save(NftUserWallet, wallet);
+    }
+
+    // 乐观锁更新钱包余额
+    const updated = await manager
+      .createQueryBuilder()
+      .update(NftUserWallet)
+      .set({
+        balance: () => `balance + ${DEFAULT_CHECKIN_POINTS}`,
+        version: () => 'version + 1',
+      })
+      .where('id = :id AND version = :version', {
+        id: wallet.id,
+        version: wallet.version,
+      })
+      .execute();
+    if (!updated.affected) {
+      throw new ConflictException({
+        code: ErrorCode.CONFLICT,
+        data: null,
+        message: '钱包余额更新冲突，请重试',
+      });
+    }
+
+    // 写入钱包流水
+    const balanceAfter = Number(wallet.balance) + DEFAULT_CHECKIN_POINTS;
+    const txn = manager.create(NftWalletTransaction, {
+      userId,
+      type: 'recharge',
+      amount: DEFAULT_CHECKIN_POINTS,
+      balanceAfter,
+      direction: 'in',
+      relatedOrderNo: null,
+      remark: '签到积分奖励',
+    });
+    await manager.save(NftWalletTransaction, txn);
+
+    return {
+      points: DEFAULT_CHECKIN_POINTS,
+      desc: `${DEFAULT_CHECKIN_POINTS}积分`,
+    };
+  }
+
+  /**
+   * 发放抽奖机会奖励
+   * 事务内：查询进行中的抽奖活动 → 写入/更新用户抽奖次数(source='check_in')
+   * 若无进行中的活动，仍然返回奖励信息但不实际发放次数（降级处理）
+   */
+  private async awardDrawChance(
+    manager: EntityManager,
+    userId: number,
+  ): Promise<{ reward: any; desc: string }> {
+    const now = new Date();
+
+    // 查询进行中的抽奖活动(status=2, 时间范围内)
+    const activity = await manager
+      .createQueryBuilder(NftLuckyDrawActivity, 'a')
+      .where('a.status = 2')
+      .andWhere('a.is_delete = 0')
+      .andWhere('(a.start_time IS NULL OR a.start_time <= :now)', { now })
+      .andWhere('(a.end_time IS NULL OR a.end_time >= :now)', { now })
+      .orderBy('a.created_at', 'DESC')
+      .getOne();
+
+    if (!activity) {
+      this.logger.warn('签到抽奖机会奖励：当前无进行中的抽奖活动，次数未发放');
+      return {
+        reward: {
+          chances: DEFAULT_CHECKIN_DRAW_CHANCES,
+          activity_id: null,
+          activity_name: null,
+        },
+        desc: `${DEFAULT_CHECKIN_DRAW_CHANCES}次抽奖机会（暂无活动，稍后发放）`,
+      };
+    }
+
+    // 查找已有次数记录
+    const existing = await manager.findOne(NftLuckyDrawUserChance, {
+      where: { activityId: activity.id, userId, source: 'check_in', isDelete: 0 },
+    });
+
+    if (existing) {
+      // 累加次数
+      await manager
+        .createQueryBuilder()
+        .update(NftLuckyDrawUserChance)
+        .set({ chances: () => `chances + ${DEFAULT_CHECKIN_DRAW_CHANCES}` })
+        .where('id = :id', { id: existing.id })
+        .execute();
+    } else {
+      // 创建新记录
+      try {
+        const chance = manager.create(NftLuckyDrawUserChance, {
+          activityId: activity.id,
+          userId,
+          source: 'check_in',
+          chances: DEFAULT_CHECKIN_DRAW_CHANCES,
+          usedChances: 0,
+          expiresAt: null,
+          isDelete: 0,
+        });
+        await manager.save(NftLuckyDrawUserChance, chance);
+      } catch (e: any) {
+        // 并发创建冲突：回退为累加
+        if (e && (e.code === 'ER_DUP_ENTRY' || e.errno === 1062)) {
+          await manager
+            .createQueryBuilder()
+            .update(NftLuckyDrawUserChance)
+            .set({ chances: () => `chances + ${DEFAULT_CHECKIN_DRAW_CHANCES}` })
+            .where('activity_id = :aid AND user_id = :uid AND source = :src AND is_delete = 0', {
+              aid: activity.id,
+              uid: userId,
+              src: 'check_in',
+            })
+            .execute();
+        } else {
+          throw e;
+        }
+      }
+    }
+
+    return {
+      reward: {
+        chances: DEFAULT_CHECKIN_DRAW_CHANCES,
+        activity_id: Number(activity.id),
+        activity_name: activity.name,
+      },
+      desc: `${DEFAULT_CHECKIN_DRAW_CHANCES}次抽奖机会`,
     };
   }
 

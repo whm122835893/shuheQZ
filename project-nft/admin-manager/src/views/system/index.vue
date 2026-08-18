@@ -298,7 +298,7 @@ const formRefMap: Record<string, any> = {
 async function handleSave(type: keyof typeof saving) {
   const formRef = formRefMap[type]
   if (!formRef || !formRef.value) return
-  await formRef.value.validate(async (valid) => {
+  await formRef.value.validate(async (valid: boolean) => {
     if (!valid) return
     try {
       await ElMessageBox.confirm(

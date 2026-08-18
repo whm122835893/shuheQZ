@@ -19,7 +19,7 @@ export class ArtifactService {
   /**
    * 文物展品列表(分页)
    * 查询 nft_artifacts WHERE is_delete=0 → 条件过滤 → 分页
-   * 返回字段：id, name, dynasty, category, image, tags
+   * 返回字段：id, name, dynasty, category, image, tags, size, origin
    */
   async getArtifacts(query: ArtifactQueryDto) {
     const page = query.page ?? 1;
@@ -55,6 +55,8 @@ export class ArtifactService {
         'a.category',
         'a.image',
         'a.tags',
+        'a.size',
+        'a.origin',
       ])
       .offset((page - 1) * page_size)
       .limit(page_size)
@@ -68,6 +70,8 @@ export class ArtifactService {
         category: r.category,
         image: r.image,
         tags: r.tags ?? [],
+        size: r.size,
+        origin: r.origin,
       })),
       total,
       page,
@@ -77,7 +81,7 @@ export class ArtifactService {
 
   /**
    * 文物展品详情
-   * 查询 nft_artifacts WHERE id=? AND is_delete=0 → 返回完整信息含 description + tags
+   * 查询 nft_artifacts WHERE id=? AND is_delete=0 → 返回完整信息含 description + tags + size + origin
    */
   async getArtifactById(id: number) {
     const artifact = await this.artifactRepo.findOne({
@@ -99,6 +103,8 @@ export class ArtifactService {
       category: artifact.category,
       image: artifact.image,
       description: artifact.description,
+      size: artifact.size,
+      origin: artifact.origin,
       tags: artifact.tags ?? [],
     };
   }

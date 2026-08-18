@@ -386,7 +386,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, InfoFilled, Upload, Download, Delete } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
-import { collectibleApi, marketingApi } from '../../api'
+import { collectibleApi, marketingApi, userApi } from '../../api'
 import type { Collectible } from '../../api'
 import { paginate } from '../../utils/pagination'
 
@@ -606,7 +606,6 @@ function genWhitelist(_activityId: number): WhitelistItem[] {
 
 // 按活动ID缓存白名单
 const whitelistCache = ref<Record<number, WhitelistItem[]>>({})
-let wlIdSeq = 1000
 
 function getCurrentWhitelist(): WhitelistItem[] {
   if (!currentActivity.value) return []
@@ -650,7 +649,7 @@ async function fetchWhitelist() {
       page: wlPage.value,
       pageSize: wlPageSize.value,
       ...wlSearch,
-    })
+    } as any)
     wlPageData.value = {
       list: (res?.list || []).map((w: any) => ({
         id: Number(w.id),
@@ -780,7 +779,9 @@ function openImportDialog() {
 }
 
 async function confirmImport() {
-  const phones = importDialog.phones.split('\n').map(p => p.trim()).filter(p => /^1\d{10}$/.test(p))
+  // 解析并去重手机号（避免重复 API 调用与重复导入）
+  const rawPhones = importDialog.phones.split('\n').map(p => p.trim()).filter(p => /^1\d{10}$/.test(p))
+  const phones = Array.from(new Set(rawPhones))
   if (phones.length === 0) {
     ElMessage.warning('请输入有效的手机号')
     return
@@ -788,13 +789,48 @@ async function confirmImport() {
   if (!currentActivity.value) return
   importDialog.loading = true
   try {
-    // 使用导入接口（userId 用手机号映射的占位值，后端按需处理）
-    const entries = phones.map((phone, i) => ({
-      userId: 1000 + i,
-      maxQuantity: importDialog.maxPurchase,
-    }))
-    const res = await marketingApi.priority.importWhitelist(currentActivity.value.id, entries)
-    ElMessage.success(`成功导入 ${res?.imported ?? entries.length} 条白名单`)
+    // 通过用户搜索接口将手机号解析为真实 userId
+    // 后端 keyword 为 LIKE 模糊匹配（phone/username/uid），故需在结果中精确匹配 phone 字段
+    const lookupResults = await Promise.all(
+      phones.map(async (phone) => {
+        try {
+          const res = await userApi.list({ keyword: phone, page: 1, pageSize: 50 })
+          const matched = (res?.list || []).find((u: any) => u.phone === phone)
+          return { phone, userId: matched ? Number(matched.id) : 0 }
+        } catch (e) {
+          // 单个手机号查询失败不应阻断整体导入流程
+          return { phone, userId: 0 }
+        }
+      }),
+    )
+
+    const matchedEntries: Array<{ userId: number; maxQuantity: number }> = []
+    const unmatchedPhones: string[] = []
+    for (const { phone, userId } of lookupResults) {
+      if (userId > 0) {
+        matchedEntries.push({ userId, maxQuantity: importDialog.maxPurchase })
+      } else {
+        unmatchedPhones.push(phone)
+      }
+    }
+
+    // 没有任何手机号匹配到用户时，给出明确错误并中止导入
+    if (matchedEntries.length === 0) {
+      ElMessage.error(`输入的 ${phones.length} 个手机号均未匹配到用户，已中止导入`)
+      return
+    }
+
+    const res = await marketingApi.priority.importWhitelist(currentActivity.value.id, matchedEntries)
+    const imported = res?.imported ?? matchedEntries.length
+
+    // 根据匹配情况组装用户提示：全部匹配走 success，存在未匹配走 warning 并附明细
+    if (unmatchedPhones.length > 0) {
+      ElMessage.warning(
+        `成功导入 ${imported} 条白名单（共输入 ${phones.length} 个手机号）；${unmatchedPhones.length} 个未匹配到用户：${unmatchedPhones.join('、')}`,
+      )
+    } else {
+      ElMessage.success(`成功导入 ${imported} 条白名单（共 ${phones.length} 个手机号全部匹配）`)
+    }
     importDialog.visible = false
     await fetchWhitelist()
   } catch (e: any) {

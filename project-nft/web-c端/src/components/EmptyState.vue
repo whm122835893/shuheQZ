@@ -1,6 +1,6 @@
 <template>
   <div class="empty-state">
-    <img src="@/assets/empty-box.png" :alt="text" class="empty-state__img" />
+    <span class="empty-state__img">📦</span>
     <p class="empty-state__text">{{ text }}</p>
   </div>
 </template>
@@ -22,9 +22,10 @@ defineProps({
   background: transparent;
 }
 .empty-state__img {
-  width: 160px;
-  height: 160px;
-  object-fit: contain;
+  font-size: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .empty-state__text {
   margin-top: 16px;

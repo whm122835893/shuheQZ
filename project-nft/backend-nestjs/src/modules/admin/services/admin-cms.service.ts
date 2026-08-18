@@ -292,6 +292,8 @@ export class AdminCmsService {
       category: body.category ?? null,
       image: body.image,
       description: body.description ?? null,
+      size: body.size ?? null,
+      origin: body.origin ?? null,
       tags: body.tags ?? null,
     });
     return this.artifactRepo.save(art);
@@ -310,6 +312,8 @@ export class AdminCmsService {
       category: body.category ?? art.category,
       image: body.image ?? art.image,
       description: body.description ?? art.description,
+      size: body.size !== undefined ? body.size : art.size,
+      origin: body.origin !== undefined ? body.origin : art.origin,
       tags: body.tags ?? art.tags,
     });
     return this.artifactRepo.findOne({ where: { id } }) as Promise<NftArtifact>;

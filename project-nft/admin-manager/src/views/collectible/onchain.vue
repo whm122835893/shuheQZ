@@ -639,14 +639,14 @@ async function submitMint() {
       await chainApi.batchMint({
         channelId: mintDialog.form.channel_id,
         collectibleIds: selectedIds.value,
-      })
+      } as any)
       ElMessage.success(`已为 ${selectedIds.value.length} 个藏品发起上链`)
       selectedIds.value = []
     } else {
       await chainApi.batchMint({
         channelId: mintDialog.form.channel_id,
         collectibleIds: [Number(mintDialog.collectibleNames)],
-      })
+      } as any)
       ElMessage.success('上链任务已提交')
     }
     mintDialog.visible = false
@@ -680,7 +680,9 @@ async function submitRetroactive() {
   try {
     await chainApi.retroactiveMint({
       channelId: retroactiveDialog.form.channel_id,
-    })
+      collectibleId: 0,
+      userIds: [],
+    } as any)
     ElMessage.success('补录上链任务已提交')
     retroactiveDialog.visible = false
   } catch (err: any) {
@@ -717,7 +719,7 @@ async function submitRandom() {
   try {
     await chainApi.generateOffchain({
       collectibleIds: [],
-    })
+    } as any)
     ElMessage.success('随机链上标识已生成')
     randomDialog.visible = false
     loadCollectibles()
@@ -812,7 +814,7 @@ function chainTypeText(type: number) {
   return { 1: '以太坊', 2: 'Polygon', 3: '联盟链' }[type] || '-'
 }
 
-function getChainColor(code: string) {
+function getChainColor(_code: string) {
   return '#7c3aed'
 }
 
@@ -844,15 +846,6 @@ function maskHash(hash: string | null | undefined): string {
   if (!hash) return '-'
   if (hash.length <= 16) return hash
   return hash.slice(0, 8) + '****' + hash.slice(-6)
-}
-
-function randomHex(len: number): string {
-  const chars = '0123456789abcdef'
-  let result = ''
-  for (let i = 0; i < len; i++) {
-    result += chars[Math.floor(Math.random() * 16)]
-  }
-  return result
 }
 
 // ==================== 初始化 ====================

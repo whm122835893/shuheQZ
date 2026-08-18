@@ -185,7 +185,6 @@ import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules, UploadRequestOptions } from 'element-plus'
 import { blindBoxApi } from '../../api'
-import { getEnabledCategoryNames } from '../../api/category'
 
 const router = useRouter()
 const route = useRoute()

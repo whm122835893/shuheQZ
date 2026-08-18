@@ -208,7 +208,7 @@ const currentRoleName = computed(() => adminUserInfo.value.roleName)
 
 // 权限：仅超管/风控可见
 const hasPermission = computed(() => {
-  const role = adminUserInfo.value.role
+  const role = adminUserInfo.value.role as any
   return role === 'super_admin' || role === 'risk'
 })
 

@@ -131,106 +131,8 @@ interface TreeNode {
   children?: TreeNode[]
 }
 
-// 权限树：菜单权限 + 按钮权限 + 数据权限（作为 fallback 初始值）
-const permissionTree = ref<TreeNode[]>([
-  {
-    key: 'menu',
-    label: '菜单权限（模块访问）',
-    children: [
-      { key: 'menu:dashboard', label: '数据仪表盘' },
-      {
-        key: 'menu:user',
-        label: '用户管理',
-        children: [
-          { key: 'menu:user:list', label: '用户列表' },
-          { key: 'menu:user:detail', label: '用户详情' },
-          { key: 'menu:user:realname', label: '实名认证' }
-        ]
-      },
-      {
-        key: 'menu:collectible',
-        label: '藏品管理',
-        children: [
-          { key: 'menu:collectible:list', label: '藏品列表' },
-          { key: 'menu:collectible:create', label: '创建藏品' },
-          { key: 'menu:collectible:priority', label: '优先购管理' },
-          { key: 'menu:collectible:qualification', label: '资格购管理' }
-        ]
-      },
-      {
-        key: 'menu:blindbox',
-        label: '盲盒管理',
-        children: [
-          { key: 'menu:blindbox:list', label: '盲盒列表' },
-          { key: 'menu:blindbox:create', label: '创建盲盒' }
-        ]
-      },
-      {
-        key: 'menu:order',
-        label: '订单管理',
-        children: [
-          { key: 'menu:order:list', label: '订单列表' },
-          { key: 'menu:order:refund', label: '退款审批' }
-        ]
-      },
-      { key: 'menu:market', label: '市场寄售' },
-      { key: 'menu:transfer', label: '转赠管理' },
-      { key: 'menu:wallet', label: '钱包财务' },
-      {
-        key: 'menu:marketing',
-        label: '营销活动',
-        children: [
-          { key: 'menu:marketing:priority', label: '优先购白名单' },
-          { key: 'menu:marketing:checkin', label: '签到活动' },
-          { key: 'menu:marketing:invite', label: '邀请活动' },
-          { key: 'menu:marketing:luckydraw', label: '抽奖活动' },
-          { key: 'menu:marketing:synthesis', label: '合成活动' },
-          { key: 'menu:marketing:airdrop', label: '活动空投' }
-        ]
-      },
-      { key: 'menu:cms', label: '内容管理' },
-      {
-        key: 'menu:permission',
-        label: '权限审计',
-        children: [
-          { key: 'menu:permission:admin', label: '管理员账号' },
-          { key: 'menu:permission:role', label: '角色权限' },
-          { key: 'menu:permission:log', label: '操作日志' }
-        ]
-      },
-      { key: 'menu:security', label: '风控安全' },
-      { key: 'menu:ticket', label: '客服工单' },
-      { key: 'menu:report', label: '数据报表' },
-      { key: 'menu:platform', label: '平台运维' }
-    ]
-  },
-  {
-    key: 'button',
-    label: '按钮权限（操作权限）',
-    children: [
-      { key: 'btn:add', label: '新增' },
-      { key: 'btn:edit', label: '编辑' },
-      { key: 'btn:delete', label: '删除' },
-      { key: 'btn:export', label: '导出' },
-      { key: 'btn:import', label: '导入' },
-      { key: 'btn:audit', label: '审批' },
-      { key: 'btn:reset_pwd', label: '重置密码' },
-      { key: 'btn:freeze', label: '冻结/解冻' },
-      { key: 'btn:publish', label: '上架/下架' },
-      { key: 'btn:danger:clear_db', label: '高危清库操作' }
-    ]
-  },
-  {
-    key: 'data',
-    label: '数据权限',
-    children: [
-      { key: 'data:all', label: '查看全部数据' },
-      { key: 'data:dept', label: '查看本部门数据' },
-      { key: 'data:self', label: '仅查看本人数据' },
-      { key: 'data:export', label: '导出数据权限' }
-    ]
-  }
-])
+// 权限树：从接口加载
+const permissionTree = ref<TreeNode[]>([])
 
 const treeProps = { label: 'label', children: 'children' }
 
@@ -265,93 +167,7 @@ function mapTreeNodes(nodes: any[]): TreeNode[] {
   })
 }
 
-const roles = ref<RoleItem[]>([
-  {
-    id: 1,
-    code: 'super_admin',
-    name: '超级管理员',
-    description: '拥有系统全部权限，不可编辑',
-    color: 'linear-gradient(135deg, #f5576c 0%, #f093fb 100%)',
-    icon: UserFilled,
-    userCount: 2,
-    isSystem: true,
-    checkedKeys: [...allLeafKeys.value]
-  },
-  {
-    id: 2,
-    code: 'operator',
-    name: '运营',
-    description: '负责藏品、盲盒、营销活动等日常运营',
-    color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    icon: Operation,
-    userCount: 2,
-    isSystem: false,
-    checkedKeys: [
-      'menu:dashboard',
-      'menu:user', 'menu:user:list', 'menu:user:detail',
-      'menu:collectible', 'menu:collectible:list', 'menu:collectible:create', 'menu:collectible:priority', 'menu:collectible:qualification',
-      'menu:blindbox', 'menu:blindbox:list', 'menu:blindbox:create',
-      'menu:order', 'menu:order:list',
-      'menu:marketing', 'menu:marketing:priority', 'menu:marketing:checkin', 'menu:marketing:invite', 'menu:marketing:luckydraw', 'menu:marketing:synthesis', 'menu:marketing:airdrop',
-      'menu:ticket',
-      'btn:add', 'btn:edit', 'btn:export', 'btn:publish'
-    ]
-  },
-  {
-    id: 3,
-    code: 'finance',
-    name: '财务',
-    description: '负责订单财务、退款审批、对账报表',
-    color: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-    icon: Money,
-    userCount: 1,
-    isSystem: false,
-    checkedKeys: [
-      'menu:dashboard',
-      'menu:order', 'menu:order:list', 'menu:order:refund',
-      'menu:wallet',
-      'menu:report',
-      'btn:audit', 'btn:export'
-    ]
-  },
-  {
-    id: 4,
-    code: 'risk',
-    name: '风控',
-    description: '负责风控安全、敏感操作审批、黑名单管理',
-    color: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-    icon: WarningFilled,
-    userCount: 1,
-    isSystem: false,
-    checkedKeys: [
-      'menu:dashboard',
-      'menu:user', 'menu:user:list',
-      'menu:security',
-      'menu:permission', 'menu:permission:log',
-      'menu:market',
-      'menu:transfer',
-      'btn:freeze', 'btn:audit', 'btn:export'
-    ]
-  },
-  {
-    id: 5,
-    code: 'customer_service',
-    name: '客服',
-    description: '负责工单处理、用户咨询、转赠纠纷',
-    color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-    icon: Service,
-    userCount: 2,
-    isSystem: false,
-    checkedKeys: [
-      'menu:dashboard',
-      'menu:user', 'menu:user:list', 'menu:user:detail',
-      'menu:order', 'menu:order:list',
-      'menu:ticket',
-      'menu:transfer',
-      'btn:edit', 'btn:reset_pwd'
-    ]
-  }
-])
+const roles = ref<RoleItem[]>([])
 
 const expandedRoles = ref<number[]>([])
 
@@ -457,8 +273,8 @@ async function loadData() {
         }
       })
     }
-  } catch {
-    // fallback: keep inline data already loaded in roles & permissionTree
+  } catch (e: any) {
+    ElMessage.error(e?.message || '数据加载失败')
   }
 }
 

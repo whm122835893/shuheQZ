@@ -129,6 +129,7 @@ import { paginate } from '../../utils/pagination'
 import { marketingApi } from '../../api'
 import type { AirdropActivity } from '../../api'
 import { post } from '../../api/request'
+import { availableCollectibles, availableBlindboxes, getAvailableCollectibles, getAvailableBlindboxes } from '../../api/salePlan'
 
 const rewardTypeOptions = [
   { label: '藏品', value: 'collectible' },
@@ -144,7 +145,9 @@ function rewardTagType(val: string) {
   const map: Record<string, string> = { collectible: 'success', priority: 'warning', qualification: 'danger', luckydraw: '', blindbox: 'info' }
   return map[val] || 'info'
 }
-function getRewardContentOptions(_type: string) {
+function getRewardContentOptions(type: string): { id: number; name: string }[] {
+  if (type === 'collectible') return availableCollectibles.value
+  if (type === 'blindbox') return availableBlindboxes.value
   return []
 }
 
@@ -341,6 +344,8 @@ async function loadData() {
 onMounted(async () => {
   await loadData()
   fetchData()
+  getAvailableCollectibles()
+  getAvailableBlindboxes()
 })
 </script>
 

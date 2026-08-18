@@ -12,7 +12,7 @@
     <!-- Upper section: slot machine + action buttons -->
     <div class="lottery-upper">
       <div class="machine-wrapper" :class="{ 'machine-wrapper--shaking': isSpinning }">
-        <img src="@/assets/lottery/lottery-main-bg.png" class="main-img" alt="抽奖机" />
+        <div class="main-img"></div>
       </div>
 
       <div class="lottery-actions">
@@ -51,12 +51,12 @@
       <div class="win-dialog">
         <!-- Prize box image -->
         <div class="win-dialog__hero">
-          <img src="@/assets/lottery/prize-box.png" class="win-dialog__hero-img" alt="奖品" />
+          <span class="win-dialog__hero-img">🎁</span>
         </div>
 
         <!-- Title -->
         <div class="win-dialog__title">
-          <img src="@/assets/lottery/win-title.png" class="win-dialog__title-img" alt="恭喜获得" />
+          <span class="win-dialog__title-img">恭喜获得</span>
         </div>
 
         <!-- Body -->
@@ -283,8 +283,10 @@ function closeDialog() {
 
 .main-img {
   width: 100%;
+  height: 280px;
   display: block;
-  object-fit: contain;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #EC4899 100%);
 }
 
 .lottery-actions {
@@ -399,16 +401,19 @@ function closeDialog() {
 .win-dialog__hero-img {
   width: 140px;
   height: 140px;
-  object-fit: contain;
+  font-size: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .win-dialog__title {
   text-align: center;
   margin-top: 8px;
 }
 .win-dialog__title-img {
-  width: 120px;
-  height: auto;
-  object-fit: contain;
+  font-size: 22px;
+  font-weight: 700;
+  color: #3B82F6;
 }
 .win-dialog__body {
   width: 100%;

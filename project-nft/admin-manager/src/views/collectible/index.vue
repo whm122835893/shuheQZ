@@ -304,7 +304,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, ArrowDown, Files, SoldOut, Tickets, Box, Promotion } from '@element-plus/icons-vue'
 import { collectibleApi } from '../../api'
 import { paginate } from '../../utils/pagination'
-import { getEnabledCategoryNames } from '../../api/category'
+import { getEnabledCategoryNames, fetchCategories } from '../../api/category'
 
 const router = useRouter()
 
@@ -336,7 +336,9 @@ const list = ref<Collectible[]>([])
 const page = ref(1)
 const pageSize = ref(10)
 
-const categories = getEnabledCategoryNames()
+// 分类筛选项来自后端公开端点 GET /categories（替代 localStorage）；
+// 使用 computed 以便 fetchCategories 完成后下拉选项自动更新
+const categories = computed(() => getEnabledCategoryNames())
 
 const searchForm = reactive({
   name: '',
@@ -668,7 +670,11 @@ async function handleDelete(row: Collectible) {
   }
 }
 
-onMounted(loadData)
+onMounted(async () => {
+  // 分类筛选项来自后端公开端点 GET /categories（替代 localStorage）
+  await fetchCategories()
+  await loadData()
+})
 </script>
 
 <style scoped>

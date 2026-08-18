@@ -294,6 +294,7 @@ import {
   updateSalePlan,
   deleteSalePlan,
   getAvailableBlindboxes,
+  availableBlindboxes,
   type SalePlan
 } from '../../api/salePlan'
 
@@ -366,7 +367,7 @@ const rules: FormRules = {
 
 const availableOptions = computed(() => {
   if (form.collectible_type === 'blindbox') {
-    return getAvailableBlindboxes()
+    return availableBlindboxes.value
   }
   const usedIds = salePlans.value
     .filter(p => p.collectible_type === 'collectible')
@@ -540,6 +541,7 @@ async function loadData() {
 
 onMounted(async () => {
   await loadData()
+  await getAvailableBlindboxes()
 })
 </script>
 

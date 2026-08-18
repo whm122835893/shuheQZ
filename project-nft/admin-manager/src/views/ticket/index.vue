@@ -445,15 +445,7 @@ function goOrderDetail(row: TicketItem) {
 
 // ===== 用户反馈 =====
 const feedbackPage = ref(1)
-const feedbackList = ref<FeedbackItem[]>([
-  { id: 1, user: '用户0012', content: 'App 首页加载有点慢，希望优化一下加载速度。', rating: 4, category: '功能建议', time: '2026-08-13 10:30' },
-  { id: 2, user: '用户0028', content: '盲盒开启动画很酷！但是有时会卡顿，建议优化。', rating: 5, category: '体验反馈', time: '2026-08-13 09:15' },
-  { id: 3, user: '用户0019', content: '希望增加藏品搜索功能，目前找藏品不太方便。', rating: 4, category: '功能建议', time: '2026-08-12 18:00' },
-  { id: 4, user: '用户0035', content: '退款流程太复杂了，填了好多次才通过。', rating: 2, category: '问题反馈', time: '2026-08-12 14:20' },
-  { id: 5, user: '用户0042', content: '客服响应很快，问题解决了，点赞！', rating: 5, category: '好评', time: '2026-08-12 11:05' },
-  { id: 6, user: '用户0051', content: '转赠功能什么时候能支持批量操作？', rating: 3, category: '功能建议', time: '2026-08-11 16:45' },
-  { id: 7, user: '用户0058', content: '希望增加更多国画风藏品，很喜欢这种风格。', rating: 5, category: '内容建议', time: '2026-08-11 10:30' }
-])
+const feedbackList = ref<FeedbackItem[]>([])
 
 function handleFeedbackReply(fb: FeedbackItem) {
   ElMessageBox.prompt('请输入回复内容', `回复「${fb.user}」的反馈`, {
@@ -489,7 +481,7 @@ type FeedbackRaw = Feedback & {
 async function loadFeedbacks() {
   try {
     const result = await ticketApi.feedbacks({ page: 1, pageSize: 100 })
-    feedbackList.value = result.list.map((item: FeedbackRaw) => ({
+    feedbackList.value = (result.list || []).map((item: FeedbackRaw) => ({
       id: Number(item.id),
       user: item.username || item.user || '',
       content: item.content || '',
@@ -497,8 +489,9 @@ async function loadFeedbacks() {
       category: item.category || feedbackCategoryTextMap[item.type] || item.type || '',
       time: item.createdAt || item.time || ''
     })) as FeedbackItem[]
-  } catch {
-    // fallback：保留已有的本地反馈数据
+  } catch (e) {
+    ElMessage.error('反馈数据加载失败')
+    feedbackList.value = []
   }
 }
 

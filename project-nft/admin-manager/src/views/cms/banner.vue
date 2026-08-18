@@ -56,7 +56,7 @@
               v-model="row.status"
               :active-value="1"
               :inactive-value="0"
-              @change="(val) => handleStatusChange(row, val as number)"
+              @change="(val: any) => handleStatusChange(row, val as number)"
             />
           </template>
         </el-table-column>

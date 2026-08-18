@@ -60,21 +60,38 @@ export class WalletService {
   /**
    * 钱包信息
    * 查询 nft_user_wallets WHERE user_id=当前用户
-   * 钱包不存在时返回零值（钱包应在用户注册时自动创建）
+   * 钱包不存在时自动创建（兜底机制，正常应在注册时创建）
    */
   async getWallet(userId: number) {
-    const wallet = await this.walletRepo.findOne({
+    let wallet = await this.walletRepo.findOne({
       where: { userId, isDelete: 0 },
     });
 
     if (!wallet) {
-      // TODO: 钱包应在用户注册时自动创建，此处返回零值兜底
-      return {
-        balance: 0,
-        frozen_balance: 0,
-        total_recharged: 0,
-        total_consumed: 0,
-      };
+      // 钱包不存在，自动创建（并发场景下唯一约束兜底）
+      this.logger.warn(`用户钱包不存在(user_id=${userId})，自动创建`);
+      try {
+        wallet = this.walletRepo.create({ userId });
+        wallet = await this.walletRepo.save(wallet);
+      } catch (e: any) {
+        // 并发创建冲突：另一个请求已创建，重新查询
+        if (e && (e.code === 'ER_DUP_ENTRY' || e.errno === 1062)) {
+          wallet = await this.walletRepo.findOne({
+            where: { userId, isDelete: 0 },
+          });
+        } else {
+          throw e;
+        }
+      }
+      if (!wallet) {
+        // 极端情况：创建失败且重新查询也失败
+        return {
+          balance: 0,
+          frozen_balance: 0,
+          total_recharged: 0,
+          total_consumed: 0,
+        };
+      }
     }
 
     return {
