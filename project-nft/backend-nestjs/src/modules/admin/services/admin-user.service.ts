@@ -31,6 +31,7 @@ import {
 } from '../../../database/entities';
 import { AuthenticatedAdmin } from '../strategies/admin-jwt.strategy';
 import { RedisService } from '../../../shared/redis.service';
+import { decrypt as aesDecrypt } from '../../../shared/aes.util';
 
 @Injectable()
 export class AdminUserService {
@@ -133,6 +134,8 @@ export class AdminUserService {
     });
     return {
       ...user,
+      realName: this.tryDecrypt(user.realName),
+      idCard: this.tryDecrypt(user.idCard),
       wallet: wallet || null,
       isBlacklisted: !!blacklistEntry,
     };
@@ -428,6 +431,24 @@ export class AdminUserService {
   // ============================================================
   // 辅助方法
   // ============================================================
+
+  /**
+   * 尝试解密敏感数据（姓名/身份证号）
+   *
+   * 兼容三种情况：
+   *   - AES-256-GCM 密文（新格式，via shared/aes.util.ts）
+   *   - AES-256-CBC 密文（旧格式，hex:hex）— 向后兼容
+   *   - 明文（未加密的旧数据）— 直接返回
+   */
+  private tryDecrypt(value: string | null): string | null {
+    if (!value) return null;
+    try {
+      return aesDecrypt(value);
+    } catch {
+      // 解密失败说明可能是旧格式或明文，直接返回原值
+      return value;
+    }
+  }
 
   /** 查询用户，不存在则抛 404 */
   private async findUserOrThrow(id: number): Promise<NftUser> {

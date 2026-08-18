@@ -26,6 +26,7 @@ import * as QRCode from 'qrcode';
 import { ErrorCode } from '../../../common/enums/error-code.enum';
 import { RedisService } from '../../../shared/redis.service';
 import { NftAdminUser } from '../../../database/entities/nft-admin-user.entity';
+import { DEV_JWT_ADMIN_SECRETS } from '../../../config/dev-defaults';
 import {
   AdminJwtPayload,
   AuthenticatedAdmin,
@@ -664,7 +665,7 @@ export class AdminAuthService {
           '[JWT-Admin] 生产环境必须配置 JWT_ADMIN_SECRET 环境变量',
         );
       }
-      return 'shuhe-admin-dev-only-secret-not-for-production';
+      return DEV_JWT_ADMIN_SECRETS[0];
     }
     return secret;
   }

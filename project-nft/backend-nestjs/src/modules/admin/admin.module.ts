@@ -21,6 +21,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SharedModule } from '../../shared/shared.module';
+import { DEV_JWT_ADMIN_SECRETS } from '../../config/dev-defaults';
 
 // 实体导入（56 个：18 个新增 + 38 个已有）
 import {
@@ -171,7 +172,7 @@ import { AdminJwtStrategy } from './strategies/admin-jwt.strategy';
                 '[JWT-Admin] 生产环境必须配置 JWT_ADMIN_SECRET 环境变量',
               );
             }
-            return 'shuhe-admin-dev-only-secret-not-for-production';
+            return DEV_JWT_ADMIN_SECRETS[0];
           }
           return secret;
         })(),

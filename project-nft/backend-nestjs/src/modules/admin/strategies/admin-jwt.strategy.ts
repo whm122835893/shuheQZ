@@ -12,6 +12,7 @@ import { Repository } from 'typeorm';
 import { ErrorCode } from '../../../common/enums/error-code.enum';
 import { NftAdminUser } from '../../../database/entities/nft-admin-user.entity';
 import { extractToken } from '../../../shared/cookie-auth.util';
+import { DEV_JWT_ADMIN_SECRETS } from '../../../config/dev-defaults';
 
 /**
  * 管理员 JWT Payload 结构
@@ -70,7 +71,7 @@ export class AdminJwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
             );
           }
           // 开发环境兜底，仅限本地
-          return 'shuhe-admin-dev-only-secret-not-for-production';
+          return DEV_JWT_ADMIN_SECRETS[0];
         }
         return secret;
       })(),

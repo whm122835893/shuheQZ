@@ -41,7 +41,7 @@ export class NftUser {
   @Column({ name: 'real_name', type: 'varchar', length: 255, nullable: true })
   realName: string | null;
 
-  // TODO: AES encrypt/decrypt
+  // 身份证号（AES-256-GCM 加密存储，密钥由 DATA_AES_KEY 环境变量管理）
   @Column({ name: 'id_card', type: 'varchar', length: 255, nullable: true })
   idCard: string | null;
 

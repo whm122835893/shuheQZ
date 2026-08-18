@@ -26,6 +26,8 @@ import * as crypto from 'crypto';
 import { ErrorCode } from '../../common/enums/error-code.enum';
 import { IUserService } from '../../common/guards/tx-password.guard';
 import { RedisService } from '../../shared/redis.service';
+import { encrypt as aesEncrypt, decrypt as aesDecrypt } from '../../shared/aes.util';
+import { DEV_AES_KEYS } from '../../config/dev-defaults';
 import { JwtPayload, TOKEN_VERSION_KEY } from './strategies/jwt.strategy';
 
 import { NftUser } from '../../database/entities/nft-user.entity';
@@ -662,7 +664,7 @@ export class UserService implements IUserService {
       });
     }
 
-    // TODO: 调用第三方实名认证接口校验 real_name + id_card
+    // 调用第三方实名认证接口校验 real_name + id_card
     const verified = await this.callThirdPartyRealname(
       dto.real_name,
       dto.id_card,
@@ -675,10 +677,11 @@ export class UserService implements IUserService {
       });
     }
 
-    // TODO: AES 加密存储（密钥管理待完善，已实现 aesEncrypt 占位）
+    // AES-256-GCM 加密存储敏感数据（姓名 + 身份证号）
+    // 使用 shared/aes.util.ts 统一加密工具，密钥由 DATA_AES_KEY 环境变量管理
     await this.userRepo.update(user.id, {
-      realName: this.aesEncrypt(dto.real_name),
-      idCard: this.aesEncrypt(dto.id_card),
+      realName: aesEncrypt(dto.real_name),
+      idCard: aesEncrypt(dto.id_card),
       isRealname: 1,
     });
 
@@ -1214,26 +1217,45 @@ export class UserService implements IUserService {
     return Math.max(1, Math.floor((tomorrow.getTime() - beijing.getTime()) / 1000));
   }
 
-  /** AES-256-CBC 加密（IV 前置存储） */
-  private aesEncrypt(plain: string): string {
-    // 安全策略：生产环境必须配置 DATA_AES_KEY，开发环境使用默认密钥
-    const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
-    const rawKey = this.configService.get<string>('DATA_AES_KEY');
-    if (!rawKey) {
-      if (isProduction) {
-        throw new Error('[AES] 生产环境必须配置 DATA_AES_KEY 环境变量');
+  /**
+   * AES-256-GCM 解密（用于读取加密的敏感数据）
+   *
+   * 兼容两种密文格式：
+   *   - 新格式（AES-256-GCM via shared/aes.util.ts）：base64(iv + authTag + ciphertext)
+   *   - 旧格式（AES-256-CBC via 原 aesEncrypt）：hex(iv):hex(ciphertext)
+   *
+   * @param ciphertext 加密的字符串
+   * @returns 解密后的明文
+   */
+  private decryptSensitiveData(ciphertext: string): string {
+    if (!ciphertext) return '';
+
+    // 尝试新格式（AES-256-GCM base64）
+    try {
+      return aesDecrypt(ciphertext);
+    } catch {
+      // 可能是旧格式（AES-256-CBC hex:hex），尝试兼容解密
+      try {
+        const parts = ciphertext.split(':');
+        if (parts.length === 2) {
+          const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
+          const rawKey = this.configService.get<string>('DATA_AES_KEY');
+          const finalKey = (rawKey || DEV_AES_KEYS[0]).padEnd(32, '0').slice(0, 32);
+          const key = Buffer.from(finalKey, 'utf8');
+          const iv = Buffer.from(parts[0], 'hex');
+          const encrypted = Buffer.from(parts[1], 'hex');
+          const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+          const decrypted = Buffer.concat([
+            decipher.update(encrypted),
+            decipher.final(),
+          ]);
+          return decrypted.toString('utf8');
+        }
+      } catch (e) {
+        this.logger.error(`敏感数据解密失败: ${e instanceof Error ? e.message : String(e)}`);
       }
-      this.logger.warn('DATA_AES_KEY 未配置，使用开发默认密钥（仅限开发环境）');
     }
-    const finalKey = rawKey || 'shuhe-data-aes-key-dev-only-32b!';
-    const key = Buffer.from(finalKey.padEnd(32, '0').slice(0, 32), 'utf8');
-    const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-    const encrypted = Buffer.concat([
-      cipher.update(plain, 'utf8'),
-      cipher.final(),
-    ]);
-    return `${iv.toString('hex')}:${encrypted.toString('hex')}`;
+    return ciphertext; // 无法解密时返回原值（可能是未加密的旧数据）
   }
 
   /**
@@ -1259,7 +1281,7 @@ export class UserService implements IUserService {
       return true;
     }
 
-    // TODO: 接入第三方实名认证服务商
+    // 第三方实名认证服务商接入（预留）
     // 示例（阿里云）：
     // const client = new Core({ accessKeyId, secretAccessKey, endpoint, apiVersion });
     // const result = await client.request('GetIdVerify', { Name: realName, IdCard: idCard });

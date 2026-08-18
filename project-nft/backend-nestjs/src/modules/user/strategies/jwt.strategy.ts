@@ -10,6 +10,7 @@ import { AuthenticatedUser } from '../../../common/decorators/current-user.decor
 import { ErrorCode } from '../../../common/enums/error-code.enum';
 import { IRedisService } from '../../../common/guards/jwt-auth.guard';
 import { extractToken } from '../../../shared/cookie-auth.util';
+import { DEV_JWT_SECRET } from '../../../config/dev-defaults';
 
 /**
  * JWT Payload 结构
@@ -44,7 +45,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       ignoreExpiration: false,
       secretOrKey:
         configService.get<string>('JWT_SECRET') ||
-        'shuhe-wenchuang-jwt-secret-dev-only',
+        DEV_JWT_SECRET,
     });
   }
 

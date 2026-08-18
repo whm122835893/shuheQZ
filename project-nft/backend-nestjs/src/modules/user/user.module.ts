@@ -8,6 +8,7 @@ import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { SharedModule } from '../../shared/shared.module';
+import { DEV_JWT_SECRET } from '../../config/dev-defaults';
 import { NftUser } from '../../database/entities/nft-user.entity';
 import { NftUserWallet } from '../../database/entities/nft-user-wallet.entity';
 import { NftSmsLog } from '../../database/entities/nft-sms-log.entity';
@@ -35,7 +36,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       useFactory: (configService: ConfigService) => ({
         secret:
           configService.get<string>('JWT_SECRET') ||
-          'shuhe-wenchuang-jwt-secret-dev-only',
+          DEV_JWT_SECRET,
         expiresIn: configService.get<string>('JWT_EXPIRES_IN', '7d'),
       }),
     }),

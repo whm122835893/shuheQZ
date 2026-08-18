@@ -9,6 +9,13 @@
 
 import { Logger } from '@nestjs/common';
 
+import {
+  DEV_JWT_SECRETS,
+  DEV_JWT_REFRESH_SECRETS,
+  DEV_JWT_ADMIN_SECRETS,
+  DEV_AES_KEYS,
+} from './dev-defaults';
+
 const logger = new Logger('EnvValidation');
 
 /**
@@ -33,7 +40,7 @@ function isConfigured(value: string | undefined): boolean {
 /**
  * 检查密钥强度（至少 16 字符，不等于已知开发默认值）
  */
-function isStrongKey(value: string | undefined, devDefaults: string[]): boolean {
+function isStrongKey(value: string | undefined, devDefaults: readonly string[]): boolean {
   if (!isConfigured(value)) return false;
   if (value.length < 16) return false;
   if (devDefaults.includes(value)) return false;
@@ -41,24 +48,12 @@ function isStrongKey(value: string | undefined, devDefaults: string[]): boolean 
 }
 
 // 已知的开发环境默认值（不应用于生产）
-// 包含所有历史使用过的弱密钥，确保生产环境不会误用
+// 统一引用 config/dev-defaults.ts 中的常量，避免散落多处
 const DEV_DEFAULTS = {
-  jwtSecret: [
-    'shuhe-wenchuang-jwt-secret-2026',
-    'shuhe-jwt-secret-2026',
-  ],
-  jwtRefreshSecret: [
-    'shuhe-wenchuang-refresh-secret-2026',
-    'shuhe-refresh-secret-2026',
-  ],
-  jwtAdminSecret: [
-    'shuhe-admin-secret-2026',
-    'shuhe-admin-dev-only-secret-not-for-production',
-  ],
-  aesKey: [
-    'shuhe-data-aes-key-dev-only-32b!',
-    'd5319230b462f52955effdc1f09aa384',
-  ],
+  jwtSecret: DEV_JWT_SECRETS,
+  jwtRefreshSecret: DEV_JWT_REFRESH_SECRETS,
+  jwtAdminSecret: DEV_JWT_ADMIN_SECRETS,
+  aesKey: DEV_AES_KEYS,
 };
 
 /**

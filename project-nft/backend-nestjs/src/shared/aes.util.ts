@@ -22,12 +22,15 @@
  */
 import * as crypto from 'crypto';
 
+import { DEV_AES_KEYS } from '../config/dev-defaults';
+
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12; // GCM 推荐 12 字节
 const AUTH_TAG_LENGTH = 16;
 
 // 开发环境默认密钥（仅用于本地开发，生产环境必须通过 DATA_AES_KEY 覆盖）
-const DEV_DEFAULT_KEY = 'shuhe-data-aes-key-dev-only-32b!';
+// 统一从 config/dev-defaults.ts 引用
+const DEV_DEFAULT_KEY = DEV_AES_KEYS[0];
 
 /**
  * 获取 AES 密钥（32 字节）

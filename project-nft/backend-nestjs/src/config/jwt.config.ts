@@ -10,6 +10,8 @@ import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 import { JwtModuleOptions } from '@nestjs/jwt';
 
+import { DEV_JWT_SECRET, DEV_JWT_REFRESH_SECRET } from './dev-defaults';
+
 const logger = new Logger('JwtConfig');
 
 /**
@@ -32,9 +34,10 @@ export interface JwtConfig extends JwtModuleOptions {
 
 /**
  * 开发环境默认密钥（仅限开发使用，生产环境禁止使用）
+ * 统一从 config/dev-defaults.ts 引用
  */
-const DEV_SECRET = 'shuhe-wenchuang-jwt-secret-dev-only';
-const DEV_REFRESH_SECRET = 'shuhe-wenchuang-refresh-secret-dev-only';
+const DEV_SECRET = DEV_JWT_SECRET;
+const DEV_REFRESH_SECRET = DEV_JWT_REFRESH_SECRET;
 
 /**
  * JWT 配置工厂
