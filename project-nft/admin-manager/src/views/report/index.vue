@@ -8,7 +8,7 @@
         </template>
         <div class="tab-toolbar">
           <span class="toolbar-title">销售趋势</span>
-          <el-radio-group v-model="salesPeriod" size="small" @change="renderSalesChart">
+          <el-radio-group v-model="salesPeriod" size="small">
             <el-radio-button label="day">按日</el-radio-button>
             <el-radio-button label="week">按周</el-radio-button>
             <el-radio-button label="month">按月</el-radio-button>
@@ -225,6 +225,19 @@ import {
   TrendCharts, User, Picture, Box, Money, Download, Document, RefreshLeft
 } from '@element-plus/icons-vue'
 import { reportApi } from '../../api'
+import type {
+  PaginationQuery,
+  SalesReport,
+  UsersReport,
+  CollectiblesReport,
+  BlindboxesReport,
+  FinanceReport,
+  SalesSummaryItem,
+  RetentionItem,
+  HotCollectibleItem,
+  HoldingDistributionItem,
+  FinanceDetailItem,
+} from '../../api'
 
 const activeTab = ref('sales')
 
@@ -233,40 +246,21 @@ const salesChartRef = ref<HTMLElement>()
 let salesChart: echarts.ECharts | null = null
 const salesPeriod = ref<'day' | 'week' | 'month'>('day')
 
-const salesDataMap = {
-  day: {
-    x: ['08-07', '08-08', '08-09', '08-10', '08-11', '08-12', '08-13'],
-    amount: [32000, 28000, 45000, 38000, 52000, 41000, 45680],
-    orders: [65, 58, 92, 78, 105, 82, 89]
-  },
-  week: {
-    x: ['第31周', '第32周', '第33周'],
-    amount: [186000, 218000, 166680],
-    orders: [372, 436, 334]
-  },
-  month: {
-    x: ['2026-06', '2026-07', '2026-08'],
-    amount: [720000, 856000, 570680],
-    orders: [1440, 1712, 1142]
-  }
-}
+// 销售趋势图数据（按当前周期从后端拉取）
+const salesChartData = ref<{ x: string[]; amount: number[]; orders: number[] }>({
+  x: [],
+  amount: [],
+  orders: [],
+})
 
-const salesSummary = ref([
-  { period: '2026-08-07', orderCount: 65, salesAmount: 32000, avgPrice: 492.31, refundAmount: 590, netAmount: 31410 },
-  { period: '2026-08-08', orderCount: 58, salesAmount: 28000, avgPrice: 482.76, refundAmount: 0, netAmount: 28000 },
-  { period: '2026-08-09', orderCount: 92, salesAmount: 45000, avgPrice: 489.13, refundAmount: 1990, netAmount: 43010 },
-  { period: '2026-08-10', orderCount: 78, salesAmount: 38000, avgPrice: 487.18, refundAmount: 890, netAmount: 37110 },
-  { period: '2026-08-11', orderCount: 105, salesAmount: 52000, avgPrice: 495.24, refundAmount: 2990, netAmount: 49010 },
-  { period: '2026-08-12', orderCount: 82, salesAmount: 41000, avgPrice: 500.00, refundAmount: 0, netAmount: 41000 },
-  { period: '2026-08-13', orderCount: 89, salesAmount: 45680, avgPrice: 513.26, refundAmount: 990, netAmount: 44690 }
-])
+const salesSummary = ref<SalesSummaryItem[]>([])
 
 function renderSalesChart() {
   if (!salesChartRef.value) return
   if (!salesChart) {
     salesChart = echarts.init(salesChartRef.value)
   }
-  const data = salesDataMap[salesPeriod.value]
+  const data = salesChartData.value
   const option: echarts.EChartsOption = {
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     legend: { data: ['销售额', '订单数'], top: 0 },
@@ -309,40 +303,40 @@ const userChartRef = ref<HTMLElement>()
 let userChart: echarts.ECharts | null = null
 
 const userStats = reactive({
-  total: 6995,
-  monthNew: 1280,
-  active7d: 3420,
-  realnameRate: 78.5
+  total: 0,
+  monthNew: 0,
+  active7d: 0,
+  realnameRate: 0,
 })
 
-const retentionData = ref([
-  { cohort: '2026-08-01 批次', day1: '45.2%', day3: '32.1%', day7: '24.8%', day14: '18.3%', day30: '12.1%' },
-  { cohort: '2026-08-05 批次', day1: '48.6%', day3: '35.4%', day7: '26.9%', day14: '20.1%', day30: '-' },
-  { cohort: '2026-08-10 批次', day1: '51.3%', day3: '38.7%', day7: '28.5%', day14: '-', day30: '-' },
-  { cohort: '2026-08-13 批次', day1: '52.8%', day3: '-', day7: '-', day14: '-', day30: '-' }
-])
+// 新增/活跃用户趋势（从后端拉取）
+const userChartData = ref<{ dates: string[]; newUsers: number[]; activeUsers: number[] }>({
+  dates: [],
+  newUsers: [],
+  activeUsers: [],
+})
+
+const retentionData = ref<RetentionItem[]>([])
 
 function renderUserChart() {
   if (!userChartRef.value) return
   if (!userChart) {
     userChart = echarts.init(userChartRef.value)
   }
-  const days = Array.from({ length: 14 }, (_, i) => `08-${String(i).padStart(2, '0')}`)
-  const newUsers = [85, 92, 78, 110, 125, 98, 130, 145, 112, 95, 118, 136, 102, 128]
-  const activeUsers = [2100, 2250, 1980, 2400, 2650, 2350, 2800, 2950, 2600, 2480, 2750, 3100, 2820, 3420]
+  const data = userChartData.value
 
   const option: echarts.EChartsOption = {
     tooltip: { trigger: 'axis' },
     legend: { data: ['新增用户', '活跃用户'], top: 0 },
     grid: { left: '3%', right: '4%', bottom: '3%', top: 40, containLabel: true },
-    xAxis: { type: 'category', boundaryGap: false, data: days, axisLabel: { color: '#909399' } },
+    xAxis: { type: 'category', boundaryGap: false, data: data.dates, axisLabel: { color: '#909399' } },
     yAxis: { type: 'value', axisLabel: { color: '#909399' }, splitLine: { lineStyle: { color: '#f0f0f0' } } },
     series: [
       {
         name: '新增用户',
         type: 'line',
         smooth: true,
-        data: newUsers,
+        data: data.newUsers,
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
             { offset: 0, color: 'rgba(67, 233, 123, 0.6)' },
@@ -356,7 +350,7 @@ function renderUserChart() {
         name: '活跃用户',
         type: 'line',
         smooth: true,
-        data: activeUsers,
+        data: data.activeUsers,
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
             { offset: 0, color: 'rgba(102, 126, 234, 0.6)' },
@@ -375,31 +369,16 @@ function renderUserChart() {
 const holdingChartRef = ref<HTMLElement>()
 let holdingChart: echarts.ECharts | null = null
 
-const hotCollectibles = ref([
-  { name: '敦煌飞天 第1期', holders: 968, volume: 286400 },
-  { name: '清明上河图 第2期', holders: 852, volume: 254800 },
-  { name: '千里江山图 第3期', holders: 740, volume: 221200 },
-  { name: '富春山居图 第4期', holders: 680, volume: 198000 },
-  { name: '韩熙载夜宴图 第5期', holders: 590, volume: 176500 },
-  { name: '五牛图 第6期', holders: 510, volume: 152400 },
-  { name: '步辇图 第7期', holders: 445, volume: 133200 },
-  { name: '洛神赋图 第8期', holders: 380, volume: 113600 },
-  { name: '新春系列 第9期', holders: 320, volume: 95600 },
-  { name: '国宝系列 第10期', holders: 280, volume: 83800 }
-])
+const hotCollectibles = ref<HotCollectibleItem[]>([])
+
+// 藏品持有分布（从后端拉取）
+const holdingData = ref<HoldingDistributionItem[]>([])
 
 function renderHoldingChart() {
   if (!holdingChartRef.value) return
   if (!holdingChart) {
     holdingChart = echarts.init(holdingChartRef.value)
   }
-  const holdingData = [
-    { name: '持有 1 件', value: 3420 },
-    { name: '持有 2-5 件', value: 2180 },
-    { name: '持有 6-10 件', value: 890 },
-    { name: '持有 11-20 件', value: 420 },
-    { name: '持有 20 件以上', value: 85 }
-  ]
   const option: echarts.EChartsOption = {
     tooltip: { trigger: 'item', formatter: '{b}<br/>人数: {c} ({d}%)' },
     legend: { orient: 'horizontal', bottom: 0, textStyle: { fontSize: 11, color: '#909399' } },
@@ -412,7 +391,7 @@ function renderHoldingChart() {
         avoidLabelOverlap: true,
         itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 3 },
         label: { show: true, formatter: '{b}\n{d}%', fontSize: 11 },
-        data: holdingData.map((item, index) => ({
+        data: holdingData.value.map((item, index) => ({
           name: item.name,
           value: item.value,
           itemStyle: { color: ['#667eea', '#43e97b', '#fa709a', '#a18cd1', '#4facfe'][index % 5] }
@@ -428,19 +407,23 @@ const blindboxChartRef = ref<HTMLElement>()
 let blindboxChart: echarts.ECharts | null = null
 
 const blindboxStats = reactive({
-  totalOpened: 12450,
-  openRate: 68.5,
-  emptyRate: 5.2,
-  rareRate: 12.8
+  totalOpened: 0,
+  openRate: 0,
+  emptyRate: 0,
+  rareRate: 0,
 })
+
+// 盲盒子藏品命中分布（从后端拉取）
+const blindboxItems = ref<string[]>([])
+const blindboxHits = ref<number[]>([])
 
 function renderBlindboxChart() {
   if (!blindboxChartRef.value) return
   if (!blindboxChart) {
     blindboxChart = echarts.init(blindboxChartRef.value)
   }
-  const items = ['稀有藏品A', '稀有藏品B', '普通藏品C', '普通藏品D', '限量藏品E', '空奖']
-  const hits = [780, 520, 4200, 3800, 1650, 650]
+  const items = blindboxItems.value
+  const hits = blindboxHits.value
   const option: echarts.EChartsOption = {
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     legend: { top: 0 },
@@ -454,7 +437,7 @@ function renderBlindboxChart() {
         data: hits.map((v, i) => ({
           value: v,
           itemStyle: {
-            color: i === 5 ? '#F56C6C' : new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            color: i === items.length - 1 ? '#F56C6C' : new echarts.graphic.LinearGradient(0, 0, 0, 1, [
               { offset: 0, color: i < 2 ? '#fa709a' : '#43e97b' },
               { offset: 1, color: i < 2 ? '#fee140' : '#38f9d7' }
             ]),
@@ -470,16 +453,7 @@ function renderBlindboxChart() {
 }
 
 // ============ 财务对账 ============
-const financeDetails = ref([
-  { date: '2026-08-13', channel: '支付宝', tradeAmount: 28500.00, tradeCount: 56, feeRate: '0.6%', feeAmount: 171.00, settleAmount: 28329.00 },
-  { date: '2026-08-13', channel: '微信', tradeAmount: 22180.00, tradeCount: 48, feeRate: '0.6%', feeAmount: 133.08, settleAmount: 22046.92 },
-  { date: '2026-08-13', channel: '余额', tradeAmount: 15600.00, tradeCount: 35, feeRate: '0%', feeAmount: 0.00, settleAmount: 15600.00 },
-  { date: '2026-08-12', channel: '支付宝', tradeAmount: 31200.00, tradeCount: 62, feeRate: '0.6%', feeAmount: 187.20, settleAmount: 31012.80 },
-  { date: '2026-08-12', channel: '微信', tradeAmount: 19800.00, tradeCount: 41, feeRate: '0.6%', feeAmount: 118.80, settleAmount: 19681.20 },
-  { date: '2026-08-12', channel: '余额', tradeAmount: 12500.00, tradeCount: 28, feeRate: '0%', feeAmount: 0.00, settleAmount: 12500.00 },
-  { date: '2026-08-11', channel: '支付宝', tradeAmount: 35600.00, tradeCount: 71, feeRate: '0.6%', feeAmount: 213.60, settleAmount: 35386.40 },
-  { date: '2026-08-11', channel: '微信', tradeAmount: 24300.00, tradeCount: 52, feeRate: '0.6%', feeAmount: 145.80, settleAmount: 24154.20 }
-])
+const financeDetails = ref<FinanceDetailItem[]>([])
 
 function financeSummary({ columns, data }: { columns: any[]; data: any[] }) {
   const sums: (string | number)[] = []
@@ -616,114 +590,140 @@ function handleResize() {
 }
 
 // ============ 加载报表数据 ============
-async function loadReportData() {
-  // 销售报表
-  try {
-    const salesRes: any = await reportApi.sales()
-    if (salesRes) {
-      // 更新销售趋势数据（按日/周/月）
-      if (salesRes.trends) {
-        const t = salesRes.trends
-        if (t.day) {
-          salesDataMap.day.x = t.day.x || t.day.dates || salesDataMap.day.x
-          salesDataMap.day.amount = t.day.amount || t.day.sales || salesDataMap.day.amount
-          salesDataMap.day.orders = t.day.orders || t.day.orderCount || salesDataMap.day.orders
-        }
-        if (t.week) {
-          salesDataMap.week.x = t.week.x || t.week.dates || salesDataMap.week.x
-          salesDataMap.week.amount = t.week.amount || t.week.sales || salesDataMap.week.amount
-          salesDataMap.week.orders = t.week.orders || t.week.orderCount || salesDataMap.week.orders
-        }
-        if (t.month) {
-          salesDataMap.month.x = t.month.x || t.month.dates || salesDataMap.month.x
-          salesDataMap.month.amount = t.month.amount || t.month.sales || salesDataMap.month.amount
-          salesDataMap.month.orders = t.month.orders || t.month.orderCount || salesDataMap.month.orders
-        }
-      }
-      // 更新销售汇总表
-      const summaryList = salesRes.summary || salesRes.list
-      if (Array.isArray(summaryList)) {
-        salesSummary.value = summaryList.map((s: any) => ({
-          period: s.period || s.date || '',
-          orderCount: Number(s.orderCount ?? s.orders) || 0,
-          salesAmount: Number(s.salesAmount ?? s.amount) || 0,
-          avgPrice: Number(s.avgPrice) || 0,
-          refundAmount: Number(s.refundAmount) || 0,
-          netAmount: Number(s.netAmount) || 0
-        }))
-      }
-    }
-  } catch {
-    // fallback：保留现有数据
+function applySalesData(data: SalesReport | undefined) {
+  const daily = data?.dailyData || []
+  salesChartData.value = {
+    x: daily.map(d => d.date ?? ''),
+    amount: daily.map(d => Number(d.revenue) || 0),
+    orders: daily.map(d => Number(d.orders) || 0),
   }
+  salesSummary.value = (data?.summary || []).map(s => ({
+    period: s.period ?? '',
+    orderCount: Number(s.orderCount) || 0,
+    salesAmount: Number(s.salesAmount) || 0,
+    avgPrice: Number(s.avgPrice) || 0,
+    refundAmount: Number(s.refundAmount) || 0,
+    netAmount: Number(s.netAmount) || 0,
+  }))
+}
 
-  // 用户报表
+// 按当前周期拉取销售报表并重渲染图表
+async function loadSalesReport() {
   try {
-    const usersRes: any = await reportApi.users()
-    if (usersRes) {
-      if (usersRes.stats) {
-        userStats.total = Number(usersRes.stats.total) || userStats.total
-        userStats.monthNew = Number(usersRes.stats.monthNew) || userStats.monthNew
-        userStats.active7d = Number(usersRes.stats.active7d) || userStats.active7d
-        userStats.realnameRate = Number(usersRes.stats.realnameRate) || userStats.realnameRate
-      }
-      const retentionList = usersRes.retention || usersRes.list
-      if (Array.isArray(retentionList)) {
-        retentionData.value = retentionList.map((r: any) => ({
-          cohort: r.cohort || '',
-          day1: r.day1 || '-',
-          day3: r.day3 || '-',
-          day7: r.day7 || '-',
-          day14: r.day14 || '-',
-          day30: r.day30 || '-'
-        }))
-      }
-    }
+    const data = await reportApi.sales({ period: salesPeriod.value } as PaginationQuery)
+    applySalesData(data)
+    await nextTick()
+    renderSalesChart()
   } catch {
-    // fallback：保留现有数据
-  }
-
-  // 藏品报表
-  try {
-    const collectiblesRes: any = await reportApi.collectibles()
-    if (collectiblesRes) {
-      const hotList = collectiblesRes.hotCollectibles || collectiblesRes.list
-      if (Array.isArray(hotList)) {
-        hotCollectibles.value = hotList.map((c: any) => ({
-          name: c.name || '',
-          holders: Number(c.holders) || 0,
-          volume: Number(c.volume ?? c.tradingVolume) || 0
-        }))
-      }
-    }
-  } catch {
-    // fallback：保留现有数据
-  }
-
-  // 财务对账
-  try {
-    const financeRes: any = await reportApi.finance()
-    if (financeRes) {
-      const detailList = financeRes.details || financeRes.list
-      if (Array.isArray(detailList)) {
-        financeDetails.value = detailList.map((f: any) => ({
-          date: f.date || '',
-          channel: f.channel || '',
-          tradeAmount: Number(f.tradeAmount) || 0,
-          tradeCount: Number(f.tradeCount) || 0,
-          feeRate: f.feeRate || '',
-          feeAmount: Number(f.feeAmount) || 0,
-          settleAmount: Number(f.settleAmount) || 0
-        }))
-      }
-    }
-  } catch {
-    // fallback：保留现有数据
+    ElMessage.error('销售报表数据加载失败')
   }
 }
 
+// 并行加载所有报表（任一接口失败不影响其它报表，仅提示错误并保持空数据）
+async function loadAllReports() {
+  const results = await Promise.allSettled([
+    reportApi.sales({ period: salesPeriod.value } as PaginationQuery),
+    reportApi.users(),
+    reportApi.collectibles(),
+    reportApi.blindboxes(),
+    reportApi.finance(),
+  ])
+
+  const salesRes = results[0] as PromiseSettledResult<SalesReport>
+  const usersRes = results[1] as PromiseSettledResult<UsersReport>
+  const collectiblesRes = results[2] as PromiseSettledResult<CollectiblesReport>
+  const blindboxesRes = results[3] as PromiseSettledResult<BlindboxesReport>
+  const financeRes = results[4] as PromiseSettledResult<FinanceReport>
+
+  // 销售报表
+  if (salesRes.status === 'fulfilled') {
+    applySalesData(salesRes.value)
+  } else {
+    ElMessage.error('销售报表数据加载失败')
+  }
+
+  // 用户报表
+  if (usersRes.status === 'fulfilled') {
+    const data = usersRes.value
+    const newUsers = data?.newUsers || []
+    const activeUsers = data?.activeUsers || []
+    userChartData.value = {
+      dates: newUsers.map(u => u.date ?? ''),
+      newUsers: newUsers.map(u => Number(u.count) || 0),
+      activeUsers: activeUsers.map(u => Number(u.count) || 0),
+    }
+    userStats.total = Number(data?.totalUsers) || 0
+    userStats.realnameRate = Number(data?.realnameRate) || 0
+    userStats.monthNew = newUsers.reduce((sum, u) => sum + (Number(u.count) || 0), 0)
+    userStats.active7d = activeUsers.length
+      ? Number(activeUsers[activeUsers.length - 1].count) || 0
+      : 0
+    retentionData.value = (data?.retentionData || []).map(r => ({
+      cohort: r.cohort ?? '',
+      day1: r.day1 ?? '-',
+      day3: r.day3 ?? '-',
+      day7: r.day7 ?? '-',
+      day14: r.day14 ?? '-',
+      day30: r.day30 ?? '-',
+    }))
+  } else {
+    ElMessage.error('用户报表数据加载失败')
+  }
+
+  // 藏品报表
+  if (collectiblesRes.status === 'fulfilled') {
+    const data = collectiblesRes.value
+    hotCollectibles.value = (data?.hotCollectibles || []).map(c => ({
+      name: c.name ?? '',
+      holders: Number(c.holders) || 0,
+      volume: Number(c.volume) || 0,
+    }))
+    holdingData.value = (data?.holdingDistribution || []).map(h => ({
+      name: h.name ?? '',
+      value: Number(h.value) || 0,
+    }))
+  } else {
+    ElMessage.error('藏品报表数据加载失败')
+  }
+
+  // 盲盒报表
+  if (blindboxesRes.status === 'fulfilled') {
+    const data = blindboxesRes.value
+    blindboxStats.totalOpened = Number(data?.totalOpened) || 0
+    blindboxStats.openRate = Number(data?.openRate) || 0
+    blindboxStats.emptyRate = Number(data?.emptyRate) || 0
+    blindboxStats.rareRate = Number(data?.rareRate) || 0
+    const dist = data?.itemDistribution || []
+    blindboxItems.value = dist.map(d => d.name ?? '')
+    blindboxHits.value = dist.map(d => Number(d.hits) || 0)
+  } else {
+    ElMessage.error('盲盒报表数据加载失败')
+  }
+
+  // 财务对账
+  if (financeRes.status === 'fulfilled') {
+    const data = financeRes.value
+    financeDetails.value = (data?.details || []).map(f => ({
+      date: f.date ?? '',
+      channel: f.channel ?? '',
+      tradeAmount: Number(f.tradeAmount) || 0,
+      tradeCount: Number(f.tradeCount) || 0,
+      feeRate: f.feeRate ?? '',
+      feeAmount: Number(f.feeAmount) || 0,
+      settleAmount: Number(f.settleAmount) || 0,
+    }))
+  } else {
+    ElMessage.error('财务对账数据加载失败')
+  }
+}
+
+// 切换销售周期时重新拉取数据并重渲染图表
+watch(salesPeriod, () => {
+  loadSalesReport()
+})
+
 onMounted(async () => {
-  await loadReportData()
+  await loadAllReports()
   await nextTick()
   renderSalesChart()
   window.addEventListener('resize', handleResize)

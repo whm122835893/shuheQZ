@@ -817,46 +817,43 @@ const page = ref(1)
 const pageSize = ref(10)
 const pageData = ref<{ list: DrawRecord[]; total: number }>({ list: [], total: 0 })
 
-function getFilteredList(): DrawRecord[] {
-  let list = [...records.value]
-  if (searchForm.username) list = list.filter(r => r.username.includes(searchForm.username.trim()))
-  if (searchForm.prizeLevel) list = list.filter(r => r.prizeType === searchForm.prizeLevel)
-  return list
-}
 async function fetchData() {
   loading.value = true
-  const list = getFilteredList()
-  const res = paginate(list, page.value, pageSize.value)
-  pageData.value = { list: res.list as DrawRecord[], total: res.total }
-  loading.value = false
+  try {
+    const params: Record<string, any> = {
+      page: page.value,
+      pageSize: pageSize.value
+    }
+    if (searchForm.username) params.username = searchForm.username
+    if (searchForm.prizeLevel) params.prizeLevel = searchForm.prizeLevel
+    const res = await marketingApi.luckyDraw(params) as any
+    const list = (res?.list || []) as any[]
+    pageData.value = {
+      list: list.map((item: any) => ({
+        id: item.id,
+        username: item.username || '',
+        activityName: item.activityName || item.activity_name || '',
+        prizeName: item.prizeName || item.prize_name || '未中奖',
+        prizeType: item.prizeType || item.prize_type || '',
+        prizeContent: item.prizeContent || item.prize_content || '-',
+        source: item.source || 'free',
+        isWin: item.isWin ?? item.is_win ?? false,
+        drawTime: item.drawTime || item.draw_time || ''
+      })),
+      total: res?.total || 0
+    }
+  } catch {
+    ElMessage.error('数据加载失败')
+    pageData.value = { list: [], total: 0 }
+  } finally {
+    loading.value = false
+  }
 }
 function handleSearch() { page.value = 1; fetchData() }
 function handleReset() { searchForm.username = ''; searchForm.prizeLevel = ''; page.value = 1; fetchData() }
 
-// 加载真实 API 数据
-async function loadData() {
-  try {
-    const res = await marketingApi.luckyDraw({ page: 1, pageSize: 9999 })
-    const list = (res?.list || []) as LuckyDrawActivity[]
-    records.value = list.map((item: any) => ({
-      id: item.id,
-      username: item.username || '',
-      activityName: item.activityName || item.activity_name || '',
-      prizeName: item.prizeName || item.prize_name || '未中奖',
-      prizeType: item.prizeType || item.prize_type || '',
-      prizeContent: item.prizeContent || item.prize_content || '-',
-      source: item.source || 'free',
-      isWin: item.isWin ?? item.is_win ?? false,
-      drawTime: item.drawTime || item.draw_time || ''
-    }))
-  } catch (e) {
-    ElMessage.error('数据加载失败')
-  }
-}
-
 onMounted(async () => {
-  await loadData()
-  fetchData()
+  await fetchData()
   getAvailableCollectibles()
 })
 </script>

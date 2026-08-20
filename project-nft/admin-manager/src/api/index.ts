@@ -446,27 +446,89 @@ export const refundApi = {
 // ============================================================
 // 报表
 // ============================================================
+export interface SalesDailyItem {
+  date: string
+  revenue: number
+  orders: number
+}
+
+export interface SalesSummaryItem {
+  period: string
+  orderCount: number
+  salesAmount: number
+  avgPrice: number
+  refundAmount: number
+  netAmount: number
+}
+
 export interface SalesReport {
-  totalOrders: number
-  totalGMV: number
-  dailyData: Array<{ date: string; orders: number; revenue: number }>
+  dailyData: SalesDailyItem[]
+  summary: SalesSummaryItem[]
+}
+
+export interface UsersTrendItem {
+  date: string
+  count: number
+}
+
+export interface RetentionItem {
+  cohort: string
+  day1: string | number
+  day3: string | number
+  day7: string | number
+  day14: string | number
+  day30: string | number
 }
 
 export interface UsersReport {
+  newUsers: UsersTrendItem[]
+  activeUsers: UsersTrendItem[]
   totalUsers: number
-  dailyData: Array<{ date: string; newUsers: number }>
+  realnameRate: number
+  retentionData: RetentionItem[]
+}
+
+export interface HotCollectibleItem {
+  name: string
+  holders: number
+  volume: number
+}
+
+export interface HoldingDistributionItem {
+  name: string
+  value: number
 }
 
 export interface CollectiblesReport {
-  totalCollectibles: number
-  topCollectibles: Array<{ id: number; name: string; sold: number; revenue: number }>
+  hotCollectibles: HotCollectibleItem[]
+  holdingDistribution: HoldingDistributionItem[]
+}
+
+export interface ItemDistributionItem {
+  name: string
+  hits: number
+}
+
+export interface BlindboxesReport {
+  totalOpened: number
+  openRate: number
+  emptyRate: number
+  rareRate: number
+  itemDistribution: ItemDistributionItem[]
+}
+
+export interface FinanceDetailItem {
+  date: string
+  channel: string
+  tradeAmount: number
+  tradeCount: number
+  feeRate: string
+  feeAmount: number
+  settleAmount: number
 }
 
 export interface FinanceReport {
-  totalRevenue: number
-  totalRefunds: number
-  netRevenue: number
-  dailyData: Array<{ date: string; revenue: number; refunds: number }>
+  details: FinanceDetailItem[]
 }
 
 export const reportApi = {
@@ -476,6 +538,8 @@ export const reportApi = {
     get<UsersReport>('/reports/users', params),
   collectibles: (params: PaginationQuery = {}) =>
     get<CollectiblesReport>('/reports/collectibles', params),
+  blindboxes: (params: PaginationQuery = {}) =>
+    get<BlindboxesReport>('/reports/blindboxes', params),
   finance: (params: PaginationQuery = {}) =>
     get<FinanceReport>('/reports/finance', params),
 }

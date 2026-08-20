@@ -309,27 +309,9 @@ interface HistoryItem {
   operator: string
 }
 
-let historyIdSeq = 100
 const services: ServiceType[] = ['oss', 'sms', 'map']
-const changeContents: Record<string, string[]> = {
-  oss: ['更换 Bucket 为 collectible-prod', '迁移 Endpoint 至华东2', '更新 AccessKey（密钥轮换）', '切换区域至华南1（深圳）'],
-  sms: ['切换服务商为腾讯云', '更新短信签名为「数字藏品」', '短信服务临时停用', '短信服务重新启用'],
-  map: ['切换地图服务商为百度地图', '更新地图 API Key', '切换地图服务商为高德地图', '地图服务限流配置调整']
-}
 
-const historyList = ref<HistoryItem[]>(
-  Array.from({ length: 12 }, (_, i) => {
-    const svc = services[i % 3]
-    const contents = changeContents[svc]
-    return {
-      id: i + 1,
-      time: `2026-${String(7 + (i % 2)).padStart(2, '0')}-${String((i % 28) + 1).padStart(2, '0')} ${String(10 + (i % 8)).padStart(2, '0')}:${String((i * 5) % 60).padStart(2, '0')}:00`,
-      service: svc,
-      content: contents[i % contents.length],
-      operator: ['admin', 'dev01', 'operator01'][i % 3]
-    }
-  })
-)
+const historyList = ref<HistoryItem[]>([])
 
 const searchForm = reactive<{ service: string; dateRange: [string, string] | null }>({
   service: '',

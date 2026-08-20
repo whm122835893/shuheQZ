@@ -322,35 +322,52 @@ function openBlacklistDialog() {
   blacklistDialogVisible.value = true
 }
 
-function handleAddBlacklist() {
-  blacklistFormRef.value?.validate((valid) => {
+async function handleAddBlacklist() {
+  if (!blacklistFormRef.value) return
+  blacklistFormRef.value.validate(async (valid) => {
     if (!valid) return
-    const newId = Math.max(...blacklist.value.map(b => b.id), 0) + 1
-    blacklist.value.unshift({
-      id: newId,
-      user: blacklistForm.user,
-      reason: blacklistForm.reason,
-      operator: '当前管理员',
-      expire_at: blacklistForm.expire_at || '永久',
-      status: 'active'
-    })
-    ElMessage.success(`已将「${blacklistForm.user}」加入黑名单`)
-    blacklistDialogVisible.value = false
-    pageMap.blacklist = 1
+    try {
+      const res = await securityApi.blacklistAdd({
+        type: 1,
+        target: blacklistForm.user,
+        reason: blacklistForm.reason,
+        expiredAt: blacklistForm.expire_at || undefined
+      })
+      const newId = (res as any)?.id || Date.now()
+      blacklist.value.unshift({
+        id: newId,
+        user: blacklistForm.user,
+        reason: blacklistForm.reason,
+        operator: '当前管理员',
+        expire_at: blacklistForm.expire_at || '永久',
+        status: 'active'
+      })
+      ElMessage.success(`已将「${blacklistForm.user}」加入黑名单`)
+      blacklistDialogVisible.value = false
+      pageMap.blacklist = 1
+    } catch (e: any) {
+      ElMessage.error(e?.message || '加入黑名单失败')
+    }
   })
 }
 
-function handleRemoveBlacklist(row: BlacklistItem) {
-  ElMessageBox.confirm(
-    `确定要将「${row.user}」从黑名单中移除吗？移除后该用户可恢复正常使用。`,
-    '移除黑名单确认',
-    { confirmButtonText: '确定移除', cancelButtonText: '取消', type: 'warning' }
-  )
-    .then(() => {
-      blacklist.value = blacklist.value.filter(b => b.id !== row.id)
-      ElMessage.success(`已将「${row.user}」移出黑名单`)
-    })
-    .catch(() => {})
+async function handleRemoveBlacklist(row: BlacklistItem) {
+  try {
+    await ElMessageBox.confirm(
+      `确定要将「${row.user}」从黑名单中移除吗？移除后该用户可恢复正常使用。`,
+      '移除黑名单确认',
+      { confirmButtonText: '确定移除', cancelButtonText: '取消', type: 'warning' }
+    )
+  } catch {
+    return
+  }
+  try {
+    await securityApi.blacklistRemove(row.id)
+    blacklist.value = blacklist.value.filter(b => b.id !== row.id)
+    ElMessage.success(`已将「${row.user}」移出黑名单`)
+  } catch (e: any) {
+    ElMessage.error(e?.message || '移除黑名单失败')
+  }
 }
 
 // ============ 风控告警数据 ============

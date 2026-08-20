@@ -209,14 +209,7 @@ interface RewardRow {
   rewardContent: string
   quantity: number
 }
-const rewardConfig = ref<RewardRow[]>(
-  Array.from({ length: 7 }, (_, i) => ({
-    day: i + 1,
-    rewardType: i === 6 ? 'blindbox' : i % 2 === 0 ? 'collectible' : 'luckydraw',
-    rewardContent: i === 6 ? '新春系列 第1期' : i % 2 === 0 ? ['敦煌飞天 第1期', '清明上河图 第2期', '千里江山图 第3期'][i % 3] : '抽奖次数',
-    quantity: i === 6 ? 1 : (i + 1)
-  }))
-)
+const rewardConfig = ref<RewardRow[]>([])
 
 // 新增一天
 function addDay() {

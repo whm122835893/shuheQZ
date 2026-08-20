@@ -481,21 +481,46 @@ function handleTxReset() {
 const feeChartRef = ref<HTMLElement>()
 let feeChart: echarts.ECharts | null = null
 
-const feeDailyData = Array.from({ length: 13 }, (_, i) => {
-  const day = String((i % 13) + 1).padStart(2, '0')
-  return {
-    date: `2026-08-${day}`,
-    fee: parseFloat((Math.random() * 800 + 200).toFixed(2)),
-    count: Math.floor(Math.random() * 50 + 10)
-  }
-})
+interface FeeDailyItem {
+  date: string
+  fee: number
+  count: number
+}
+const feeDailyData = ref<FeeDailyItem[]>([])
 
 const feeSummary = reactive({
-  total: feeDailyData.reduce((s, d) => s + d.fee, 0),
-  avg: feeDailyData.reduce((s, d) => s + d.fee, 0) / feeDailyData.length,
-  peak: Math.max(...feeDailyData.map(d => d.fee)),
-  count: feeDailyData.reduce((s, d) => s + d.count, 0)
+  total: 0,
+  avg: 0,
+  peak: 0,
+  count: 0
 })
+
+async function loadFeeData() {
+  try {
+    const res = await walletApi.transactions({ page: 1, pageSize: 9999 }) as any
+    const txList = res?.list || []
+    // 按日期聚合手续费
+    const dayMap = new Map<string, FeeDailyItem>()
+    for (const tx of txList) {
+      const rawDate = tx.createdAt || tx.created_at || ''
+      const date = rawDate.slice(0, 10) || '未知'
+      const fee = Number(tx.fee || tx.feeAmount || 0)
+      const existing = dayMap.get(date) || { date, fee: 0, count: 0 }
+      existing.fee += fee
+      existing.count += 1
+      dayMap.set(date, existing)
+    }
+    feeDailyData.value = Array.from(dayMap.values()).sort((a, b) => a.date.localeCompare(b.date))
+    // 计算汇总
+    const fees = feeDailyData.value.map(d => d.fee)
+    feeSummary.total = fees.reduce((s, f) => s + f, 0)
+    feeSummary.avg = fees.length > 0 ? feeSummary.total / fees.length : 0
+    feeSummary.peak = fees.length > 0 ? Math.max(...fees) : 0
+    feeSummary.count = feeDailyData.value.reduce((s, d) => s + d.count, 0)
+  } catch {
+    feeDailyData.value = []
+  }
+}
 
 function renderFeeChart() {
   if (!feeChartRef.value) return
@@ -510,7 +535,7 @@ function renderFeeChart() {
     grid: { left: '3%', right: '4%', bottom: '3%', top: 40, containLabel: true },
     xAxis: {
       type: 'category',
-      data: feeDailyData.map(d => d.date.substring(5)),
+      data: feeDailyData.value.map(d => d.date.substring(5)),
       axisLine: { lineStyle: { color: '#dcdfe6' } },
       axisLabel: { color: '#909399' }
     },
@@ -538,7 +563,7 @@ function renderFeeChart() {
         name: '手续费',
         type: 'bar',
         yAxisIndex: 0,
-        data: feeDailyData.map(d => d.fee),
+        data: feeDailyData.value.map(d => d.fee),
         barWidth: '45%',
         itemStyle: {
           borderRadius: [4, 4, 0, 0],
@@ -553,7 +578,7 @@ function renderFeeChart() {
         type: 'line',
         yAxisIndex: 1,
         smooth: true,
-        data: feeDailyData.map(d => d.count),
+        data: feeDailyData.value.map(d => d.count),
         itemStyle: { color: '#fa709a' },
         lineStyle: { width: 2 }
       }
@@ -671,6 +696,7 @@ onMounted(async () => {
   await loadData()
   fetchRecharge()
   fetchTx()
+  await loadFeeData()
   await nextTick()
   renderFeeChart()
   window.addEventListener('resize', handleResize)
