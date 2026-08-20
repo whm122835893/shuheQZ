@@ -1,0 +1,113 @@
+:root {
+  /* Brand colors */
+  --ht-red: #B30A03;
+  --ht-orange: #FF7A00;
+  --ht-blue: #3B82F6;
+  --ht-blue-light: #EFF6FF;
+
+  /* Text colors */
+  --ht-text-primary: #1F2937;
+  --ht-text-secondary: #6B7280;
+  --ht-text-tertiary: #9CA3AF;
+
+  /* Background colors */
+  --ht-bg-page: #F5F7FA;
+  --ht-bg-card: #FFFFFF;
+  --ht-bg-gray: #F3F4F6;
+  --ht-bg-gray-light: #F9FAFB;
+  --ht-border: #E5E7EB;
+  --ht-border-light: #F3F4F6;
+
+  /* Tag colors */
+  --ht-tag-blue: #3B82F6;
+  --ht-tag-orange: #FF9800;
+  --ht-tag-coral: #FF6B6B;
+
+  /* Gradients */
+  --ht-gradient-pink: linear-gradient(180deg, #FFF5F5 0%, #FFFFFF 100%);
+  --ht-gradient-blue-white: linear-gradient(180deg, #DBEAFE 0%, #FFFFFF 60%);
+  --ht-gradient-blue-purple: linear-gradient(135deg, #DBEAFE 0%, #EDE9FE 100%);
+  --ht-gradient-vip: linear-gradient(135deg, #3D3A5C 0%, #4A4868 100%);
+
+  /* Shadows */
+  --ht-shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --ht-shadow-float: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+  font-size: 16px;
+  color: var(--ht-text-primary);
+  background: var(--ht-bg-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+input, button {
+  font-family: inherit;
+  border: none;
+  outline: none;
+  background: none;
+}
+
+ul, li {
+  list-style: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* Utility classes */
+.ht-page {
+  min-height: 100vh;
+  background: var(--ht-bg-page);
+}
+
+.ht-safe-bottom {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
+}
+
+/* Vant overrides */
+.van-tabbar--fixed {
+  z-index: 100;
+}
+
+.van-nav-bar {
+  background: #fff;
+}
+
+.van-nav-bar__title {
+  font-weight: 600;
+}
+
+/* Scrollbar hide */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Monospace font for codes */
+.mono {
+  font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+}

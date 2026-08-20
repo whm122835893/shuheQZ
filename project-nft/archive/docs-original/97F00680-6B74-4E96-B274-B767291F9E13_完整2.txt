@@ -1,0 +1,1446 @@
+我需要先仔细阅读上传的提示词文件，然后全面分析现有项目代码，进行详细对比。
+
+The user wants me to:
+1. Analyze the existing user-facing frontend (Vue), database (MySQL), and backend (NestJS) to determine what admin backend features are needed
+2. Compare with the uploaded prompt file to see what features are added, missing, or need supplementing
+3. Determine what database tables and backend APIs need to be added
+4. Suggest how to write the prompt
+
+Let me first read the uploaded prompt file, then thoroughly analyze the existing codebase to understand all existing features, entities, and APIs.
+
+I need to be thorough and careful. Let me start by reading the uploaded file and then exploring the codebase systematically.
+
+提示词非常详尽，共 17 个模块。我需要全面分析现有代码库的实体、接口和前端功能，与提示词进行逐项对比。
+
+This is a very comprehensive prompt file. Now I need to thoroughly analyze the existing codebase to understand:
+1. What entities/tables already exist
+2. What backend APIs already exist
+3. What features the existing user-facing frontend has
+
+Then I need to compare this with the admin prompt to identify:
+- What features are already supported by existing data structures
+- What features are new (in the prompt but not in existing code)
+- What features are missing (in existing code but not in prompt)
+- What new database tables need to be added
+- What new backend APIs need to be added
+- How to improve the prompt
+
+Let me launch parallel exploration tasks to thoroughly analyze the existing codebase.
+
+Let me start by exploring the frontend source code structure to understand the layout.
+
+我将彻底分析 `/workspace/shuheWC/backend/src/` 下的代码。让我先从探索目录结构开始。
+
+Let me analyze the codebase systematically. I'll start by exploring the directory structure and then dive into the specific areas requested.
+
+Let me start by listing the relevant directories to understand the structure.
+
+我将分段读取该SQL文件，先检查文件大小和基本信息。
+
+Let me start by reading the SQL file. The user mentioned it's about 84KB, so I'll need to read it in segments. Let me first check the file size and then read it.
+
+Let me start by reading the file. The Read tool can read up to 2000 lines at a time. Let me first check the file size and structure.
+
+Good, I have a clear view of the directory structure. Let me now read the key files in parallel:
+
+1. Router: /workspace/shuheWC/frontend/src/router/index.js
+2. API request: /workspace/shuheWC/frontend/src/api/request.js
+3. Composables: useCountdown.js, useFavorites.js, useUser.js
+4. Main App.vue and main.js
+
+Then I'll read all the Vue files in views/.
+
+Let me batch these reads.
+
+我来读取一下所有实体文件。我将对它们进行批量读取，首先处理最关键的那些。
+
+Now I have a good understanding of the structure. Let me read all the entity files first. There are 41 entity files. Let me batch-read the most important ones first based on the task requirements.
+
+Let me read the key entities mentioned in the task:
+1. nft-collectible.entity.ts
+2. nft-blind-box.entity.ts
+3. nft-order.entity.ts
+4. nft-priority-sale.entity.ts / nft-priority-sale-whitelist.entity.ts
+5. nft-user.entity.ts
+6. nft-resale-listing.entity.ts
+
+Plus all the other entities. Let me batch read them all.
+
+文件共1224行。我将分3段读取完整内容。先读取第一段（1-450行）和第二段（451-900行）。
+
+The file is 1224 lines. Let me read it in segments. I'll start with the first 400 lines, then the next 400, then the final 424.
+
+Actually, the Read tool can read up to 2000 lines at a time. Let me read 600 lines at a time to be safe. Let me read the whole thing in 2 batches.
+
+Actually, let me read the first 600 lines first.
+
+I have the router, API, composables, and entry files. Now let me read all the Vue page files. I'll batch them by directory.
+
+Now I have the router, API request, composables, main.js and App.vue. Let me now read all the Vue files in views/. Let me read them in batches. I'll start with the home views, market views, activity views, profile views, auth views, and common views.
+
+Let me read all views in parallel batches. First batch: home views.
+
+现在让我读取剩余的实体文件：
+
+Good. Now let me read the remaining entity files. There are many more. Let me batch read them.
+
+Now let me read the market views, activity views, and common views in parallel.
+
+Now let me read the market views, activity views, and profile views. Let me batch these reads.
+
+Let me continue reading the remaining entity files.
+
+已读取前900行。继续读取剩余部分（901-1224行）。
+
+Good, I've read lines 1-900. Now let me read the rest of the file (lines 901-1224).
+
+I've now read the entire SQL file (1224 lines). Let me compile a comprehensive structured report based on the user's requirements:
+
+1. List all CREATE TABLE statement table names
+2. For each table, list all field definitions (field name, type, nullable, default value, comment)
+3. List all indexes and unique constraints
+4. List all ENUM type field options
+5. Specifically check whether the following exist:
+   - Admin role/permission table
+   - Customer service work order table
+   - Blacklist table
+   - Refund record table
+   - Platform operation approval table
+   - Collection inventory audit fields (destroyed, independent airdrop, quota reserved, etc.)
+   - Blind box inventory related fields (total issued, sold, circulating, destroyed, etc.)
+   - Eligibility purchase related tables or fields
+   - Secondary market price control fields (price limit upper/lower)
+   - Consignment switch field
+   - Transfer switch field (independent from consignment)
+
+Let me compile the report now. I have all the data I need from reading the file.
+
+Let me organize this systematically.
+
+## Tables found (42 tables):
+
+1. nft_users - 用户表
+2. nft_categories - 藏品分类表
+3. nft_collectibles - 藏品主表
+4. nft_user_collectibles - 用户藏品表
+5. nft_blind_boxes - 盲盒表
+6. nft_blind_box_items - 盲盒奖品池配置表
+7. nft_orders - 订单表
+8. nft_payments - 支付记录表
+9. nft_resale_listings - 寄售挂单表
+10. nft_transfers - 转赠记录表
+11. nft_synthesis_activities - 合成活动表
+12. nft_synthesis_materials - 合成材料子表
+13. nft_synthesis_records - 合成记录表
+14. nft_synthesis_record_items - 合成消耗明细表
+15. nft_lucky_draw_prizes - 抽奖奖品池表
+16. nft_lucky_draw_records - 抽奖记录表
+16.5. nft_lucky_draw_user_chances - 抽奖用户次数表
+17. nft_check_in_records - 签到记录表
+18. nft_artifacts - 文物表
+19. nft_announcements - 公告/新闻合并表
+20. nft_banners - 轮播图表
+21. nft_user_favorites - 用户关注表
+22. nft_user_addresses - 收货地址表
+23. nft_system_configs - 系统参数表
+24. nft_airdrop_activities - 空投活动表
+25. nft_airdrop_snapshots - 持有藏品快照表
+26. nft_airdrop_records - 空投记录表
+27. nft_airdrop_eligibilities - 空投资格记录表
+28. nft_invite_activities - 邀请活动配置表
+29. nft_invite_records - 邀请记录表
+30. nft_site_settings - 网站全局配置表
+31. nft_lucky_draw_activities - 抽奖活动表
+32. nft_audit_logs - 审计日志表
+33. nft_user_wallets - 用户钱包表
+34. nft_blind_box_open_records - 盲盒开启记录表
+35. nft_sms_logs - 短信记录表
+36. nft_agreements - 合规文档表
+37. nft_admin_users - 管理员账号表
+38. nft_operation_logs - 操作审计表
+39. nft_priority_sales - 优先购活动表
+40. nft_priority_sale_whitelists - 优先购白名单表
+41. nft_wallet_transactions - 钱包流水表
+42. nft_feedback - 用户意见反馈表
+
+Now for the specific checks:
+
+### Admin role/permission table
+- `nft_admin_users` exists but has only a `role` TINYINT field (1=超级管理员 2=运营管理员 3=财务管理员 4=客服)
+- No separate role table or permission table exists
+- No RBAC table structure (no role-permission mapping)
+
+### Customer service work order table (客服工单表)
+- No dedicated customer service work order table
+- `nft_feedback` is closest - it's a user feedback table with status (1=待处理 2=处理中 3=已解决) and has ticket_id
+- But it's user feedback, not specifically customer service work orders
+
+### Blacklist table (黑名单表)
+- No blacklist table found at all
+
+### Refund record table (退款记录表)
+- No dedicated refund record table
+- `nft_payments` has a status field with value 4=已退款, but no separate refund record table
+
+### Platform operation approval table (平台操作审批表)
+- No platform operation approval table found
+- `nft_audit_logs` and `nft_operation_logs` exist but are log tables, not approval tables
+
+### Collection inventory audit fields (藏品库存审计相关字段: 已销毁、已独立空投、配额预留等)
+- `nft_collectibles` has: edition (发行总量), circulate (可售数量), sold (已售数量), locked_quantity (待支付锁定数量), vol (成交量)
+- Missing: destroyed_count (已销毁), airdropped_count (已独立空投), quota_reserved (配额预留)
+- No field tracking how many have been destroyed or independently airdropped
+
+### Blind box inventory fields (盲盒库存相关字段: 发行总量、已售出、流通量、已销毁等)
+- `nft_blind_boxes` is extremely minimal - only id, collectible_id, is_delete, created_at, updated_at
+- No inventory tracking fields (total issued, sold, circulating, destroyed)
+- The blind box itself is just a link to a collectible, all inventory info would be on the collectible
+
+### Eligibility purchase (资格购相关表或字段)
+- `nft_priority_sales` + `nft_priority_sale_whitelists` exist for 优先购 (priority purchase)
+- But this is specifically for "priority purchase" (优先购), not general "eligibility purchase" (资格购)
+- Actually, looking more carefully, 优先购 = priority purchase which IS a form of 资格购. So this exists.
+
+### Secondary market price control (二级市场价格管控相关字段: 限价上限/下限)
+- `nft_resale_listings` has price field but NO price ceiling/floor fields
+- `nft_collectibles` has no min/max resale price fields
+- No secondary market price control mechanism in the schema
+
+### Consignment switch field (寄售开关字段)
+- No global consignment switch field found
+- No `is_resale_enabled` or similar field on `nft_collectibles` or system config
+- `nft_user_collectibles` has `is_consigned` (是否寄售) on individual items, but no global or per-collectible switch
+
+### Transfer switch field (转赠开关字段, independent from consignment)
+- `nft_collectibles` has `is_transferable` (是否可转赠 0=不可 1=可) - this IS a per-collectible transfer switch
+- This is independent from consignment (no consignment switch exists separately)
+- But there's no GLOBAL transfer switch (system-level on/off)
+
+Let me now write the comprehensive report. I'll be thorough but organized.
+
+Now let me read the auth views, profile views, and components in parallel.
+
+Now let me read the auth views and profile views, and components. Let me batch these.
+
+现在让我读取所有的 Controller 文件：
+
+Now I've read all entity files. Let me now read all the controller files. Let me batch them all.
+
+Now let me read the remaining profile views.
+
+Now I need to read the remaining profile views: Settings, Info, Orders, Consignments, Address, TransactionPassword, Certification, ResaleCollectible, ResaleDetail, Transfer, JoinGroup. Let me batch read these.
+
+现在让我读取任务中提到的关键服务文件：
+
+Now let me read the key service files mentioned in the task:
+1. market.service.ts
+2. payment.service.ts
+3. wallet.service.ts
+4. transfer.service.ts
+5. collectible.service.ts
+
+Let me read the final remaining profile views and components.
+
+Now I need to read the remaining files: ResaleDetail.vue, Transfer.vue, JoinGroup.vue, and the components NavBar.vue and EmptyState.vue. Let me also check common/UserAgreement.vue and PrivacyPolicy.vue briefly.
+
+让我再检查一下 decorators 和 app module，以验证是否有任何与管理员（admin）相关的模块：
+
+Now I have all the information needed to compile the report. Let me also check the decorators to understand the @Public() and @TxPassword() decorators, and check if there's any admin controller that I may have missed.
+
+Let me also quickly check the app.module.ts to see which modules are registered, and check the public and tx-password decorators.
+
+让我检查一下是否有我可能遗漏的与管理员相关的控制器或路由：
+
+Now I have all the information I need to compile the comprehensive report. Let me organize it into the requested format.
+
+Let me also quickly verify there's no admin module by searching for "admin" in controllers.
+
+让我检查一下服务文件中 "admin" 的使用上下文：
+
+Let me check those admin-related references to understand what "admin" context is used in the service files.
+
+OK, so the "admin" references in the service files are all just `adminId: null` in the operation log saves - there is NO actual admin controller or admin API endpoints in this backend. The admin operations are all done via the operation log table with `adminId: null` for user-initiated actions.
+
+Now I have all the information I need to compile the comprehensive report. Let me organize this carefully.
+
+Let me summarize the key findings:
+
+### Database Entities Analysis
+
+**41 entity files** found. Let me go through each one with the requested details.
+
+Key findings for the specific questions:
+1. **藏品表(nft_collectibles)**: 
+   - `edition` ✅ exists (int unsigned, default 0)
+   - `circulate` ✅ exists (int unsigned, default 0)
+   - `sold` ✅ exists (int unsigned, default 0)
+   - `locked_quantity` ✅ exists (int unsigned, default 0)
+   - `is_transferable` ✅ exists (tinyint, default 1)
+   - `is_release` ✅ exists (tinyint, default 0)
+   - `resale_enabled`/寄售开关相关字段: ❌ NOT FOUND - no resale_enabled field on collectibles table. The resale/寄售 functionality is controlled per-listing in the nft_resale_listings table, not as a toggle on the collectible itself. The `is_transferable` field acts as the master switch for whether a collectible can be resold/transferred.
+
+2. **盲盒表(nft_blind_boxes)**:
+   - 发行总量: ❌ NOT FOUND
+   - 库存池: ❌ NOT FOUND
+   - 流通量: ❌ NOT FOUND
+   - 已销毁: ❌ NOT FOUND
+   - The blind box table is very minimal - just `collectible_id`, `is_delete`, `created_at`, `updated_at`. The prize pool info is in `nft_blind_box_items`.
+
+3. **订单表**: ✅ `source` field exists - enum('release', 'market')
+
+4. **优先购表**: The `nft_priority_sales` table has `start_time` and `end_time` (not a specific "有效期" field but time window). The `nft_priority_sale_whitelists` table has `max_quantity` and `used_quantity` but no explicit "有效期" (expiry) field per whitelist entry.
+
+5. **用户表**: The `nft_users` table has a `status` field (tinyint, default 1) but no explicit "黑名单" (blacklist) field. Status=1 presumably means normal; there's no specific blacklist flag. There's an `is_delete` field for soft deletion.
+
+### API Analysis
+
+All controllers have been analyzed. Key findings:
+- NO admin controllers exist in the backend
+- All routes are user-facing (C端) APIs
+- Admin-related operations only appear as `adminId: null` in operation log writes
+
+Let me compile the full report now.
+
+我将重新读取关键文件以确保报告的准确性，然后生成完整的结构化报告。
+
+The user wants me to analyze the frontend codebase at /workspace/shuheWC/frontend/src/ and provide a structured report. According to the summary, I've already examined most of the files. However, since the context was lost, I should verify my findings by re-reading key files to ensure accuracy before producing the final report.
+
+Let me re-read the most critical files to ensure I have accurate information for the report:
+1. router/index.js - for route analysis
+2. api/request.js - for API call analysis
+3. composables/ files - for state management analysis
+4. Key view files - for page function analysis
+
+Since I'm in read-only mode, I'll just read the files and produce the report. Let me start by reading the essential files in parallel to gather all the information I need.
+
+Let me be efficient and read the most critical files first to verify my previous findings.
+
+现在让我读取其他composables文件和关键页面文件。
+
+Good, I have the router, API request, and useUser composable files. Now let me read the other composables and some key view files to complete my analysis.
+
+Good. Now let me read the remaining composables and key view files that I need to verify. Let me batch read the most important files.
+
+现在读取市场、个人中心和其他关键页面文件。
+
+Good, I've confirmed the Home.vue and Checkin.vue content. Now let me read the remaining key view files to verify my analysis. Let me batch read the market, profile, activity, and other important pages.
+
+继续读取个人中心、钱包、活动等关键页面。
+
+Good. Now let me read the remaining key view files - profile, wallet, activity, auth, and others.
+
+让我搜索所有Vue文件中的API调用，以确保API分析完整。
+
+I now have enough information from all the key files. Let me also read a few more important files to complete the API analysis - I need to search for all API calls across the Vue files.
+
+让我读取剩余的关键文件以确保完整性。
+
+Now I have all the information I need. Let me also quickly check the remaining files I haven't verified - particularly the auth pages, settings, and a few other view files.
+
+Actually, looking at the grep results, I now have a comprehensive list of all API calls. Let me also read the remaining important pages to complete the picture.
+
+让我最后读取几个文件以确保完全覆盖。
+
+I now have all the information I need. Let me also check a couple more files to ensure completeness - particularly the remaining view files and the main.js / App.vue for completeness.
+
+我已完成对所有关键文件的读取和验证。现在生成完整的结构化分析报告。
+
+---
+
+# 数和文创前端代码完整分析报告
+
+## 一、项目概述
+
+- **技术栈**: Vue 3 (Composition API) + Vue Router + Axios + Vant UI
+- **设计模式**: 移动端优先（Mobile-First），单页应用（SPA）
+- **状态管理**: 自定义 Composables + localStorage 持久化（无 Pinia/Vuex）
+- **API 基础路径**: `/api`
+- **认证机制**: JWT Bearer Token + Refresh Token 自动刷新
+
+---
+
+## 二、路由分析
+
+**文件**: `/workspace/shuheWC/frontend/src/router/index.js`
+
+路由采用 `createWebHistory` 模式，共定义 **34 条路由**（含 1 条重定向和 1 条 404 兜底）。路由守卫通过 `meta.requiresAuth` 控制子页面登录权限，未登录时重定向至 `/auth/login` 并记录目标路径。
+
+### 2.1 路由完整列表
+
+| 路径 | 名称 | 组件路径 | meta 信息 |
+|------|------|----------|-----------|
+| `/` | - | (重定向至 `/home`) | - |
+| **认证模块** | | | |
+| `/auth/login` | Login | `@/views/auth/Login.vue` | `{ showTab: false }` |
+| `/auth/register` | Register | `@/views/auth/Register.vue` | `{ showTab: false }` |
+| `/auth/reset-password` | ResetPassword | `@/views/auth/ResetPassword.vue` | `{ showTab: false }` |
+| `/auth/operation-password` | OperationPassword | `@/views/auth/OperationPassword.vue` | `{ showTab: false }` |
+| `/auth/realname` | Realname | `@/views/auth/Realname.vue` | `{ showTab: false }` |
+| `/auth/user-agreement` | UserAgreement | `@/views/common/UserAgreement.vue` | `{ showTab: false }` |
+| `/auth/privacy-policy` | PrivacyPolicy | `@/views/common/PrivacyPolicy.vue` | `{ showTab: false }` |
+| **首页模块** | | | |
+| `/home` | Home | `@/views/home/Home.vue` | `{ showTab: true }` |
+| `/home/checkin` | Checkin | `@/views/home/Checkin.vue` | `{ showTab: false, requiresAuth: true }` |
+| `/home/release/:id` | ReleaseDetail | `@/views/home/ReleaseDetail.vue` | `{ showTab: false, requiresAuth: true }` |
+| `/home/museum` | MuseumGallery | `@/views/home/MuseumGallery.vue` | `{ showTab: false, requiresAuth: true, title: '文物展馆' }` |
+| `/home/museum/:id` | ArtifactDetail | `@/views/home/ArtifactDetail.vue` | `{ showTab: false, requiresAuth: true, title: '文物详情' }` |
+| `/home/lucky-draw` | LuckyDraw | `@/views/home/LuckyDraw.vue` | `{ showTab: false, requiresAuth: true, title: '幸运抽奖' }` |
+| `/home/lottery` | Lottery | `@/views/common/EmptyPage.vue` | `{ showTab: false, requiresAuth: true, title: '抽签活动' }` |
+| `/home/furnace` | Furnace | `@/views/common/EmptyPage.vue` | `{ showTab: false, requiresAuth: true, title: '幻化熔炉' }` |
+| `/home/hall-of-fame` | HallOfFame | `@/views/common/EmptyPage.vue` | `{ showTab: false, requiresAuth: true, title: '名人堂' }` |
+| `/home/beginner-guide` | BeginnerGuide | `@/views/common/EmptyPage.vue` | `{ showTab: false, requiresAuth: true, title: '新手指南' }` |
+| `/home/release-calendar` | ReleaseCalendar | `@/views/common/EmptyPage.vue` | `{ showTab: false, requiresAuth: true, title: '发售日历' }` |
+| **市场模块** | | | |
+| `/market` | Market | `@/views/market/Market.vue` | `{ showTab: true }` |
+| `/market/detail/:id` | MarketDetail | `@/views/market/Detail.vue` | `{ showTab: false, requiresAuth: true }` |
+| `/market/album/:id` | Album | `@/views/market/Album.vue` | `{ showTab: false, requiresAuth: true }` |
+| `/market/order/:id` | Order | `@/views/market/Order.vue` | `{ showTab: false, requiresAuth: true }` |
+| **活动模块** | | | |
+| `/activity` | Activity | `@/views/activity/Activity.vue` | `{ showTab: true }` |
+| `/activity/notice/:id` | Notice | `@/views/activity/Notice.vue` | `{ showTab: false, requiresAuth: true }` |
+| `/activity/synthesis` | Synthesis | `@/views/activity/Synthesis.vue` | `{ showTab: false, requiresAuth: true }` |
+| `/activity/synthesis/:id` | SynthesisDetail | `@/views/activity/SynthesisDetail.vue` | `{ showTab: false, requiresAuth: true }` |
+| `/activity/invite` | Invite | `@/views/activity/Invite.vue` | `{ showTab: false, requiresAuth: true }` |
+| **个人中心模块** | | | |
+| `/profile` | Profile | `@/views/profile/Profile.vue` | `{ showTab: true }` |
+| `/profile/settings` | Settings | `@/views/profile/Settings.vue` | `{ showTab: false, requiresAuth: true }` |
+| `/profile/info` | Info | `@/views/profile/Info.vue` | `{ showTab: false, requiresAuth: true }` |
+| `/profile/wallet` | Wallet | `@/views/profile/Wallet.vue` | `{ showTab: false, requiresAuth: true }` |
+| `/profile/orders` | Orders | `@/views/profile/orders.vue` | `{ showTab: false, requiresAuth: true }` |
+| `/profile/consignments` | Consignments | `@/views/profile/Consignments.vue` | `{ showTab: false, requiresAuth: true }` |
+| `/profile/address` | Address | `@/views/profile/address.vue` | `{ showTab: false, requiresAuth: true }` |
+| `/profile/transaction-password` | TransactionPassword | `@/views/profile/transaction-password.vue` | `{ showTab: false, requiresAuth: true }` |
+| `/profile/certification` | Certification | `@/views/profile/Certification.vue` | `{ showTab: false, requiresAuth: true }` |
+| `/profile/resale-collectible/:id` | ResaleCollectible | `@/views/profile/ResaleCollectible.vue` | `{ showTab: false, requiresAuth: true }` |
+| `/profile/resale/:id` | ResaleDetail | `@/views/profile/ResaleDetail.vue` | `{ showTab: false, requiresAuth: true }` |
+| `/profile/transfer` | Transfer | `@/views/profile/Transfer.vue` | `{ showTab: false, requiresAuth: true }` |
+| `/profile/join-group` | JoinGroup | `@/views/profile/JoinGroup.vue` | `{ showTab: false, requiresAuth: true }` |
+| `/profile/community` | Community | `@/views/common/EmptyPage.vue` | `{ showTab: false, requiresAuth: true, title: '社区共创' }` |
+| `/profile/contact` | Contact | `@/views/common/EmptyPage.vue` | `{ showTab: false, requiresAuth: true, title: '联系我们' }` |
+| `/profile/share` | Share | `@/views/common/EmptyPage.vue` | `{ showTab: false, requiresAuth: true, title: '分享App' }` |
+| `/profile/privacy` | Privacy | `@/views/common/EmptyPage.vue` | `{ showTab: false, requiresAuth: true, title: '隐私协议' }` |
+| `/profile/invoice` | Invoice | `@/views/common/EmptyPage.vue` | `{ showTab: false, requiresAuth: true, title: '我的发票' }` |
+| `/profile/terms` | Terms | `@/views/common/EmptyPage.vue` | `{ showTab: false, requiresAuth: true, title: '使用条款' }` |
+| `/:pathMatch(.*)*` | - | (重定向至 `/home`) | 404 兜底 |
+
+### 2.2 路由守卫逻辑
+
+```javascript
+router.beforeEach((to, from, next) => {
+  if (to.meta.requiresAuth) {
+    // 从 localStorage 读取 ht_user，检查 isLoggedIn
+    // 未登录则重定向至 /auth/login?redirect=原路径
+  }
+  next()
+})
+```
+
+- 四个主 Tab 页（`/home`, `/market`, `/activity`, `/profile`）**不需要登录**即可浏览
+- 所有子页面均设置 `requiresAuth: true`，需登录后访问
+- `showTab: true` 的页面底部显示 TabBar 导航栏
+
+---
+
+## 三、页面功能分析
+
+### 3.1 首页 (Home.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/home/Home.vue`
+
+**功能入口**:
+
+1. **顶部头部区域**
+   - 品牌LOGO "数和文创"
+   - 公告滚动栏（3秒轮播，点击跳转至 `/activity`），数据来自 `GET /announcements`
+
+2. **Banner 轮播图**
+   - Vant Swipe 组件，4秒自动播放，数据来自 `GET /banners`
+
+3. **功能宫格（2x2 + 1x4）**
+   - **第一行（2x2 大格）**:
+     - 合成兑换 → `/activity/synthesis`
+     - 幸运抽奖 → `/home/lucky-draw`
+     - 抽签活动 → `/home/lottery`（空页面占位）
+     - 签到专区 → `/home/checkin`
+   - **第二行（1x4 圆形图标）**:
+     - 幻化熔炉 → `/home/furnace`（空页面占位）
+     - 名人堂 → `/home/hall-of-fame`（空页面占位）
+     - 新手指南 → `/home/beginner-guide`（空页面占位）
+     - 文物展馆 → `/home/museum`
+
+4. **发售区域**
+   - Tab 切换：**首发** / **盲盒**
+   - 发售日历入口 → `/home/release-calendar`（空页面占位）
+   - 首发列表数据来自 `GET /collectibles`
+   - 盲盒列表数据来自 `GET /blind-boxes`
+   - 每张发售卡片展示：藏品图片、名称、发行份数、价格、发售状态（即将发售/正在发售/已售罄）
+   - 点击跳转至 `/home/release/:id`
+
+5. **登录拦截**: 点击任何功能入口前检查 `isLoggedIn`，未登录弹出登录提示
+
+### 3.2 签到页 (Checkin.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/home/Checkin.vue`
+
+- 用户信息卡片（头像、昵称、UID）
+- 连续签到天数显示
+- 月历签到日历（可前后切换月份，显示已签到日期标记）
+- 底部"立即签到"按钮（今日已签到则禁用）
+- API 调用：
+  - `GET /check-in/records?month=YYYY-MM` - 获取月签到记录
+  - `POST /check-in` - 执行签到
+
+### 3.3 幸运抽奖页 (LuckyDraw.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/home/LuckyDraw.vue`
+
+- 老虎机式抽奖动画界面
+- 显示剩余抽奖次数
+- 支持"抽一次"和"抽五次"两种模式
+- 奖品表格（名称、已中/总数、对应奖品）
+- 中奖弹窗展示
+- API 调用：
+  - `GET /lucky-draw/activities` - 获取抽奖活动列表
+  - `GET /lucky-draw/activities/:id` - 获取抽奖活动详情
+  - `POST /lucky-draw/activities/:id/draw` - 执行抽奖
+
+### 3.4 发售详情页 (ReleaseDetail.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/home/ReleaseDetail.vue`
+
+- 藏品3D展示卡（带3D平台底座效果）
+- 藏品名称、副标题
+- 限量/流通份数标签
+- **即将发售状态**: 显示倒计时（天/时/分/秒）
+- **发售中/售罄状态**: 显示发售进度条（已售百分比、剩余/总量）
+- 创作者、品牌方、购买须知等信息
+- 收藏功能（心形按钮）
+- 底部购买按钮（支持首发购买和优先购）
+- API 调用：
+  - `GET /collectibles/:id` - 获取藏品详情
+  - `GET /priority-sales?collectible_id=:id` - 获取优先购信息
+
+### 3.5 文物展馆 (MuseumGallery.vue) 和文物详情 (ArtifactDetail.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/home/MuseumGallery.vue`, `ArtifactDetail.vue`
+
+- 文物展馆介绍横幅
+- 文物瀑布流卡片（图片、朝代、名称、材质/类别）
+- 点击进入文物详情
+- API 调用：
+  - `GET /artifacts?page=1&page_size=20` - 获取文物列表
+  - `GET /artifacts/:id` - 获取文物详情
+
+### 3.6 市场页 (Market.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/market/Market.vue`
+
+**功能**:
+
+1. **顶部 Tab**: 藏品 / 盲盒 双栏切换
+2. **搜索栏**: 关键词搜索
+3. **分类标签**: 横向滚动分类筛选
+4. **筛选栏**:
+   - 价格排序（升序/降序切换）
+   - 热度排行排序
+   - 未退市筛选（单选按钮）
+5. **商品网格**: 每个商品卡片展示图片、名称、发行份数、价格、收藏按钮
+6. API 调用：
+   - `GET /market/listings?page=1&page_size=100` - 获取市场寄售列表
+   - `GET /blind-boxes?page=1&page_size=100` - 获取盲盒列表
+7. 点击商品跳转至 `/market/detail/:id`
+
+### 3.7 市场藏品详情页 (Detail.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/market/Detail.vue`
+
+- 3D展示藏品图片（带平台底座）
+- 藏品名称（左右月桂叶装饰）
+- 发行份数 / 流通份数标签
+- 元数据卡片：所属专辑、合约地址、认证标识
+- 创作者、品牌方、购买须知详细信息
+- 收藏功能
+- API 调用：`GET /collectibles/:id`
+
+### 3.8 专辑/寄售列表页 (Album.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/market/Album.vue`
+
+- 藏品Hero展示区
+- 浮动按钮：相关公告、我有吗（查询是否持有）
+- 发行/流通份数标签
+- Tab 切换：寄售列表 / 成交记录
+- 寄售列表项：编号、价格、"寄售中"标签
+- 底部"快捷下单"按钮（寄售购买）
+- API 调用：
+  - `GET /collectibles/:id` - 藏品详情
+  - `GET /market/listings?collectible_id=:id` - 该藏品的寄售列表
+  - `GET /user/collectibles?holding_status=1` - 查询用户是否持有
+
+### 3.9 订单页 (Order.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/market/Order.vue`
+
+- 订单标题（数字藏品订单信息）
+- 商品卡片（图片、名称、购买类型标签：发售购买/优先购/寄售购买）
+- 数量选择器（仅发售/优先购可选数量，寄售购买固定1件）
+- 合计金额
+- 付款方式选择（余额、支付宝、微信等）
+- 交易密码输入弹窗
+- 订单超时取消提示
+- API 调用：
+  - `GET /collectibles/:id` - 获取藏品信息
+  - `POST /market/listings/:id/buy` - 寄售购买
+  - `POST /priority-sales/:id/buy` - 优先购购买
+  - `POST /collectibles/:id/buy` - 发售购买
+  - `POST /payments` - 创建支付
+
+### 3.10 活动页 (Activity.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/activity/Activity.vue`
+
+- 顶部 Tab：发现 / 新闻
+- 分类标签（发现：全部/运营公告/系统公告/寄售公告/合成公告/活动公告；新闻：全部/辟谣/行情/政策）
+- 搜索栏
+- 公告/新闻列表卡片（标题、标签、时间）
+- API 调用：`GET /announcements?page=1&page_size=20&type=xxx`
+
+### 3.11 公告详情页 (Notice.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/activity/Notice.vue`
+
+- API 调用：`GET /announcements/:id`
+
+### 3.12 合成中心 (Synthesis.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/activity/Synthesis.vue`
+
+- 合成活动横幅
+- 搜索栏
+- Tab 切换：限时活动 / 常驻活动
+- 活动卡片列表（状态标签：进行中/即将开始/已结束，缩略图、标题、活动规则、去合成按钮/倒计时/已结束）
+- 右上角"活动记录"入口
+- API 调用：`GET /synthesis/activities?page=1&page_size=20`
+
+### 3.13 合成详情页 (SynthesisDetail.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/activity/SynthesisDetail.vue`
+
+- 结果藏品3D展示
+- 活动标题
+- **即将开始状态**: 倒计时显示
+- **已结束状态**: 结束提示
+- **进行中状态**:
+  - 合成材料列表（需要数量 vs 持有数量，不足时红色标记）
+  - 从仓库选择材料
+  - 确认合成按钮
+- API 调用：
+  - `GET /synthesis/activities/:id` - 获取合成活动详情
+  - `GET /user/collectibles?holding_status=1` - 获取用户可合成材料
+  - `POST /synthesis/activities/:id/synthesize` - 执行合成
+
+### 3.14 邀请好友页 (Invite.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/activity/Invite.vue`
+
+- 邀请横幅
+- 二维码（前端使用 qrcode 库生成）
+- 邀请码展示与复制
+- 邀请记录列表（用户、时间、奖励金额）
+- API 调用：`GET /user/invites?page=1&page_size=50`
+
+### 3.15 个人中心 (Profile.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/profile/Profile.vue`
+
+**功能入口**:
+
+1. **头部区域**
+   - 侧边菜单按钮（打开设置侧边栏）
+   - 用户头像、昵称、UID（可复制）
+   - 未实名时显示"去实名"入口
+
+2. **功能宫格（2行）**
+   - **第一行**: 我的订单、我的钱包、邀请好友、在线客服
+   - **第二行**: 寄售记录、社区共创（空页面）、转赠、加入群聊
+
+3. **藏品收藏列表**
+   - Tab 切换：持有 / 盲盒 / 已售
+   - 持有: `GET /user/collectibles?holding_status=1`
+   - 盲盒: `GET /blind-boxes`
+   - 已售: `GET /user/collectibles?holding_status=2`
+   - 每个藏品卡片：图片、名称、持有数量、收藏按钮
+   - 点击打开藏品详情弹窗
+
+4. **藏品详情弹窗功能**
+   - 查看藏品编号列表
+   - 寄售入口（跳转至 `/profile/resale-collectible/:id`）
+   - 转赠入口（跳转至 `/profile/transfer`）
+   - 盲盒开启：`POST /blind-boxes/:id/open`
+   - 查看寄售挂单：`GET /market/my-listings`
+   - 取消寄售：`PUT /market/listings/:id/cancel`
+
+5. **设置侧边栏**
+   - 跳转至 `/profile/settings`
+
+### 3.16 钱包页 (Wallet.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/profile/Wallet.vue`
+
+- 资金安全提示横幅
+- 余额显示
+- 支付渠道列表（立即开通按钮）
+- 交易记录列表（类型、时间、金额）
+- 充值弹窗（选择渠道、输入金额）
+- 交易密码验证弹窗
+- API 调用：
+  - `GET /wallet` - 获取钱包余额
+  - `GET /wallet/transactions?page=1&page_size=50` - 获取交易记录
+  - `GET /wallet/channels` - 获取支付渠道
+  - `POST /wallet/recharge` - 充值
+
+### 3.17 订单页 (orders.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/profile/orders.vue`
+
+- Tab 切换：全部/待支付/已完成/已取消
+- 订单卡片（订单号、状态、倒计时、商品图片、名称、编号、时间、价格）
+- 空投订单特殊标记
+- 操作按钮：去支付、取消订单、再次购买
+- API 调用：
+  - `GET /orders?status=xxx&page=1&page_size=20` - 获取订单列表
+  - `GET /user/collectibles?source=airdrop` - 获取空投记录
+  - `PUT /orders/:id/cancel` - 取消订单
+
+### 3.18 寄售记录页 (Consignments.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/profile/Consignments.vue`
+
+- Tab 切换：全部/在售/已售出/已取消
+- 寄售卡片（图片、名称、寄售时间、编号、价格、状态）
+- 在售状态可"取消寄售"
+- API 调用：
+  - `GET /market/my-listings?page=1&page_size=100` - 获取我的寄售列表
+  - `PUT /market/listings/:id/cancel` - 取消寄售
+
+### 3.19 寄售准备页 (ResaleCollectible.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/profile/ResaleCollectible.vue`
+
+- 展示可寄售的持有藏品列表
+- 已寄售的藏品灰显
+- 点击选择藏品进入寄售详情
+- API 调用：
+  - `GET /user/collectibles?holding_status=1` - 持有藏品
+  - `GET /user/collectibles?holding_status=2` - 已售藏品
+  - `GET /collectibles/:id` - 藏品详情
+
+### 3.20 寄售详情页 (ResaleDetail.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/profile/ResaleDetail.vue`
+
+- 藏品卡片（图片、名称、编号、持仓天数、购入价）
+- 价格输入框
+- 实时计算：寄售价格、平台服务费（5%）、预计到账金额
+- 最低寄售价格限制（购入价的50%）
+- 交易密码验证弹窗
+- API 调用：
+  - `GET /user/collectibles?holding_status=1` - 获取藏品信息
+  - `POST /market/listings` - 创建寄售挂单
+
+### 3.21 转赠页 (Transfer.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/profile/Transfer.vue`
+
+- Tab 切换：转赠藏品 / 转赠记录
+- **转赠藏品**: 可转赠藏品列表（排除已寄售），选择后输入对方手机号，交易密码验证
+- **转赠记录**: 记录列表（方向、对方手机号、状态），待确认状态可确认接收/拒绝/取消
+- API 调用：
+  - `GET /user/collectibles?holding_status=1` - 可转赠藏品
+  - `GET /transfers?page=1&page_size=50` - 转赠记录
+  - `POST /transfers` - 发起转赠
+  - `PUT /transfers/:id/confirm` - 确认接收
+  - `PUT /transfers/:id/reject` - 拒绝转赠
+  - `PUT /transfers/:id/cancel` - 取消转赠
+
+### 3.22 设置页 (Settings.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/profile/Settings.vue`
+
+- 退出登录
+- 用户信息（头像、昵称、手机号）
+- 菜单项：个人资料、收货地址、我的认证、隐私设置、交易密码、我的发票、使用条款、联系我们、分享App、隐私协议
+
+### 3.23 个人信息页 (Info.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/profile/Info.vue`
+
+- 头像修改（ActionSheet 选择）
+- 昵称修改（弹窗输入）
+- 手机号显示（脱敏）
+- API 调用：
+  - `GET /user/info` - 获取用户信息
+  - `PATCH /user/profile` - 更新头像/昵称
+
+### 3.24 地址管理页 (address.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/profile/address.vue`
+
+- 收货地址列表
+- 新增/编辑/删除地址
+- 设为默认地址
+- API 调用：
+  - `GET /user/addresses` - 地址列表
+  - `POST /user/addresses` - 新增地址
+  - `PUT /user/addresses/:id` - 编辑地址
+  - `DELETE /user/addresses/:id` - 删除地址
+  - `PUT /user/addresses/:id/default` - 设为默认
+
+### 3.25 交易密码管理页 (transaction-password.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/profile/transaction-password.vue`
+
+- 设置/修改交易密码
+- 需短信验证码验证
+- API 调用：
+  - `POST /sms/send` (scene=4) - 发送验证码
+  - `POST /user/transaction-password` - 设置/修改交易密码
+
+### 3.26 认证页 (Certification.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/profile/Certification.vue`
+
+- 实名认证状态显示
+- 已认证：显示姓名、身份证号
+- 未认证：输入真实姓名和身份证号进行认证
+- API 调用：
+  - `GET /user/info` - 获取认证状态
+  - `POST /user/realname` - 提交实名认证
+
+### 3.27 加入群聊页 (JoinGroup.vue)
+
+**文件**: `/workspace/shuheWC/frontend/src/views/profile/JoinGroup.vue`
+
+- 群聊信息卡片（群名、描述、群友数）
+- 群聊二维码（前端使用 QR API 生成）
+- 群聊福利列表
+- **无 API 调用**（纯静态页面）
+
+### 3.28 认证模块页面
+
+| 文件 | 功能 |
+|------|------|
+| `Login.vue` | 手机号+验证码登录 / 手机号+密码登录，协议同意，跳转注册/重置密码 |
+| `Register.vue` | 手机号+验证码+密码注册，邀请码可选 |
+| `ResetPassword.vue` | 手机号+验证码+新密码重置 |
+| `OperationPassword.vue` | 首次设置交易密码（注册后引导） |
+| `Realname.vue` | 实名认证（姓名+身份证号） |
+
+### 3.29 通用组件
+
+| 组件 | 文件路径 | 功能 |
+|------|----------|------|
+| NavBar | `@/components/NavBar.vue` | 通用导航栏（返回按钮、标题、右侧文字/插槽） |
+| EmptyState | `@/components/EmptyState.vue` | 空状态占位组件（图片+文字） |
+| TabBar | `@/components/TabBar.vue` | 底部 Tab 导航（首页/市场/活动/我的） |
+| EmptyPage | `@/views/common/EmptyPage.vue` | 空页面占位（功能待开发） |
+| UserAgreement | `@/views/common/UserAgreement.vue` | 用户协议页面 |
+| PrivacyPolicy | `@/views/common/PrivacyPolicy.vue` | 隐私政策页面 |
+
+---
+
+## 四、API 调用分析
+
+### 4.1 请求封装
+
+**文件**: `/workspace/shuheWC/frontend/src/api/request.js`
+
+- **基础配置**: `baseURL: '/api'`, `timeout: 15000`
+- **请求拦截器**: 从 localStorage 读取 token，添加 `Authorization: Bearer {token}` 请求头
+- **响应拦截器**: 
+  - 成功：直接返回 `response.data`（后端统一格式 `{ code, data, message }`）
+  - 401 错误：自动刷新 token（`POST /api/user/refresh-token`），支持并发请求队列排队，刷新失败则清除本地数据并跳转登录页
+  - 其他错误：`showToast(message)` 显示错误提示
+  - 网络错误：提示"网络异常，请检查网络连接"
+
+### 4.2 完整 API 接口列表
+
+按功能模块分类，共 **38 个后端接口**:
+
+#### 4.2.1 用户认证模块
+
+| 方法 | 接口路径 | 调用页面 | 功能说明 |
+|------|----------|----------|----------|
+| POST | `/sms/send` | Login.vue, Register.vue, ResetPassword.vue, OperationPassword.vue, transaction-password.vue | 发送短信验证码（scene: 1=注册, 2=登录, 4=交易密码, 5=重置密码） |
+| POST | `/user/login` | Login.vue | 用户登录 |
+| POST | `/user/register` | Register.vue | 用户注册 |
+| POST | `/user/reset-password` | ResetPassword.vue | 重置密码 |
+| POST | `/user/refresh-token` | request.js | 刷新 token（拦截器自动调用） |
+| POST | `/user/transaction-password` | OperationPassword.vue, transaction-password.vue | 设置/修改交易密码 |
+| POST | `/user/realname` | Realname.vue, Certification.vue | 实名认证 |
+| GET | `/user/info` | Info.vue, Certification.vue | 获取用户信息 |
+| PATCH | `/user/profile` | Info.vue | 更新用户资料（头像、昵称） |
+
+#### 4.2.2 藏品模块
+
+| 方法 | 接口路径 | 调用页面 | 功能说明 |
+|------|----------|----------|----------|
+| GET | `/collectibles` | Home.vue, useFavorites.js | 获取藏品列表 |
+| GET | `/collectibles/:id` | Detail.vue, ReleaseDetail.vue, Album.vue, Order.vue, ResaleCollectible.vue | 获取藏品详情 |
+| POST | `/collectibles/:id/buy` | Order.vue | 发售购买 |
+| POST | `/collectibles/:id/favorite` | useFavorites.js | 收藏藏品 |
+| DELETE | `/collectibles/:id/favorite` | useFavorites.js | 取消收藏 |
+
+#### 4.2.3 盲盒模块
+
+| 方法 | 接口路径 | 调用页面 | 功能说明 |
+|------|----------|----------|----------|
+| GET | `/blind-boxes` | Home.vue, Market.vue, Profile.vue | 获取盲盒列表 |
+| POST | `/blind-boxes/:id/open` | Profile.vue | 开启盲盒 |
+
+#### 4.2.4 市场寄售模块
+
+| 方法 | 接口路径 | 调用页面 | 功能说明 |
+|------|----------|----------|----------|
+| GET | `/market/listings` | Market.vue, Album.vue | 获取市场寄售列表 |
+| GET | `/market/my-listings` | Consignments.vue, Profile.vue | 获取我的寄售记录 |
+| POST | `/market/listings` | ResaleDetail.vue | 创建寄售挂单 |
+| POST | `/market/listings/:id/buy` | Order.vue | 寄售购买 |
+| PUT | `/market/listings/:id/cancel` | Consignments.vue, Profile.vue | 取消寄售 |
+
+#### 4.2.5 优先购模块
+
+| 方法 | 接口路径 | 调用页面 | 功能说明 |
+|------|----------|----------|----------|
+| GET | `/priority-sales` | ReleaseDetail.vue | 获取优先购信息 |
+| POST | `/priority-sales/:id/buy` | Order.vue | 优先购购买 |
+
+#### 4.2.6 支付模块
+
+| 方法 | 接口路径 | 调用页面 | 功能说明 |
+|------|----------|----------|----------|
+| POST | `/payments` | Order.vue | 创建支付订单 |
+
+#### 4.2.7 用户藏品模块
+
+| 方法 | 接口路径 | 调用页面 | 功能说明 |
+|------|----------|----------|----------|
+| GET | `/user/collectibles` | Profile.vue, Transfer.vue, ResaleDetail.vue, ResaleCollectible.vue, SynthesisDetail.vue, Album.vue, orders.vue | 获取用户藏品（holding_status: 1=持有, 2=已售; source: airdrop=空投） |
+
+#### 4.2.8 订单模块
+
+| 方法 | 接口路径 | 调用页面 | 功能说明 |
+|------|----------|----------|----------|
+| GET | `/orders` | orders.vue | 获取订单列表 |
+| PUT | `/orders/:id/cancel` | orders.vue | 取消订单 |
+
+#### 4.2.9 转赠模块
+
+| 方法 | 接口路径 | 调用页面 | 功能说明 |
+|------|----------|----------|----------|
+| GET | `/transfers` | Transfer.vue | 获取转赠记录 |
+| POST | `/transfers` | Transfer.vue | 发起转赠 |
+| PUT | `/transfers/:id/confirm` | Transfer.vue | 确认接收转赠 |
+| PUT | `/transfers/:id/reject` | Transfer.vue | 拒绝转赠 |
+| PUT | `/transfers/:id/cancel` | Transfer.vue | 取消转赠 |
+
+#### 4.2.10 签到模块
+
+| 方法 | 接口路径 | 调用页面 | 功能说明 |
+|------|----------|----------|----------|
+| GET | `/check-in/records` | Checkin.vue | 获取签到记录 |
+| POST | `/check-in` | Checkin.vue | 执行签到 |
+
+#### 4.2.11 抽奖模块
+
+| 方法 | 接口路径 | 调用页面 | 功能说明 |
+|------|----------|----------|----------|
+| GET | `/lucky-draw/activities` | LuckyDraw.vue | 获取抽奖活动列表 |
+| GET | `/lucky-draw/activities/:id` | LuckyDraw.vue | 获取抽奖活动详情 |
+| POST | `/lucky-draw/activities/:id/draw` | LuckyDraw.vue | 执行抽奖 |
+
+#### 4.2.12 合成模块
+
+| 方法 | 接口路径 | 调用页面 | 功能说明 |
+|------|----------|----------|----------|
+| GET | `/synthesis/activities` | Synthesis.vue | 获取合成活动列表 |
+| GET | `/synthesis/activities/:id` | SynthesisDetail.vue | 获取合成活动详情 |
+| POST | `/synthesis/activities/:id/synthesize` | SynthesisDetail.vue | 执行合成 |
+
+#### 4.2.13 钱包模块
+
+| 方法 | 接口路径 | 调用页面 | 功能说明 |
+|------|----------|----------|----------|
+| GET | `/wallet` | Wallet.vue | 获取钱包余额 |
+| GET | `/wallet/transactions` | Wallet.vue | 获取交易记录 |
+| GET | `/wallet/channels` | Wallet.vue | 获取支付渠道 |
+| POST | `/wallet/recharge` | Wallet.vue | 充值 |
+
+#### 4.2.14 公告/内容模块
+
+| 方法 | 接口路径 | 调用页面 | 功能说明 |
+|------|----------|----------|----------|
+| GET | `/banners` | Home.vue | 获取轮播图 |
+| GET | `/announcements` | Home.vue, Activity.vue | 获取公告列表 |
+| GET | `/announcements/:id` | Notice.vue | 获取公告详情 |
+
+#### 4.2.15 邀请模块
+
+| 方法 | 接口路径 | 调用页面 | 功能说明 |
+|------|----------|----------|----------|
+| GET | `/user/invites` | Invite.vue | 获取邀请记录 |
+
+#### 4.2.16 文物展馆模块
+
+| 方法 | 接口路径 | 调用页面 | 功能说明 |
+|------|----------|----------|----------|
+| GET | `/artifacts` | MuseumGallery.vue | 获取文物列表 |
+| GET | `/artifacts/:id` | ArtifactDetail.vue | 获取文物详情 |
+
+#### 4.2.17 收货地址模块
+
+| 方法 | 接口路径 | 调用页面 | 功能说明 |
+|------|----------|----------|----------|
+| GET | `/user/addresses` | address.vue | 获取地址列表 |
+| POST | `/user/addresses` | address.vue | 新增地址 |
+| PUT | `/user/addresses/:id` | address.vue | 编辑地址 |
+| DELETE | `/user/addresses/:id` | address.vue | 删除地址 |
+| PUT | `/user/addresses/:id/default` | address.vue | 设为默认地址 |
+
+---
+
+## 五、Composables 状态管理分析
+
+### 5.1 useUser.js
+
+**文件**: `/workspace/shuheWC/frontend/src/composables/useUser.js`
+
+**核心用户状态管理，全局共享响应式数据 + localStorage 持久化。**
+
+**状态字段**:
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `isLoggedIn` | ref(boolean) | 登录状态 |
+| `token` | ref(string) | JWT 访问令牌 |
+| `refreshToken` | ref(string) | 刷新令牌 |
+| `username` | ref(string) | 用户昵称（未设置时随机生成8位大写字母+数字） |
+| `phone` | ref(string) | 手机号 |
+| `avatar` | ref(string) | 头像URL（默认 dicebear 头像） |
+| `uid` | ref(string) | 用户UID（未设置时随机生成5位数字） |
+| `isRealname` | ref(boolean) | 是否已实名认证 |
+| `realName` | ref(string) | 真实姓名 |
+| `idCard` | ref(string) | 身份证号 |
+| `hasTxPassword` | ref(boolean) | 是否已设置交易密码（仅布尔标记，不存储密码） |
+
+**方法**:
+
+| 方法 | 功能 |
+|------|------|
+| `login(apiData)` | 接收后端登录/注册返回数据，设置所有用户状态并持久化 |
+| `register(apiData)` | 注册成功后调用 login |
+| `logout()` | 清除所有用户状态并持久化 |
+| `updateProfile(newName, newAvatar)` | 更新昵称/头像 |
+| `setRealname(name, id)` | 设置实名认证信息 |
+| `setTransactionPassword()` | 标记已设置交易密码 |
+| `hasTransactionPassword()` | 查询是否已设置交易密码 |
+| `maskedPhone()` | 返回脱敏手机号（138****8888） |
+
+**持久化机制**: 所有状态变更后调用 `persistUser()` 将完整用户对象序列化至 `localStorage` 的 `ht_user` 键。
+
+### 5.2 useCountdown.js
+
+**文件**: `/workspace/shuheWC/frontend/src/composables/useCountdown.js`
+
+**验证码倒计时功能。**
+
+- **参数**: `seconds` (默认60秒)
+- **状态**: `countdown` (剩余秒数), `text` (按钮文本)
+- **方法**: `start()` - 启动倒计时
+- **自动清理**: 组件卸载时 `onUnmounted` 清除定时器
+- **使用场景**: 登录、注册、重置密码、交易密码设置页面的"获取验证码"按钮
+
+### 5.3 useFavorites.js
+
+**文件**: `/workspace/shuheWC/frontend/src/composables/useFavorites.js`
+
+**藏品收藏状态管理，本地缓存 + 后端同步。**
+
+**状态**: `favoriteIds` (ref(Set)) - 收藏的藏品ID集合
+
+**方法**:
+
+| 方法 | 功能 |
+|------|------|
+| `isFavorited(id)` | 判断某藏品是否已收藏 |
+| `toggleFavorite(id)` | 切换收藏状态（乐观更新 + 后端同步 + 失败回滚） |
+| `syncFavorites()` | 从后端同步收藏状态（通过 `GET /collectibles` 返回的 `is_favored` 字段） |
+| `getFavoriteIds()` | 获取所有收藏ID数组 |
+| `clearFavorites()` | 清空收藏 |
+
+**同步策略**:
+- **乐观更新**: 先更新本地 Set 并持久化，再异步同步后端
+- **未登录降级**: 未登录时仅使用 localStorage
+- **已登录同步**: `POST /collectibles/:id/favorite` 收藏, `DELETE /collectibles/:id/favorite` 取消收藏
+- **失败回滚**: 后端同步失败时恢复本地状态并提示
+- **持久化键**: `ht_favorites`
+
+---
+
+## 六、关键架构特征总结
+
+### 6.1 认证流程
+1. 登录/注册 → 后端返回 `{ token, refresh_token, user }` → `useUser.login()` 存储至 localStorage
+2. 请求自动携带 Bearer Token
+3. 401 时自动刷新 token（支持并发队列）
+4. 刷新失败清除本地数据，跳转登录页
+
+### 6.2 功能完成度
+
+| 功能模块 | 状态 | 说明 |
+|----------|------|------|
+| 用户认证（登录/注册/重置密码） | 已实现 | 支持验证码和密码两种登录方式 |
+| 实名认证 | 已实现 | 姓名+身份证号 |
+| 交易密码 | 已实现 | 6位数字密码，寄售/转赠/充值时验证 |
+| 首页展示 | 已实现 | 轮播图、公告、发售列表 |
+| 藏品发售/购买 | 已实现 | 支持发售购买和优先购 |
+| 市场寄售 | 已实现 | 挂单、购买、取消 |
+| 盲盒 | 已实现 | 列表展示、开启 |
+| 签到 | 已实现 | 月历签到、连续签到天数 |
+| 幸运抽奖 | 已实现 | 老虎机式抽奖、抽一次/抽五次 |
+| 合成兑换 | 已实现 | 材料选择、合成 |
+| 转赠 | 已实现 | 手机号转赠、确认/拒绝/取消 |
+| 钱包 | 已实现 | 余额、充值、交易记录 |
+| 订单管理 | 已实现 | 列表、取消、再次购买 |
+| 收货地址 | 已实现 | CRUD + 默认地址 |
+| 邀请好友 | 已实现 | 二维码、邀请码、邀请记录 |
+| 文物展馆 | 已实现 | 列表、详情 |
+| 抽签活动 | 未实现 | 空页面占位 |
+| 幻化熔炉 | 未实现 | 空页面占位 |
+| 名人堂 | 未实现 | 空页面占位 |
+| 新手指南 | 未实现 | 空页面占位 |
+| 发售日历 | 未实现 | 空页面占位 |
+| 社区共创 | 未实现 | 空页面占位 |
+
+### 6.3 安全设计要点
+- 交易密码仅存储布尔标记（`hasTxPassword`），不存储密码值
+- 手机号脱敏显示（138****8888）
+- Token 刷新机制防止并发重复刷新
+- 路由守卫拦截未登录访问
+- 寄售价格最低限制（购入价50%）
+- 转赠时校验不能转给自己
+
+I now have comprehensive information about the entire frontend codebase. Let me compile the structured report in Chinese. I have:
+
+1. Router configuration with all 30+ routes
+2. API request configuration with token refresh
+3. All composables (useUser, useCountdown, useFavorites)
+4. All view files analyzed
+5. All API endpoints identified from grep results
+
+Let me now write the comprehensive report.
+
+Now I have comprehensive information from all three analyses. Let me synthesize this into a thorough comparison report. I need to:
+
+1. Identify what admin features the prompt requires
+2. Compare with existing data structures
+3. Identify what's missing (tables, fields, APIs)
+4. Identify what the prompt has that's extra/unnecessary
+5. Suggest how to improve the prompt
+
+Let me organize this into a clear, detailed comparison report.
+
+Key findings from the analysis:
+
+**Existing codebase:**
+- 42 database tables (all for C-end user operations)
+- 67 API endpoints (all C-end, zero admin APIs)
+- Frontend: 34 routes, mobile-first Vue 3 app
+- Admin tables exist (nft_admin_users, nft_audit_logs, nft_operation_logs) but no admin Controller/API
+
+**Major gaps identified:**
+
+1. **Database tables missing:**
+   - RBAC: nft_admin_roles, nft_admin_permissions, nft_admin_role_permissions
+   - Customer service: nft_support_tickets
+   - Blacklist: nft_blacklist
+   - Refund: nft_refunds
+   - Approval workflow: nft_approvals
+   - Qualification purchase: nft_eligibility_purchases (资格购)
+
+2. **Fields missing on existing tables:**
+   - nft_collectibles: destroyed_count, airdropped_count, reserved_count, is_resaleable, resale_price_min, resale_price_max
+   - nft_blind_boxes: edition, sold, circulate, destroyed (entire inventory management)
+   - nft_priority_sale_whitelists: expires_at (independent validity period)
+   - nft_resale_listings: no price control fields
+   - nft_admin_users: 2FA fields, IP whitelist
+   - nft_users: blacklist status field
+
+3. **APIs completely missing (all admin APIs):**
+   - Admin authentication (login, logout, refresh)
+   - Dashboard statistics
+   - User management (list, freeze/unfreeze, blacklist, detail)
+   - Realname management (list, view with password verification)
+   - Collectible management (create, edit, release config, inventory management, airdrop, destroy, force recall)
+   - Blind box management (create, sub-collectible config, release, destroy, recall)
+   - Order management (list, force cancel, mark paid, refund)
+   - Market management (price control, listing audit, fee config)
+   - Transfer management (list, revoke, freeze)
+   - Marketing activity management (priority sale, checkin, invite, lucky draw, synthesis, airdrop)
+   - Wallet/finance management (recharge records, fund audit, fee statistics)
+   - CMS management (banner, announcement, agreement, site settings)
+   - System config management
+   - Permission & audit management
+   - Security management
+   - Customer service tickets
+   - Reports
+   - Platform data management (clear all)
+
+4. **Prompt issues to address:**
+   - The prompt mentions "资格购" as a concept distinct from "优先购" - this needs clarification
+   - The prompt's inventory model is more complex than what exists
+   - The prompt mentions 5 roles but existing DB only has 4 (no "风控" role)
+   - The prompt's reward type system needs new ENUM values
+   - Need to address how admin backend connects to existing C-end backend
+
+Let me write a comprehensive analysis document.
+
+分析完成。现在我已全面掌握了现有代码库和提示词的详细内容，下面进行逐项对比分析。
+
+---
+
+## 现有项目 vs 管理后台提示词 — 完整对比分析
+
+### 一、现有项目概况
+
+| 维度 | 现有项目 |
+|------|----------|
+| 数据库表 | 42 张（全部为 C 端用户业务表） |
+| 后端 API | 67 个端点 x 15 个 Controller（**0 个管理后台接口**） |
+| 前端路由 | 34 条（移动端 H5，全部为 C 端页面） |
+| 管理员表 | `nft_admin_users` 存在但无 Controller/Service |
+| 审计日志表 | `nft_audit_logs` + `nft_operation_logs` 存在但无写入入口 |
+
+**核心结论**：现有项目是纯 C 端（用户端）项目，管理后台需要从零搭建后端 API，前端也需要全新项目。
+
+---
+
+### 二、提示词 17 个模块与现有代码的逐项对比
+
+#### 2.1 需要全新建表的功能（现有库完全缺失）
+
+| 提示词模块 | 需要的新表 | 原因 |
+|-----------|-----------|------|
+| 权限与审计（8.13） | `nft_admin_roles`、`nft_admin_permissions`、`nft_admin_role_permissions` | 现有 `nft_admin_users.role` 是 TINYINT 硬编码（1-4），无 RBAC 体系，提示词要求 5 种角色 + 动态权限 |
+| 客服工单（8.15） | `nft_support_tickets`、`nft_ticket_replies` | 现有 `nft_feedback` 是用户反馈，非工单系统，缺少分配/流转/优先级/关联订单 |
+| 风控安全（8.14） | `nft_blacklist`、`nft_risk_alerts`、`nft_security_events` | 现有无黑名单表、无风控告警表、无安全事件记录表 |
+| 订单管理（8.6） | `nft_refunds` | 现有 `nft_payments.status` 含 `4=已退款` 状态值，但无退款记录表（缺退款金额/原因/操作人/渠道） |
+| 风控安全（8.14） | `nft_approvals` | 提示词要求大额退款/强制修改资产等需二次审批，现有库无审批工作流表 |
+| 资格购（4.2） | `nft_eligibility_purchases` | 提示词定义的「资格购」与现有「优先购」是不同概念，需独立表记录资格藏品+白名单手机号 |
+| 营销活动（8.9） | `nft_activity_rewards` | 提示词要求统一奖励类型（藏品/优先购资格/资格购资格/抽奖次数/盲盒），现有各活动表奖励字段分散且不统一 |
+| 平台运维（8.17） | `nft_platform_cleanup_logs` | 平台清库操作记录表 |
+
+#### 2.2 现有表需要新增字段
+
+| 表名 | 缺失字段 | 提示词对应功能 | 严重程度 |
+|------|---------|---------------|---------|
+| `nft_collectibles` | `destroyed_count`（已销毁） | 4.1.8 销毁规则 | **高** |
+| `nft_collectibles` | `airdropped_count`（已独立空投） | 4.1.6 独立空投规则 | **高** |
+| `nft_collectibles` | `reserved_count`（配额预留） | 4.1.3 配额配置规则 | **高** |
+| `nft_collectibles` | `is_resaleable`（寄售开关） | 4.3 寄售开关联动 | **高** |
+| `nft_collectibles` | `resale_price_min`（限价下限） | 4.3.1 价格管控 | **高** |
+| `nft_collectibles` | `resale_price_max`（限价上限） | 4.3.1 价格管控 | **高** |
+| `nft_collectibles` | `resale_price_mode`（限价模式） | 4.3.1 限价/不限价 | **高** |
+| `nft_blind_boxes` | `edition`（发行总量） | 4.1.2 盲盒库存定义 | **高** |
+| `nft_blind_boxes` | `sold`（已售出） | 4.1.2 盲盒库存定义 | **高** |
+| `nft_blind_boxes` | `circulate`（流通量） | 4.1.2 盲盒库存定义 | **高** |
+| `nft_blind_boxes` | `destroyed_count`（已销毁） | 4.1.8 销毁规则 | **高** |
+| `nft_blind_boxes` | `airdropped_count`（已独立空投） | 4.1.7 盲盒独立空投 | **高** |
+| `nft_blind_boxes` | `name`（盲盒名称） | 8.5 盲盒管理 | **中** |
+| `nft_blind_boxes` | `image`（盲盒图片） | 8.5 盲盒管理 | **中** |
+| `nft_blind_boxes` | `description`（描述） | 8.5 盲盒管理 | **中** |
+| `nft_blind_boxes` | `price`（发售价格） | 4.1.5 盲盒发售规则 | **中** |
+| `nft_blind_boxes` | `status`（发售状态） | 5.2 盲盒状态流转 | **高** |
+| `nft_blind_boxes` | `per_user_limit`（每人限购） | 4.1.5 盲盒发售规则 | **中** |
+| `nft_blind_boxes` | `onsale_at` / `off_sale_at` | 4.1.5 发售时间 | **中** |
+| `nft_priority_sale_whitelists` | `expires_at`（独立有效期） | 4.6 优先购资格全链路 | **高** |
+| `nft_admin_users` | `twofa_secret`（2FA密钥） | 8.13 登录安全 | **中** |
+| `nft_admin_users` | `ip_whitelist`（IP白名单） | 8.13 登录安全 | **中** |
+| `nft_users` | `is_blacklisted`（黑名单标记） | 8.14 风控安全 | **中** |
+| `nft_resale_listings` | `system_delisted`（系统下架标记） | 4.3.1 关闭后强制下架 | **中** |
+| `nft_lucky_draw_prizes` | `prize_type`（奖品类型） | 4.7 奖励类型统一 | **高** |
+| `nft_lucky_draw_prizes` | `prize_config`（奖品配置JSON） | 4.7 奖励类型统一 | **高** |
+| `nft_check_in_records` | reward_type ENUM 需扩展 | 4.7 奖励类型统一 | **高** |
+
+#### 2.3 现有表结构已有但需确认兼容性
+
+| 表名 | 现有字段 | 提示词要求 | 兼容性评估 |
+|------|---------|-----------|-----------|
+| `nft_collectibles.edition` | 发行总量 INT | 4.1.1 发行总量不可变更 | 兼容，但现有默认值=0 需确认创建时必填 |
+| `nft_collectibles.circulate` | 流通量 INT | 4.1.1 库存池实时计算 | **语义冲突**：现有 circulate 表示「可售数量」，提示词中库存池=发行总量-已配置配额-已售出-已独立空投-已销毁，是不同概念 |
+| `nft_collectibles.sold` | 已售出 INT | 4.1.1 已售出发售 | 兼容 |
+| `nft_collectibles.locked_quantity` | 锁定数量 INT | 4.1.1 待支付锁定 | 兼容 |
+| `nft_collectibles.is_transferable` | 转赠开关 TINYINT | 4.4 转赠开关独立 | 兼容 |
+| `nft_collectibles.is_release` | 发售开关 TINYINT | 5.1 藏品状态流转 | 兼容但语义不完全匹配，提示词要求更细的状态（草稿/发售中/已售罄/已下架/已删除） |
+| `nft_orders.source` | ENUM('release','market') | 8.6 全类型订单 | **需扩展**：提示词提到「公售/优先购/市场购买/资格购/盲盒购买」5 种来源 |
+| `nft_payments.status` | 含 4=已退款 | 8.6 退款处理 | 状态值兼容但需配套退款表 |
+
+---
+
+### 三、后端 API 缺失分析
+
+现有后端 **0 个管理后台 API**。提示词 17 个模块需要的全部 Admin API 估算如下：
+
+| 模块 | 预估 API 数 | 关键接口 |
+|------|------------|---------|
+| 管理员认证 | 4 | 登录/登出/刷新Token/修改密码 |
+| 数据仪表盘 | 6 | 核心指标/资金监控/库存预警/实时动态/趋势图/优先购统计 |
+| 用户管理 | 8 | 列表/详情/冻结解冻/重置密码/强制登出/加黑名单/优先购资格台账/邀请关系链 |
+| 实名认证 | 3 | 列表/查看完整信息(密码验证)/查看审计日志 |
+| 藏品管理 | 15 | 创建/编辑/发售配置/配额配置/重新上架/强制售罄/销毁/删除/强制回收/独立空投/库存审计/列表/详情/寄售开关/价格管控 |
+| 盲盒管理 | 14 | 创建/编辑/子藏品配置/发售配置/重新上架/强制售罄/销毁/删除/强制回收/独立空投/库存审计/列表/详情/开启记录 |
+| 订单管理 | 6 | 列表/详情/强制取消/标记已支付/退款处理/异常订单修复/对账导出 |
+| 市场寄售 | 7 | 二级市场开关/价格管控/寄售审核/市场监控/异常价格预警/手续费配置/成交记录 |
+| 转赠管理 | 5 | 转赠记录/撤销转赠/强制取消/异常监控/转赠统计 |
+| 营销活动 | 20+ | 优先购CRUD/签到配置/邀请配置/抽奖CRUD+奖项池/合成CRUD/活动空投/注册福利/活动数据 |
+| 钱包财务 | 6 | 充值记录/资金流水/手续费统计/资金守恒校验/异常资金监控/导出 |
+| CMS内容 | 8 | Banner CRUD/公告CRUD/帮助中心/藏品文案审核/网页装修配置 |
+| 系统配置 | 5 | 支付配置/安全策略/CORS域名/短信OSS配置/全局参数 |
+| 权限审计 | 6 | 管理员CRUD/角色CRUD/权限分配/操作日志/登录安全配置 |
+| 风控安全 | 6 | 交易密码锁定/限流封禁日志/异常行为监控/安全事件审计/敏感操作审批/黑名单管理 |
+| 客服工单 | 5 | 工单列表/工单处理/用户反馈查看/快捷操作/工单分配 |
+| 数据报表 | 6 | 销售报表/用户报表/藏品报表/盲盒报表/财务对账表/自定义导出 |
+| 平台运维 | 2 | 一键清空/清库记录 |
+| **合计** | **~120** | 全部为新增 |
+
+---
+
+### 四、提示词存在的问题和需要修正的地方
+
+#### 4.1 库存模型语义冲突（必须修正）
+
+提示词 4.1.1 定义：
+
+> 库存池（自由库存） = 发行总量 - 已配置配额 - 已售出发售 - 已独立空投 - 已销毁
+
+现有数据库 `nft_collectibles` 中 `circulate` 字段语义是「可售数量」，并非提示词中的「流通量」（已进入用户仓库的数量）。提示词需要明确：
+
+- 现有 `circulate` 字段应重命名或重新定义语义为「库存池/自由库存」
+- 需新增 `in_circulation` 字段表示「流通量」（= sold + airdropped_count）
+- 或者保留 `circulate` 原义但新增 `free_stock` 字段
+
+#### 4.2 资格购 vs 优先购概念混淆（需要厘清）
+
+提示词 4.2 定义了一种新的「资格购」机制（持有特定藏品才能购买），这与现有的「优先购」（`nft_priority_sales`）是**完全不同的功能**：
+
+- **优先购**（已有）：白名单用户在特定时间窗口内优先购买
+- **资格购**（提示词新增）：用户必须持有指定藏品才能购买
+
+提示词需要明确说明这两者的关系，并要求后端新建 `nft_eligibility_purchases` 表。
+
+#### 4.3 盲盒表结构差距过大（需要重建）
+
+现有 `nft_blind_boxes` 仅有 5 个字段（id, collectible_id, is_delete, created_at, updated_at），提示词要求盲盒有独立的发行总量、库存池、流通量、发售配置、状态流转等。这本质上需要**重建盲盒表**。
+
+#### 4.4 奖励类型统一需要 ENUM 扩展（需要明确）
+
+提示词 4.7 要求全平台奖励类型统一为：藏品/优先购白名单资格/资格购资格/抽奖次数/盲盒。
+
+现有各表的奖励相关 ENUM：
+- `nft_check_in_records.reward_type`: `('none','collectible','points','draw_chance')` — 缺少 `priority_qualification`、`eligibility_qualification`、`blindbox`
+- `nft_lucky_draw_prizes` 无 `prize_type` 字段，仅关联 `collectible_id`
+
+提示词需要明确列出所有需要扩展的 ENUM 字段。
+
+#### 4.5 订单 source 需要扩展（需要明确）
+
+现有 `nft_orders.source` ENUM 仅 `('release','market')`，提示词 8.6 提到「公售/优先购/市场购买/资格购/盲盒购买」5 种类型。需要扩展为：
+
+```sql
+ALTER TABLE nft_orders MODIFY COLUMN source ENUM('release','market','priority','eligibility','blindbox') NOT NULL;
+```
+
+#### 4.6 角色数量不匹配
+
+现有 `nft_admin_users.role` 注释为 4 种（1=超管 2=运营 3=财务 4=客服），提示词要求 5 种（超管/运营/财务/风控/客服）。需新增 `role=5`（风控）。
+
+#### 4.7 提示词缺少与现有 C 端后端的集成说明
+
+提示词未说明管理后台后端与现有 C 端后端的关系：
+- 是同一个 NestJS 项目新增 Admin Module？
+- 还是独立的新项目共享同一个数据库？
+- Admin JWT 与 C 端 JWT 是否隔离？
+
+建议提示词增加「后端架构要求」章节。
+
+---
+
+### 五、提示词改进建议
+
+基于以上分析，提示词应补充以下内容：
+
+#### 5.1 新增「与现有 C 端系统的集成规范」章节
+
+```
+十四、与现有 C 端系统集成规范
+
+14.1 后端架构
+- 管理后台后端作为独立 NestJS 项目部署，与 C 端后端共享同一 MySQL 数据库
+- Admin JWT 与 C 端 JWT 完全隔离（不同密钥、不同端口）
+- Admin API 统一前缀 /admin/api/v1/
+- 所有 Admin 接口需 Admin JWT 认证（除登录接口）
+
+14.2 数据库变更规范
+- 不得修改现有 42 张表的已有字段语义
+- 新增字段必须设置合理默认值，确保 C 端业务不受影响
+- 新增表使用 nft_admin_ 前缀
+- 所有数据库变更通过 TypeORM migration 管理
+
+14.3 前端部署
+- 管理后台前端独立部署，不同端口（如 5174）
+- 管理后台前端技术栈：Vue3 + TS + Element Plus + Pinia
+- 与 C 端前端完全隔离，不共享组件
+```
+
+#### 5.2 新增「数据库变更清单」章节
+
+明确列出所有需要新增的表和字段，避免开发时遗漏。
+
+#### 5.3 新增「API 端点完整清单」章节
+
+按模块列出所有 ~120 个 Admin API 端点，确保开发无歧义。
+
+#### 5.4 修正库存模型定义
+
+将 4.1.1 的库存公式与现有数据库字段对齐：
+
+```
+库存池 = nft_collectibles.circulate（现有字段，重定义语义为「自由库存」）
+发行总量 = nft_collectibles.edition
+已售出发售 = nft_collectibles.sold
+已独立空投 = nft_collectibles.airdropped_count（新增字段）
+已销毁 = nft_collectibles.destroyed_count（新增字段）
+配额预留 = nft_collectibles.reserved_count（新增字段）
+流通量 = sold + airdropped_count（实时计算，非存储字段）
+```
+
+---
+
+### 六、总结矩阵
+
+| 维度 | 现有项目 | 提示词要求 | 差距 |
+|------|---------|-----------|------|
+| 数据库表 | 42 张 | 42 + ~8 张新表 = ~50 张 | 需新增 8 张表 |
+| 数据库字段 | 现有字段 | 现有 + ~25 个新字段 | 需新增 25 个字段 |
+| 后端 API | 67 个（全 C 端） | 67 + ~120 个 Admin API | 需新增 ~120 个接口 |
+| 前端页面 | 34 条路由（移动端） | 17 个模块全新 PC 端 | 全新项目 |
+| 管理员认证 | 无 | 完整 RBAC + 2FA | 从零搭建 |
+| 库存管理 | 基础（sold/circulate/locked） | 完整闭环（销毁/空投/配额/审计） | 需大幅扩展 |
+| 盲盒管理 | 极简（5 字段） | 完整独立模块 | 需重建表结构 |
+| 价格管控 | 无 | 限价/不限价模式 | 全新功能 |
+| 退款 | 无 | 完整退款流程+审批 | 全新功能 |
+| 客服工单 | 无（仅 feedback） | 完整工单系统 | 全新功能 |
+| 风控 | 无 | 黑名单+告警+审批 | 全新功能 |
+| 平台清库 | 无 | 四重确认+备份 | 全新功能 |
+
+**结论**：提示词整体设计完善，业务逻辑闭环严谨，但需要补充与现有 C 端系统的集成规范、数据库变更清单和 API 端点完整清单，以确保开发时不遗漏关键细节。特别是库存模型语义冲突、盲盒表重建、资格购新概念这三个点必须在提示词中明确说明，否则开发时会产生严重歧义。
