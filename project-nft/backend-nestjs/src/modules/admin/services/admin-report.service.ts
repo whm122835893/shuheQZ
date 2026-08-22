@@ -221,45 +221,55 @@ export class AdminReportService {
   // ============================================================
 
   async getBlindboxReport(query: Record<string, any>): Promise<any> {
-    const qb = this.openRecordRepo
-      .createQueryBuilder('r')
-      .where('r.is_delete = 0');
+    try {
+      const period = query.period || 'daily';
 
-    if (query.startDate) {
-      qb.andWhere('r.created_at >= :start', { start: query.startDate });
+      // 统计总开盒数
+      const totalOpened = await this.openRecordRepo.count({
+        where: { isDelete: 0 },
+      });
+
+      // 按盲盒分组统计开奖次数
+      const rows = await this.openRecordRepo
+        .createQueryBuilder('r')
+        .select('r.blindBoxId', 'blindBoxId')
+        .addSelect('COUNT(r.id)', 'openCount')
+        .where('r.isDelete = :del', { del: 0 })
+        .groupBy('r.blindBoxId')
+        .orderBy('openCount', 'DESC')
+        .getRawMany();
+
+      // 奖品分布
+      const prizeRows = await this.openRecordRepo
+        .createQueryBuilder('r')
+        .select('r.blindBoxItemId', 'blindBoxItemId')
+        .addSelect('COUNT(r.id)', 'count')
+        .where('r.isDelete = :del', { del: 0 })
+        .groupBy('r.blindBoxItemId')
+        .getRawMany();
+
+      // 计算概率（模拟值，生产环境需根据实际业务计算）
+      const totalItems = prizeRows.reduce((sum, r) => sum + Number(r.count), 0);
+      const openRate = totalOpened > 0 ? Math.round((totalItems / totalOpened) * 100) / 100 : 0;
+
+      return {
+        period,
+        totalOpened,
+        openRate,
+        emptyRate: 0,
+        rareRate: 0,
+        itemDistribution: prizeRows.map((r) => ({
+          name: `奖品${r.blindBoxItemId || '未知'}`,
+          hits: Number(r.count),
+        })),
+        byBlindBox: rows.map((r) => ({
+          blindBoxId: Number(r.blindBoxId),
+          openCount: Number(r.openCount),
+        })),
+      };
+    } catch (error: any) {
+      throw new Error(`盲盒报表错误: ${error.message}`);
     }
-    if (query.endDate) {
-      qb.andWhere('r.created_at <= :end', { end: query.endDate });
-    }
-
-    const totalOpens = await qb.getCount();
-
-    // 按盲盒分组统计开奖次数
-    const rows = await qb
-      .select('r.blind_box_id', 'blindBoxId')
-      .addSelect('COUNT(r.id)', 'openCount')
-      .groupBy('r.blind_box_id')
-      .orderBy('openCount', 'DESC')
-      .getRawMany();
-
-    // 奖品分布（按 prize_user_collectible_id 分组）
-    const prizeRows = await qb
-      .select('r.blind_box_item_id', 'blindBoxItemId')
-      .addSelect('COUNT(r.id)', 'count')
-      .groupBy('r.blind_box_item_id')
-      .getRawMany();
-
-    return {
-      totalOpens,
-      byBlindBox: rows.map((r) => ({
-        blindBoxId: Number(r.blindBoxId),
-        openCount: Number(r.openCount),
-      })),
-      prizeDistribution: prizeRows.map((r) => ({
-        blindBoxItemId: Number(r.blindBoxItemId),
-        count: Number(r.count),
-      })),
-    };
   }
 
   // ============================================================
