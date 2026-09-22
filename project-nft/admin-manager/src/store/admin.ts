@@ -17,7 +17,7 @@ export const useAdminStore = defineStore('admin', () => {
   const isLoggedIn = ref(!!getToken())
 
   async function login(username: string, password: string) {
-    const result: LoginResult = await authApi.login(username, password)
+    const result: LoginResult = await authApi.login({ username, password })
     token.value = result.token
     setToken(result.token)
     isLoggedIn.value = true

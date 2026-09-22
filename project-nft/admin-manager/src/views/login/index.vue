@@ -18,7 +18,7 @@
         </el-button>
       </el-form>
       <div class="login-tip">
-        <p>默认账号：admin / admin123</p>
+        <p>默认账号：admin / Admin123456</p>
       </div>
     </div>
   </div>
@@ -43,7 +43,7 @@ const loading = ref(false)
 
 const form = reactive({
   username: 'admin',
-  password: 'admin123'
+  password: 'Admin123456'
 })
 
 const rules = {
