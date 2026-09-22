@@ -71,6 +71,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
           message = r.error;
         }
       }
+    } else if (
+      exception instanceof Error &&
+      /Unknown column 'NaN'/i.test(exception.message)
+    ) {
+      // 路径参数非数字（如 /xx/abc）经 Number() 转为 NaN 进入 SQL 查询，
+      // 属于客户端参数错误，返回 400 而非 500
+      httpStatus = HttpStatus.BAD_REQUEST;
+      bodyCode = ErrorCode.BAD_REQUEST;
+      message = '参数错误：ID 必须为数字';
     } else if (exception instanceof Error) {
       // INT-007 修复：5xx 错误不向客户端暴露内部错误细节，防止信息泄露
       // 保留堆栈，仅在服务端结构化日志中记录完整错误信息

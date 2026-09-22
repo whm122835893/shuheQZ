@@ -41,6 +41,13 @@ export interface PaginatedData<T> {
   pageSize: number
 }
 
+/** 分页查询参数 */
+export type PaginationQuery = {
+  page?: number
+  pageSize?: number
+  [key: string]: any
+}
+
 /** 通用请求方法 */
 async function request<T = any>(
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',

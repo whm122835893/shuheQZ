@@ -1,6 +1,9 @@
 import { get, post, put, del, patch } from './request'
 import type { PaginatedData, PaginationQuery } from './request'
 
+// 补充页面引用的类型导出
+export * from './types'
+
 // ============================================================
 // 认证模块
 // ============================================================
@@ -353,69 +356,27 @@ export const marketApi = {
 // 营销活动
 // ============================================================
 export const marketingApi = {
+  // ---- Airdrop（顶层扁平，供 airdrop.vue 调用）----
   /** GET /marketing/airdrop */
   airdrop: (params?: Record<string, any>) =>
     get<any>(`/marketing/airdrop`, params),
   /** POST /marketing/airdrop */
-  airdrop1: (data?: Record<string, any>) =>
+  createAirdrop: (data?: Record<string, any>) =>
     post(`/marketing/airdrop`, data),
+  /** POST /marketing/airdrop/{id}/execute */
+  executeAirdrop: (id: number | string, data?: Record<string, any>) =>
+    post(`/marketing/airdrop/${id}/execute`, data),
+
+  // ---- Lucky Draw（顶层扁平）----
   /** GET /marketing/lucky-draw */
   luckyDraw: (params?: Record<string, any>) =>
     get<any>(`/marketing/lucky-draw`, params),
   /** POST /marketing/lucky-draw */
   luckyDraw1: (data?: Record<string, any>) =>
     post(`/marketing/lucky-draw`, data),
-  /** GET /marketing/priority */
-  priority: (params?: Record<string, any>) =>
-    get<any>(`/marketing/priority`, params),
-  /** POST /marketing/priority */
-  priority1: (data?: Record<string, any>) =>
-    post(`/marketing/priority`, data),
-  /** GET /marketing/synthesis */
-  synthesis: (params?: Record<string, any>) =>
-    get<any>(`/marketing/synthesis`, params),
-  /** POST /marketing/synthesis */
-  synthesis1: (data?: Record<string, any>) =>
-    post(`/marketing/synthesis`, data),
-  /** GET /marketing/checkin/config */
-  config: (params?: Record<string, any>) =>
-    get<any>(`/marketing/checkin/config`, params),
-  /** PUT /marketing/checkin/config */
-  config1: (data?: Record<string, any>) =>
-    put(`/marketing/checkin/config`, data),
-  /** GET /marketing/checkin/records */
-  records: (params?: Record<string, any>) =>
-    get<any>(`/marketing/checkin/records`, params),
-  /** GET /marketing/invite/activities */
-  activities: (params?: Record<string, any>) =>
-    get<any>(`/marketing/invite/activities`, params),
-  /** POST /marketing/invite/activities */
-  activities1: (data?: Record<string, any>) =>
-    post(`/marketing/invite/activities`, data),
-  /** GET /marketing/invite/records */
-  records1: (params?: Record<string, any>) =>
-    get<any>(`/marketing/invite/records`, params),
   /** PUT /marketing/lucky-draw/{id} */
   luckyDraw2: (id: number | string, data?: Record<string, any>) =>
     put(`/marketing/lucky-draw/${id}`, data),
-  /** PUT /marketing/priority/{id} */
-  priority2: (id: number | string, data?: Record<string, any>) =>
-    put(`/marketing/priority/${id}`, data),
-  /** DELETE /marketing/priority/{id} */
-  priority3: (id: number | string) =>
-    del(`/marketing/priority/${id}`),
-  /** GET /marketing/register/config */
-  config2: (params?: Record<string, any>) =>
-    get<any>(`/marketing/register/config`, params),
-  /** PUT /marketing/register/config */
-  config3: (data?: Record<string, any>) =>
-    put(`/marketing/register/config`, data),
-  /** PUT /marketing/synthesis/{id} */
-  synthesis2: (id: number | string, data?: Record<string, any>) =>
-    put(`/marketing/synthesis/${id}`, data),
-  /** POST /marketing/airdrop/{id}/execute */
-  execute: (id: number | string, data?: Record<string, any>) =>
-    post(`/marketing/airdrop/${id}/execute`, data),
   /** POST /marketing/lucky-draw/{id}/grant */
   grant: (id: number | string, data?: Record<string, any>) =>
     post(`/marketing/lucky-draw/${id}/grant`, data),
@@ -428,36 +389,109 @@ export const marketingApi = {
   /** GET /marketing/lucky-draw/{id}/records */
   records2: (id: number | string, params?: Record<string, any>) =>
     get<any>(`/marketing/lucky-draw/${id}/records`, params),
-  /** PUT /marketing/priority/{id}/end */
-  end: (id: number | string, data?: Record<string, any>) =>
-    put(`/marketing/priority/${id}/end`, data),
-  /** PUT /marketing/priority/{id}/start */
-  start: (id: number | string, data?: Record<string, any>) =>
-    put(`/marketing/priority/${id}/start`, data),
-  /** GET /marketing/priority/{id}/whitelist */
-  whitelist: (id: number | string, params?: Record<string, any>) =>
-    get<any>(`/marketing/priority/${id}/whitelist`, params),
-  /** GET /marketing/synthesis/{id}/materials */
-  materials: (id: number | string, params?: Record<string, any>) =>
-    get<any>(`/marketing/synthesis/${id}/materials`, params),
-  /** GET /marketing/synthesis/{id}/records */
-  records3: (id: number | string, params?: Record<string, any>) =>
-    get<any>(`/marketing/synthesis/${id}/records`, params),
   /** PUT /marketing/lucky-draw/{id}/prizes/{pid} */
   prizes2: (id: number | string, pid: number | string, data?: Record<string, any>) =>
     put(`/marketing/lucky-draw/${id}/prizes/${pid}`, data),
   /** DELETE /marketing/lucky-draw/{id}/prizes/{pid} */
   prizes3: (id: number | string, pid: number | string) =>
     del(`/marketing/lucky-draw/${id}/prizes/${pid}`),
-  /** GET /marketing/priority/{id}/whitelist/export */
-  export: (id: number | string, params?: Record<string, any>) =>
-    get<any>(`/marketing/priority/${id}/whitelist/export`, params),
-  /** POST /marketing/priority/{id}/whitelist/import */
-  import: (id: number | string, data?: Record<string, any>) =>
-    post(`/marketing/priority/${id}/whitelist/import`, data),
-  /** DELETE /marketing/priority/{id}/whitelist/{wid} */
-  whitelist1: (id: number | string, wid: number | string) =>
-    del(`/marketing/priority/${id}/whitelist/${wid}`),
+
+  // ---- Synthesis（顶层扁平）----
+  /** GET /marketing/synthesis */
+  synthesis: (params?: Record<string, any>) =>
+    get<any>(`/marketing/synthesis`, params),
+  /** POST /marketing/synthesis */
+  synthesis1: (data?: Record<string, any>) =>
+    post(`/marketing/synthesis`, data),
+  /** PUT /marketing/synthesis/{id} */
+  synthesis2: (id: number | string, data?: Record<string, any>) =>
+    put(`/marketing/synthesis/${id}`, data),
+  /** GET /marketing/synthesis/{id}/materials */
+  materials: (id: number | string, params?: Record<string, any>) =>
+    get<any>(`/marketing/synthesis/${id}/materials`, params),
+  /** GET /marketing/synthesis/{id}/records */
+  records3: (id: number | string, params?: Record<string, any>) =>
+    get<any>(`/marketing/synthesis/${id}/records`, params),
+
+  // ---- Checkin ----
+  /** GET /marketing/checkin/config */
+  checkinConfig: (params?: Record<string, any>) =>
+    get<any>(`/marketing/checkin/config`, params),
+  /** PUT /marketing/checkin/config */
+  checkinConfigUpdate: (data?: Record<string, any>) =>
+    put(`/marketing/checkin/config`, data),
+  /** GET /marketing/checkin/records */
+  checkinRecords: (params?: Record<string, any>) =>
+    get<any>(`/marketing/checkin/records`, params),
+
+  // ---- Invite（供 invite.vue 调用）----
+  /** GET /marketing/invite/activities */
+  inviteActivities: (params?: Record<string, any>) =>
+    get<any>(`/marketing/invite/activities`, params),
+  /** POST /marketing/invite/activities */
+  inviteActivitiesCreate: (data?: Record<string, any>) =>
+    post(`/marketing/invite/activities`, data),
+  /** GET /marketing/invite/records */
+  inviteRecords: (params?: Record<string, any>) =>
+    get<any>(`/marketing/invite/records`, params),
+
+  // ---- Register ----
+  /** GET /marketing/register/config */
+  registerConfig: (params?: Record<string, any>) =>
+    get<any>(`/marketing/register/config`, params),
+  /** PUT /marketing/register/config */
+  registerConfigUpdate: (data?: Record<string, any>) =>
+    put(`/marketing/register/config`, data),
+
+  // ---- Priority 优先购（嵌套对象，供 priority.vue / register.vue 调用）----
+  priority: {
+    /** GET /marketing/priority */
+    list: (params?: Record<string, any>) =>
+      get<any>(`/marketing/priority`, params),
+    /** POST /marketing/priority */
+    create: (data?: Record<string, any>) =>
+      post(`/marketing/priority`, data),
+    /** PUT /marketing/priority/{id} */
+    update: (id: number | string, data?: Record<string, any>) =>
+      put(`/marketing/priority/${id}`, data),
+    /** DELETE /marketing/priority/{id} */
+    remove: (id: number | string) =>
+      del(`/marketing/priority/${id}`),
+    /** PUT /marketing/priority/{id}/start */
+    start: (id: number | string, data?: Record<string, any>) =>
+      put(`/marketing/priority/${id}/start`, data),
+    /** PUT /marketing/priority/{id}/end */
+    end: (id: number | string, data?: Record<string, any>) =>
+      put(`/marketing/priority/${id}/end`, data),
+    /** GET /marketing/priority/{id}/whitelist */
+    whitelist: (id: number | string, params?: Record<string, any>) =>
+      get<any>(`/marketing/priority/${id}/whitelist`, params),
+    /** GET /marketing/priority/{id}/whitelist/export */
+    exportWhitelist: (id: number | string, params?: Record<string, any>) =>
+      get<any>(`/marketing/priority/${id}/whitelist/export`, params),
+    /** POST /marketing/priority/{id}/whitelist/import */
+    importWhitelist: (id: number | string, data?: Record<string, any>) =>
+      post(`/marketing/priority/${id}/whitelist/import`, data),
+    /** DELETE /marketing/priority/{id}/whitelist/{wid} */
+    deleteWhitelist: (id: number | string, wid: number | string) =>
+      del(`/marketing/priority/${id}/whitelist/${wid}`),
+  },
+
+  // 保留的旧 hack 别名（兼容可能的其他调用）
+  airdrop1: (data?: Record<string, any>) => post(`/marketing/airdrop`, data),
+  priority1: (data?: Record<string, any>) => post(`/marketing/priority`, data),
+  priority2: (id: number | string, data?: Record<string, any>) => put(`/marketing/priority/${id}`, data),
+  priority3: (id: number | string) => del(`/marketing/priority/${id}`),
+  synthesis1: (data?: Record<string, any>) => post(`/marketing/synthesis`, data),
+  config: (params?: Record<string, any>) => get<any>(`/marketing/checkin/config`, params),
+  config1: (data?: Record<string, any>) => put(`/marketing/checkin/config`, data),
+  records: (params?: Record<string, any>) => get<any>(`/marketing/checkin/records`, params),
+  activities: (params?: Record<string, any>) => get<any>(`/marketing/invite/activities`, params),
+  activities1: (data?: Record<string, any>) => post(`/marketing/invite/activities`, data),
+  records1: (params?: Record<string, any>) => get<any>(`/marketing/invite/records`, params),
+  config2: (params?: Record<string, any>) => get<any>(`/marketing/register/config`, params),
+  config3: (data?: Record<string, any>) => put(`/marketing/register/config`, data),
+  execute: (id: number | string, data?: Record<string, any>) => post(`/marketing/airdrop/${id}/execute`, data),
 }
 
 // ============================================================
@@ -497,8 +531,8 @@ export const permissionApi = {
   /** GET /permission/admins */
   admins: (params?: Record<string, any>) =>
     get<any>(`/permission/admins`, params),
-  /** POST /permission/admins */
-  admins1: (data?: Record<string, any>) =>
+  /** POST /permission/admins — 创建管理员 */
+  createAdmin: (data?: Record<string, any>) =>
     post(`/permission/admins`, data),
   /** GET /permission/login-logs */
   loginLogs: (params?: Record<string, any>) =>
@@ -513,10 +547,10 @@ export const permissionApi = {
   roles1: (data?: Record<string, any>) =>
     post(`/permission/roles`, data),
   /** GET /permission/admins/{id} */
-  admins2: (id: number | string, params?: Record<string, any>) =>
+  adminsDetail: (id: number | string, params?: Record<string, any>) =>
     get<any>(`/permission/admins/${id}`, params),
-  /** PUT /permission/admins/{id} */
-  admins3: (id: number | string, data?: Record<string, any>) =>
+  /** PUT /permission/admins/{id} — 更新管理员 */
+  updateAdmin: (id: number | string, data?: Record<string, any>) =>
     put(`/permission/admins/${id}`, data),
   /** DELETE /permission/admins/{id} */
   admins4: (id: number | string) =>
@@ -528,7 +562,7 @@ export const permissionApi = {
   operationLogs1: (id: number | string, params?: Record<string, any>) =>
     get<any>(`/permission/operation-logs/${id}`, params),
   /** GET /permission/permissions/tree */
-  tree: (params?: Record<string, any>) =>
+  permissionTree: (params?: Record<string, any>) =>
     get<any>(`/permission/permissions/tree`, params),
   /** PUT /permission/roles/{id} */
   roles2: (id: number | string, data?: Record<string, any>) =>
@@ -537,7 +571,7 @@ export const permissionApi = {
   roles3: (id: number | string) =>
     del(`/permission/roles/${id}`),
   /** PUT /permission/admins/{id}/reset-password */
-  resetPassword: (id: number | string, data?: Record<string, any>) =>
+  resetAdminPassword: (id: number | string, data?: Record<string, any>) =>
     put(`/permission/admins/${id}/reset-password`, data),
   /** PUT /permission/roles/{id}/permissions */
   permissions: (id: number | string, data?: Record<string, any>) =>
@@ -659,9 +693,12 @@ export const securityApi = {
   /** GET /security/blacklist */
   blacklist: (params?: Record<string, any>) =>
     get<any>(`/security/blacklist`, params),
-  /** POST /security/blacklist */
-  blacklist1: (data?: Record<string, any>) =>
+  /** POST /security/blacklist — 加入黑名单 */
+  blacklistAdd: (data?: Record<string, any>) =>
     post(`/security/blacklist`, data),
+  /** DELETE /security/blacklist/{id} — 移除黑名单 */
+  blacklistRemove: (id: number | string) =>
+    del(`/security/blacklist/${id}`),
   /** GET /security/events */
   events: (params?: Record<string, any>) =>
     get<any>(`/security/events`, params),
@@ -674,9 +711,6 @@ export const securityApi = {
   /** GET /security/approvals/{id} */
   approvals1: (id: number | string, params?: Record<string, any>) =>
     get<any>(`/security/approvals/${id}`, params),
-  /** DELETE /security/blacklist/{id} */
-  blacklist2: (id: number | string) =>
-    del(`/security/blacklist/${id}`),
   /** GET /security/events/{id} */
   events1: (id: number | string, params?: Record<string, any>) =>
     get<any>(`/security/events/${id}`, params),
