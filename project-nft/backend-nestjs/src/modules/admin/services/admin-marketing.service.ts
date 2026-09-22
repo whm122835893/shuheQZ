@@ -454,10 +454,20 @@ export class AdminMarketingService {
     const pageSize = Math.min(100, Math.max(1, Number(query.pageSize) || 20));
     const skip = (page - 1) * pageSize;
 
+    const activity = await this.luckyDrawRepo.findOne({ where: { id, isDelete: 0 } });
+    if (!activity) throw new NotFoundException(`抽奖活动 #${id} 不存在`);
+
+    const prizes = await this.luckyDrawPrizeRepo.find({ where: { activityId: id, isDelete: 0 } });
+    const prizeIds = prizes.map((p) => p.id);
+
+    if (prizeIds.length === 0) {
+      return { list: [], total: 0, page, pageSize };
+    }
+
     const qb = this.luckyDrawRecordRepo
       .createQueryBuilder('r')
       .where('r.is_delete = 0')
-      .innerJoin(NftLuckyDrawPrize, 'p', 'p.id = r.prize_id AND p.activity_id = :id', { id });
+      .andWhere('r.prize_id IN (:...prizeIds)', { prizeIds });
 
     if (query.userId) qb.andWhere('r.user_id = :userId', { userId: query.userId });
     qb.orderBy('r.created_at', 'DESC').skip(skip).take(pageSize);

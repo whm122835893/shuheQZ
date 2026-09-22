@@ -31,19 +31,19 @@
       <div class="func-grid">
         <div class="func-cell" @click="go('/activity/synthesis')">
           <span class="func-cell__label">合成兑换</span>
-          <span class="func-cell__img">🔬</span>
+          <img class="func-cell__img" :src="icons.synthesis" alt="合成兑换" />
         </div>
         <div class="func-cell" @click="go('/home/lucky-draw')">
           <span class="func-cell__label">幸运抽奖</span>
-          <span class="func-cell__img">🎰</span>
+          <img class="func-cell__img" :src="icons.luckyDraw" alt="幸运抽奖" />
         </div>
         <div class="func-cell" @click="go('/home/lottery')">
           <span class="func-cell__label">抽签活动</span>
-          <span class="func-cell__img">🎲</span>
+          <img class="func-cell__img" :src="icons.lottery" alt="抽签活动" />
         </div>
         <div class="func-cell" @click="go('/home/checkin')">
           <span class="func-cell__label">签到专区</span>
-          <span class="func-cell__img">📅</span>
+          <img class="func-cell__img" :src="icons.checkin" alt="签到专区" />
         </div>
       </div>
 
@@ -52,19 +52,19 @@
       <!-- Row 3: 4 quick circular icons -->
       <div class="func-quick">
         <div class="func-quick__item" @click="go('/home/furnace')">
-          <span class="func-quick__img">🔥</span>
+          <img class="func-quick__img" :src="icons.furnace" alt="幻化熔炉" />
           <span class="func-quick__label">幻化熔炉</span>
         </div>
         <div class="func-quick__item" @click="go('/home/hall-of-fame')">
-          <span class="func-quick__img">🏆</span>
+          <img class="func-quick__img" :src="icons.hallOfFame" alt="名人堂" />
           <span class="func-quick__label">名人堂</span>
         </div>
         <div class="func-quick__item" @click="go('/home/beginner-guide')">
-          <span class="func-quick__img">📖</span>
+          <img class="func-quick__img" :src="icons.beginnerGuide" alt="新手指南" />
           <span class="func-quick__label">新手指南</span>
         </div>
         <div class="func-quick__item" @click="go('/home/museum')">
-          <span class="func-quick__img">🏛️</span>
+          <img class="func-quick__img" :src="icons.museum" alt="文物展馆" />
           <span class="func-quick__label">文物展馆</span>
         </div>
       </div>
@@ -147,6 +147,18 @@ import { showDialog } from 'vant'
 import request from '@/api/request'
 import { useUser } from '@/composables/useUser'
 import EmptyState from '@/components/EmptyState.vue'
+
+// 金刚区图标
+const icons = {
+  synthesis: new URL('@/assets/icons/synthesis.jpg', import.meta.url).href,
+  luckyDraw: new URL('@/assets/icons/lucky-draw.jpg', import.meta.url).href,
+  lottery: new URL('@/assets/icons/lottery.jpg', import.meta.url).href,
+  checkin: new URL('@/assets/icons/checkin.jpg', import.meta.url).href,
+  furnace: new URL('@/assets/icons/furnace.jpg', import.meta.url).href,
+  hallOfFame: new URL('@/assets/icons/hall-of-fame.jpg', import.meta.url).href,
+  beginnerGuide: new URL('@/assets/icons/beginner-guide.jpg', import.meta.url).href,
+  museum: new URL('@/assets/icons/museum.jpg', import.meta.url).href
+}
 
 const router = useRouter()
 const { isLoggedIn } = useUser()
@@ -397,12 +409,12 @@ function goDetail(id) {
   color: #1F2937;
 }
 .func-cell__img {
-  font-size: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 10px;
   flex-shrink: 0;
+  display: block;
 }
 
 .func-divider {
@@ -426,11 +438,11 @@ function goDetail(id) {
   transform: scale(0.94);
 }
 .func-quick__img {
-  font-size: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
   border-radius: 50%;
+  display: block;
 }
 .func-quick__label {
   margin-top: 8px;
@@ -478,7 +490,7 @@ function goDetail(id) {
   width: 32px;
   height: 3px;
   border-radius: 2px;
-  background: var(--ht-red);
+  background: #3B82F6;
 }
 .section__more {
   display: flex;

@@ -349,7 +349,7 @@ function toggleFavorite(item) {
   width: 32px;
   height: 3px;
   border-radius: 2px;
-  background: var(--ht-red);
+  background: #3B82F6;
 }
 
 /* Search bar */
