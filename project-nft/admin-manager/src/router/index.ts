@@ -1,4 +1,5 @@
 import { createRouter, createWebHashHistory, type RouteRecordRaw } from 'vue-router'
+import { getToken } from '../api/request'
 
 const Layout = () => import('../layouts/MainLayout.vue')
 
@@ -422,6 +423,18 @@ export const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHashHistory(),
   routes
+})
+
+// 全局路由守卫：未登录重定向到 /login
+router.beforeEach((to, _from, next) => {
+  const token = getToken()
+  if (!token && to.name !== 'Login') {
+    next({ name: 'Login', query: { redirect: to.fullPath } })
+  } else if (token && to.name === 'Login') {
+    next({ name: 'Dashboard' })
+  } else {
+    next()
+  }
 })
 
 export default router

@@ -1,12 +1,14 @@
 // API 请求工具 - 基于 fetch 封装，自动注入 JWT Token
 //
 // 设计要点：
-//  - 所有请求路径以 /admin/api/v1/ 开头，通过 Vite 代理转发到后端 NestJS
+//  - BASE_URL 通过 VITE_API_BASE_URL 环境变量控制，生产环境可配置绝对 URL
+//  - 默认相对路径 /admin/api/v1 走同域部署 + nginx 反代
+//  - 前后端不同域部署时，在 .env.production 里填后端绝对地址即可
 //  - 自动从 localStorage 读取 admin_token 并注入 Authorization 头
 //  - 统一处理后端返回的 { code, data, message } 结构
 //  - 401 时自动清除 token 并跳转登录页
 
-const BASE_URL = '/admin/api/v1'
+const BASE_URL: string = (import.meta.env.VITE_API_BASE_URL as string) || '/admin/api/v1'
 const TOKEN_KEY = 'admin_token'
 
 /** 获取存储的 token */
@@ -83,11 +85,12 @@ async function request<T = any>(
 
   // 处理业务错误码
   if (result.code !== 200) {
-    // 401 未授权 - 清除 token 并跳转登录
+    // 401 未授权 - 清除 token 并跳转登录（hash 路由模式）
     if (result.code === 401 || response.status === 401) {
       clearToken()
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login'
+      const currentHash = window.location.hash || ''
+      if (!currentHash.startsWith('#/login')) {
+        window.location.replace('/#/login')
       }
     }
     throw new Error(result.message || '请求失败')
