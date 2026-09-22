@@ -236,7 +236,7 @@ onMounted(() => {
   width: 32px;
   height: 3px;
   border-radius: 2px;
-  background: var(--ht-red);
+  background: var(--ht-blue);
   margin-top: 6px;
 }
 
@@ -269,7 +269,7 @@ onMounted(() => {
   transform: translateX(-50%);
   width: 100%;
   height: 2px;
-  background: var(--ht-text-primary);
+  background: var(--ht-blue);
   border-radius: 1px;
 }
 
