@@ -589,14 +589,17 @@ function goDetail(id) {
   background: #3B82F6;
 }
 
-/* Bottom content with gradient overlay */
+/* Bottom content with floating rounded overlay */
 .release-card__bottom {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 16px 14px 14px;
-  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  padding: 14px 16px;
+  background: rgba(190, 190, 190, 0.22);
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
